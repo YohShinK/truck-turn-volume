@@ -1,0 +1,3891 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>トラッ角解析</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #dfe5ea;
+      --sheet: rgba(245, 248, 250, .68);
+      --panel: rgba(247, 250, 252, .66);
+      --panel-2: rgba(255, 255, 255, .58);
+      --panel-3: rgba(236, 241, 245, .72);
+      --surface-glass: rgba(247, 250, 252, .68);
+      --surface-glass-strong: rgba(250, 252, 253, .84);
+      --line: rgba(124, 137, 148, .22);
+      --line-strong: rgba(74, 88, 101, .34);
+      --line-soft: rgba(255, 255, 255, .58);
+      --text: #111721;
+      --muted: #4a5563;
+      --quiet: #687381;
+      --subtle: #8d97a3;
+      --accent: #b7ff2f;
+      --accent-hover: #d7ff84;
+      --accent-2: #18b7aa;
+      --warn: #ff756b;
+      --road: #dfe5e9;
+      --amber: #18b7aa;
+      --radius: 18px;
+      --radius-sm: 10px;
+      --shadow: 0 22px 58px rgba(62, 74, 86, .18);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 18px;
+      font-family: Inter, "SF Pro Text", "Segoe UI", "Microsoft YaHei", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 18% 12%, rgba(255,255,255,.92), transparent 34%),
+        radial-gradient(circle at 82% 8%, rgba(245,249,252,.86), transparent 32%),
+        linear-gradient(135deg, rgba(255,255,255,.7), rgba(194,205,216,.62)),
+        var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      text-rendering: geometricPrecision;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: minmax(356px, 428px) minmax(0, 1fr);
+      height: calc(100vh - 36px);
+      border: 1px solid rgba(255, 255, 255, .82);
+      border-radius: 18px;
+      background: var(--sheet);
+      box-shadow: 0 32px 82px rgba(74, 88, 101, .22);
+      backdrop-filter: blur(22px) saturate(150%);
+      overflow: hidden;
+    }
+
+    aside {
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      border-right: 1px solid rgba(126, 140, 154, .24);
+      background: var(--panel);
+      backdrop-filter: blur(22px) saturate(145%);
+    }
+
+    header {
+      position: relative;
+      padding: 28px 24px 18px;
+      border-bottom: 0;
+    }
+
+    header::before {
+      display: none;
+    }
+
+    .header-kicker {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 18px;
+      font-size: 13px;
+      line-height: 1;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .header-kicker::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex: 0 0 auto;
+    }
+
+    .language-toggle {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      min-width: 54px;
+      min-height: 34px;
+      padding: 0 13px;
+      font-weight: 800;
+      color: #050505;
+    }
+
+    .language-toggle.is-jp {
+      background: var(--accent);
+    }
+
+    .language-toggle.is-cn {
+      background: rgba(255, 255, 255, .82);
+    }
+
+    .brand-term {
+      font-weight: 820;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      max-width: 18em;
+      font-size: 40px;
+      line-height: 1.05;
+      letter-spacing: 0;
+      font-weight: 820;
+      text-transform: none;
+    }
+
+    .subtitle {
+      margin: 0;
+      max-width: 31em;
+      color: var(--quiet);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 4px 20px 18px;
+      border-bottom: 0;
+      background: transparent;
+    }
+
+    .metric {
+      position: relative;
+      overflow: hidden;
+      min-width: 0;
+      padding: 16px 16px 14px;
+      border: 1px solid rgba(255, 255, 255, .78);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .46);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.85), 0 8px 24px rgba(78, 92, 106, .07);
+      backdrop-filter: blur(16px) saturate(140%);
+    }
+
+    .metric > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .metric--ratio {
+      --ratio-fill: 0%;
+      background:
+        linear-gradient(90deg, rgba(183, 255, 47, .88) 0 var(--ratio-fill), rgba(255, 255, 255, .46) var(--ratio-fill) 100%);
+      transition: background .22s ease;
+    }
+
+    .metric--ratio::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,.36), transparent 60%);
+      pointer-events: none;
+    }
+
+    .metric strong {
+      display: flex;
+      align-items: baseline;
+      min-height: 23px;
+      margin-bottom: 6px;
+      font-size: 27px;
+      line-height: 1.1;
+      font-weight: 820;
+      color: var(--text);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--quiet);
+      font-size: 13px;
+      line-height: 1.4;
+      text-transform: none;
+    }
+
+    .controls {
+      overflow-y: auto;
+      padding: 2px 18px 24px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--line-strong) transparent;
+    }
+
+    .controls::-webkit-scrollbar,
+    .volume-library::-webkit-scrollbar {
+      width: 10px;
+    }
+
+    .controls::-webkit-scrollbar-track,
+    .volume-library::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .controls::-webkit-scrollbar-thumb,
+    .volume-library::-webkit-scrollbar-thumb {
+      border: 3px solid transparent;
+      border-radius: 999px;
+      background: var(--line-strong);
+      background-clip: padding-box;
+    }
+
+    details {
+      margin: 0 0 12px;
+      padding: 12px 14px 14px;
+      border: 1px solid rgba(255, 255, 255, .7);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .42);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.76), 0 10px 28px rgba(78, 92, 106, .06);
+      backdrop-filter: blur(16px) saturate(145%);
+    }
+
+    summary {
+      cursor: pointer;
+      list-style: none;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      font-size: 12px;
+      font-weight: 720;
+      color: var(--text);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
+    summary::-webkit-details-marker {
+      display: none;
+    }
+
+    summary::after {
+      content: "+";
+      display: grid;
+      place-items: center;
+      width: 22px;
+      height: 22px;
+      border: 1px solid rgba(128, 141, 154, .26);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-weight: 900;
+      background: rgba(255,255,255,.5);
+    }
+
+    details[open] summary::after {
+      content: "-";
+    }
+
+    .control {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 84px;
+      gap: 8px 12px;
+      align-items: center;
+      margin-top: 12px;
+    }
+
+    label {
+      min-width: 0;
+      color: var(--quiet);
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .value {
+      justify-self: end;
+      width: 84px;
+      min-height: 34px;
+      padding: 5px 9px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255,255,255,.54);
+      color: var(--text);
+      font: inherit;
+      font-size: 12px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .value:hover,
+    .lookup input:hover,
+    .lookup-text:hover,
+    .saved-volume input[type="text"]:hover {
+      border-color: var(--line-strong);
+    }
+
+    input::placeholder,
+    textarea::placeholder {
+      color: var(--subtle);
+      opacity: .5;
+    }
+
+    input[type="range"] {
+      grid-column: 1 / -1;
+      width: 100%;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 3px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), rgba(141, 153, 165, .18));
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      margin-top: -7px;
+    }
+
+    .toggle-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      min-height: 42px;
+      margin-top: 9px;
+    }
+
+    .toggle-row input {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+    }
+
+    .lookup {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .lookup input {
+      min-width: 0;
+      height: 40px;
+      padding: 0 11px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--panel-2);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+    }
+
+    .lookup-text {
+      width: 100%;
+      min-height: 96px;
+      margin-top: 10px;
+      padding: 10px;
+      resize: vertical;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--panel-2);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .lookup-status {
+      margin: 8px 0 0;
+      color: var(--quiet);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .lookup-footer {
+      align-items: end;
+      margin-top: 10px;
+    }
+
+    .lookup-footer .lookup-status {
+      margin: 0;
+      align-self: end;
+    }
+
+    input:focus-visible,
+    textarea:focus-visible,
+    summary:focus-visible,
+    button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-color: rgba(93, 105, 118, .4);
+    }
+
+    main {
+      position: relative;
+      min-width: 0;
+      min-height: 0;
+      padding: 18px;
+      background:
+        radial-gradient(circle at 42% 32%, rgba(255,255,255,.88), transparent 38%),
+        linear-gradient(135deg, rgba(255,255,255,.28), rgba(217,225,232,.46));
+    }
+
+    #scene {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 1px solid rgba(126, 140, 154, .22);
+      border-radius: 18px;
+      background:
+        linear-gradient(90deg, rgba(133,145,156,.12) 1px, transparent 1px),
+        linear-gradient(rgba(133,145,156,.12) 1px, transparent 1px),
+        rgba(245, 248, 250, .42);
+      background-size: 28px 28px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 18px 48px rgba(80, 94, 108, .12);
+    }
+
+    .legend {
+      position: absolute;
+      left: 20px;
+      bottom: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 12px;
+      max-width: calc(100% - 40px);
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, .78);
+      border-radius: 12px;
+      background: rgba(247, 250, 252, .66);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(145%);
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .legend i {
+      display: inline-block;
+      width: 11px;
+      height: 11px;
+      margin-right: 6px;
+      border-radius: 3px;
+      vertical-align: -1px;
+    }
+
+    .toolbar {
+      position: absolute;
+      top: 32px;
+      right: 34px;
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    button {
+      min-height: 40px;
+      padding: 0 15px;
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 10px;
+      background: rgba(247, 250, 252, .62);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+      text-transform: none;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.86), 0 8px 20px rgba(76, 90, 104, .12);
+      backdrop-filter: blur(16px) saturate(145%);
+    }
+
+    button svg {
+      width: 17px;
+      height: 17px;
+      flex: 0 0 auto;
+      stroke: currentColor;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    button:hover {
+      border-color: rgba(255,255,255,.95);
+      background: rgba(255,255,255,.78);
+      color: var(--text);
+    }
+
+    button:active {
+      transform: translateY(1px);
+    }
+
+    button:disabled {
+      cursor: default;
+      opacity: .5;
+    }
+
+    button.is-active {
+      border-color: rgba(255,255,255,.95);
+      background: var(--accent);
+      color: var(--text);
+    }
+
+    .status {
+      display: none;
+      position: absolute;
+      top: 32px;
+      left: 34px;
+      max-width: min(520px, calc(100% - 36px));
+      padding: 14px 18px;
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 14px;
+      background: rgba(247, 250, 252, .66);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(145%);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.55;
+    }
+
+    .axis-gizmo {
+      position: absolute;
+      top: 32px;
+      left: 34px;
+      z-index: 18;
+      width: 108px;
+      height: 108px;
+      border: 1px solid rgba(68, 78, 88, .28);
+      border-radius: 18px;
+      background: rgba(99, 112, 124, .24);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.42), 0 16px 38px rgba(64, 76, 88, .18);
+      backdrop-filter: blur(18px) saturate(145%);
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .axis-gizmo canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .volume-viewer {
+      position: absolute;
+      inset: 18px;
+      z-index: 50;
+      display: none;
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 18px;
+      background:
+        linear-gradient(90deg, rgba(133,145,156,.12) 1px, transparent 1px),
+        linear-gradient(rgba(133,145,156,.12) 1px, transparent 1px),
+        rgba(247,250,252,.72);
+      background-size: 28px 28px;
+      box-shadow: 0 28px 70px rgba(80, 94, 108, .22);
+      backdrop-filter: blur(18px) saturate(145%);
+      overflow: hidden;
+    }
+
+    .volume-viewer.is-open {
+      display: block;
+    }
+
+    .volume-viewer canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .volume-viewer__bar {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      right: 14px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .volume-viewer__title {
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 12px;
+      background: rgba(247, 250, 252, .66);
+      color: var(--text);
+      font-size: 12px;
+      line-height: 1.45;
+      backdrop-filter: blur(18px) saturate(145%);
+      pointer-events: auto;
+    }
+
+    .volume-viewer__actions {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .volume-library {
+      position: absolute;
+      right: 20px;
+      bottom: 20px;
+      z-index: 24;
+      width: min(340px, calc(100% - 40px));
+      max-height: 320px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 14px;
+      background: rgba(247, 250, 252, .68);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px) saturate(145%);
+      color: var(--text);
+      font-size: 12px;
+    }
+
+    .volume-library[open] {
+      overflow-y: auto;
+    }
+
+    .volume-library > summary {
+      min-height: 42px;
+      padding: 0 12px;
+      border-bottom: 1px solid rgba(126, 140, 154, .16);
+      color: var(--text);
+    }
+
+    .volume-library__body {
+      display: grid;
+      gap: 10px;
+      padding: 11px;
+    }
+
+    .volume-library__actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .volume-library__list {
+      display: grid;
+      gap: 7px;
+    }
+
+    .saved-volume {
+      border: 1px solid rgba(255, 255, 255, .72);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, .38);
+    }
+
+    .saved-volume summary {
+      min-height: 38px;
+      padding: 0 9px;
+      font-size: 12px;
+      font-weight: 620;
+      color: var(--text);
+    }
+
+    .saved-volume__content {
+      display: grid;
+      gap: 8px;
+      padding: 0 9px 9px;
+    }
+
+    .saved-volume input[type="text"] {
+      width: 100%;
+      min-height: 34px;
+      border: 1px solid rgba(126, 140, 154, .2);
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      padding: 0 9px;
+      font: inherit;
+      font-size: 12px;
+    }
+
+    .saved-volume__meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      color: var(--subtle);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .saved-volume__buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .saved-volume__buttons button,
+    .volume-library__actions button,
+    .heatmap-viewer__actions button,
+    .mini-volume-viewer__actions button {
+      min-height: 34px;
+      padding: 0 10px;
+      font-size: 12px;
+    }
+
+    .mini-volume-viewer,
+    .heatmap-viewer {
+      position: absolute;
+      z-index: 55;
+      display: none;
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 16px;
+      background:
+        linear-gradient(90deg, rgba(133,145,156,.12) 1px, transparent 1px),
+        linear-gradient(rgba(133,145,156,.12) 1px, transparent 1px),
+        rgba(247,250,252,.74);
+      background-size: 28px 28px;
+      box-shadow: 0 28px 70px rgba(80, 94, 108, .22);
+      backdrop-filter: blur(18px) saturate(145%);
+      overflow: hidden;
+    }
+
+    .mini-volume-viewer.is-open,
+    .heatmap-viewer.is-open {
+      display: block;
+    }
+
+    .mini-volume-viewer {
+      right: 20px;
+      bottom: 358px;
+      width: min(340px, calc(100% - 40px));
+      height: 240px;
+    }
+
+    .heatmap-viewer {
+      inset: 8% 8% 10%;
+    }
+
+    .mini-volume-viewer canvas,
+    .heatmap-viewer canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .mini-volume-viewer__bar,
+    .heatmap-viewer__bar {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      right: 12px;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      pointer-events: none;
+    }
+
+    .mini-volume-viewer__title,
+    .heatmap-viewer__title,
+    .heatmap-viewer__controls {
+      border: 1px solid rgba(255, 255, 255, .84);
+      border-radius: 12px;
+      background: rgba(247, 250, 252, .66);
+      color: var(--text);
+      font-size: 12px;
+      backdrop-filter: blur(18px) saturate(145%);
+      pointer-events: auto;
+    }
+
+    .mini-volume-viewer__title,
+    .heatmap-viewer__title {
+      padding: 8px 10px;
+      line-height: 1.35;
+    }
+
+    .mini-volume-viewer__actions,
+    .heatmap-viewer__actions {
+      display: flex;
+      gap: 8px;
+      pointer-events: auto;
+    }
+
+    .heatmap-viewer__controls {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+      padding: 10px 12px;
+    }
+
+    .heatmap-viewer__controls input[type="range"] {
+      width: 100%;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+      }
+    }
+
+    @media (max-width: 860px) {
+      body {
+        overflow: auto;
+        padding: 12px;
+      }
+
+      .app {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      aside {
+        min-height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      main {
+        height: 70vh;
+        min-height: 520px;
+      }
+
+      .toolbar,
+      .status {
+        left: 14px;
+        right: 14px;
+        max-width: none;
+      }
+
+      .toolbar {
+        top: auto;
+        bottom: 84px;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+      }
+
+      .status {
+        top: 14px;
+      }
+
+      .axis-gizmo {
+        top: 14px;
+        left: 14px;
+        width: 92px;
+        height: 92px;
+      }
+
+      .legend {
+        left: 14px;
+        right: 14px;
+        bottom: 14px;
+        max-width: none;
+      }
+
+      .volume-viewer {
+        inset: 10px;
+      }
+
+      .volume-viewer__bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .volume-library {
+        left: 14px;
+        right: 14px;
+        bottom: 150px;
+        width: auto;
+        max-height: 230px;
+      }
+
+      .mini-volume-viewer {
+        left: 14px;
+        right: 14px;
+        bottom: 392px;
+        width: auto;
+        height: 220px;
+      }
+
+      .heatmap-viewer {
+        inset: 12px;
+      }
+
+      .heatmap-viewer__bar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .heatmap-viewer__controls {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside>
+      <header>
+        <div class="header-kicker" id="brandKicker">トラッ角</div>
+        <button class="language-toggle is-jp" id="languageToggle" type="button" aria-label="言語切替">JP</button>
+        <h1>トラッ角演示</h1>
+        <p class="subtitle">用可调参数模拟车头与挂车联动转弯，并估算トラッ角三角柱被扫掠体切掉后的剩余体积。</p>
+      </header>
+
+      <section class="metrics" aria-label="结果">
+        <div class="metric">
+          <strong id="totalVolume">0.0</strong>
+          <span>原始体积 m³</span>
+        </div>
+        <div class="metric">
+          <strong id="cutVolume">0.0</strong>
+          <span>与扫掠体交集 m³</span>
+        </div>
+        <div class="metric">
+          <strong id="remainVolume">0.0</strong>
+          <span>剩余体积 m³</span>
+        </div>
+        <div class="metric metric--ratio" id="remainRatioCard">
+          <strong id="remainRatio">0%</strong>
+          <span>剩余比例</span>
+        </div>
+      </section>
+
+      <section class="controls">
+        <details open>
+          <summary>车型自动匹配</summary>
+          <div class="lookup">
+            <input id="vehicleSearchQuery" type="search" placeholder="输入货车品牌型号，例如 Volvo FH16" autocomplete="off">
+            <button id="vehicleSearchButton" type="button">匹配</button>
+          </div>
+          <textarea id="vehicleDimensionText" class="lookup-text" placeholder="也可以粘贴车辆尺寸资料，例如：外形尺寸 5995×2550×3950mm，轴距 3400mm，前悬 1.2m，后悬 0.9m"></textarea>
+          <div class="lookup lookup-footer">
+            <p class="lookup-status" id="vehicleLookupStatus">自动匹配会尝试查找开放结构化车型数据；查不到时不会改动当前参数。</p>
+            <button id="parseDimensionButton" type="button">从文本识别</button>
+          </div>
+        </details>
+
+        <details open>
+          <summary>街角</summary>
+          <div class="control" data-param="roadWidthIn">
+            <label>入口道路宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="3" max="12" step="0.1">
+          </div>
+          <div class="control" data-param="roadWidthOut">
+            <label>出口道路宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="3" max="12" step="0.1">
+          </div>
+          <div class="control" data-param="chamferX">
+            <label><strong class="brand-term">トラッ角</strong> X 向长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="10" step="0.1">
+          </div>
+          <div class="control" data-param="chamferY">
+            <label><strong class="brand-term">トラッ角</strong> Y 向长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="10" step="0.1">
+          </div>
+          <div class="control" data-param="prismHeight">
+            <label>向上延伸高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="8" step="0.1">
+          </div>
+        </details>
+
+        <details open>
+          <summary>车头尺寸</summary>
+          <div class="control" data-param="cabLength">
+            <label>车头长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.2" max="8" step="0.1">
+          </div>
+          <div class="control" data-param="cabFrontOverhang">
+            <label>车头前悬 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.2" max="2.5" step="0.1">
+          </div>
+          <div class="control" data-param="cabRearOverhang">
+            <label>车头后悬 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.2" max="2.5" step="0.1">
+          </div>
+          <div class="control" data-param="hitchGap">
+            <label>车头后端到挂点距离 m</label><input class="value" type="number" step="0.1"><input type="range" min="0" max="2.5" step="0.1">
+          </div>
+          <div class="control" data-param="cabWidth">
+            <label>车头宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.8" max="3.5" step="0.1">
+          </div>
+          <div class="control" data-param="cabHeight">
+            <label>车头高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.8" max="4.2" step="0.1">
+          </div>
+        </details>
+
+        <details open>
+          <summary>挂车尺寸</summary>
+          <div class="control" data-param="trailerLength">
+            <label>挂车长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.5" max="18" step="0.1">
+          </div>
+          <div class="control" data-param="trailerFrontOverhang">
+            <label>挂车前伸 m</label><input class="value" type="number" step="0.1"><input type="range" min="0" max="3" step="0.1">
+          </div>
+          <div class="control" data-param="trailerRearOverhang">
+            <label>挂车尾悬 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="6" step="0.1">
+          </div>
+          <div class="control" data-param="trailerWidth">
+            <label>挂车宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.8" max="3.5" step="0.1">
+          </div>
+          <div class="control" data-param="sideProtrusion">
+            <label>每侧外扩量 m</label><input class="value" type="number" step="0.05"><input type="range" min="0" max="0.8" step="0.05">
+          </div>
+          <div class="control" data-param="deckHeight">
+            <label>挂车底盘厚度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.15" max="1" step="0.05">
+          </div>
+          <div class="control" data-param="chassisHeight">
+            <label>底盘高度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.3" max="1.8" step="0.05">
+          </div>
+          <div class="control" data-param="wheelTrack">
+            <label>轮胎轮距 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.2" max="3.5" step="0.1">
+          </div>
+          <div class="control" data-param="wheelWidth">
+            <label>轮胎宽度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.2" max="0.8" step="0.05">
+          </div>
+          <div class="control" data-param="wheelRadius">
+            <label>轮胎半径 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.25" max="0.8" step="0.05">
+          </div>
+        </details>
+
+        <details open>
+          <summary>货箱</summary>
+          <div class="toggle-row">
+            <label for="cargoEnabled">显示并参与计算</label>
+            <input id="cargoEnabled" type="checkbox" checked>
+          </div>
+          <div class="control" data-param="cargoLength">
+            <label>货箱长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="2" max="18" step="0.1">
+          </div>
+          <div class="control" data-param="cargoFrontOverhang">
+            <label>货箱前伸 m</label><input class="value" type="number" step="0.1"><input type="range" min="0" max="3" step="0.1">
+          </div>
+          <div class="control" data-param="cargoBaseOffset">
+            <label>货箱离底盘高度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0" max="1" step="0.05">
+          </div>
+          <div class="control" data-param="cargoHeight">
+            <label>货箱高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="4.5" step="0.1">
+          </div>
+        </details>
+
+        <details open>
+          <summary>转弯与计算</summary>
+          <div class="control" data-param="progress">
+            <label>转弯进度 %</label><input class="value" type="number" step="1"><input type="range" min="0" max="100" step="1">
+          </div>
+          <div class="control" data-param="turnRadius">
+            <label>牵引点转弯半径 m</label><input class="value" type="number" step="0.1"><input type="range" min="2" max="14" step="0.1">
+          </div>
+          <div class="control" data-param="turnStartX">
+            <label>X 轴开始转向位置 m</label><input class="value" type="number" step="0.1"><input type="range" min="-14" max="8" step="0.1">
+          </div>
+          <div class="control" data-param="stopY">
+            <label>Y 轴停车位置 m</label><input class="value" type="number" step="0.1"><input type="range" min="0" max="26" step="0.1">
+          </div>
+          <div class="control" data-param="maxArticulation">
+            <label>最大折角 °</label><input class="value" type="number" step="1"><input type="range" min="0" max="70" step="1">
+          </div>
+          <div class="control" data-param="sweepSamples">
+            <label>转弯采样帧数</label><input class="value" type="number" step="1"><input type="range" min="12" max="90" step="1">
+          </div>
+          <div class="control" data-param="gridResolution">
+            <label>平面采样精度</label><input class="value" type="number" step="1"><input type="range" min="12" max="46" step="1">
+          </div>
+          <div class="control" data-param="heightSlices">
+            <label>高度切片数</label><input class="value" type="number" step="1"><input type="range" min="4" max="24" step="1">
+          </div>
+        </details>
+
+        <details open>
+          <summary>显示</summary>
+          <div class="toggle-row">
+            <label for="smoothVolume">平滑体积模式</label>
+            <input id="smoothVolume" type="checkbox" checked>
+          </div>
+          <div class="toggle-row">
+            <label for="showRemaining">显示剩余体积</label>
+            <input id="showRemaining" type="checkbox" checked>
+          </div>
+          <div class="toggle-row">
+            <label for="showIntersection">显示扫掠占用体积</label>
+            <input id="showIntersection" type="checkbox" checked>
+          </div>
+          <div class="toggle-row">
+            <label for="showSwept">显示扫掠影子</label>
+            <input id="showSwept" type="checkbox" checked>
+          </div>
+        </details>
+      </section>
+    </aside>
+
+    <main>
+      <canvas id="scene"></canvas>
+      <div class="status" id="status">正在加载 3D 场景…</div>
+      <div class="axis-gizmo" aria-label="XYZ 坐标轴">
+        <canvas id="axisGizmoScene"></canvas>
+      </div>
+      <div class="toolbar">
+        <button id="playButton" type="button" aria-label="播放">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+          <span>播放</span>
+        </button>
+        <button id="toggleSmoothVolume" type="button" aria-label="切换体积显示模式">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15c3-4 6 4 10 0s3-7 6-4"/><path d="M4 20h16"/><path d="M4 4h16"/></svg>
+          <span>平滑体积</span>
+        </button>
+        <button id="openRemainingViewer" type="button" aria-label="打开剩余体积视图">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
+          <span>剩余体积视图</span>
+        </button>
+        <button id="exportStl" type="button" aria-label="导出 STL">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v11"/><path d="m7 9 5 5 5-5"/><path d="M5 19h14"/></svg>
+          <span>导出STL</span>
+        </button>
+        <button id="topViewCamera" type="button" aria-label="切换到顶视图">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14" rx="1.5"/><path d="M8 8h8v8H8z"/></svg>
+          <span>顶视图</span>
+        </button>
+        <button id="resetCamera" type="button" aria-label="重置视角">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 1 1 2.4 5.7"/><path d="M4 18v-6h6"/></svg>
+          <span>重置视角</span>
+        </button>
+      </div>
+      <div class="legend">
+        <span><i style="background:#050505"></i>剩余体积</span>
+        <span><i style="background:rgba(255,255,255,.72);border:1px solid rgba(17,23,33,.18)"></i>被卡车扫掠占用</span>
+        <span><i style="background:linear-gradient(90deg,#b7ff2f 0 48%,#3f464d 48% 100%)"></i>当前卡车姿态</span>
+        <span><i style="background:#b7ff2f"></i><strong class="brand-term">トラッ角</strong>三角柱边界</span>
+      </div>
+      <details class="volume-library" id="volumeLibrary" open>
+        <summary>剩余体积库 <span id="savedVolumeCount">0/20</span></summary>
+        <div class="volume-library__body">
+          <div class="volume-library__actions">
+            <button id="saveRemainingVolume" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              <span>保存当前</span>
+            </button>
+            <button id="openHeatmapViewer" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17c3-6 5 2 8-4s5 1 8-6"/><path d="M4 21h16"/></svg>
+              <span>叠加分析</span>
+            </button>
+          </div>
+          <div class="volume-library__list" id="savedVolumeList"></div>
+        </div>
+      </details>
+      <div class="volume-viewer" id="remainingViewer" role="dialog" aria-modal="true" aria-labelledby="remainingViewerTitle" aria-hidden="true">
+        <canvas id="remainingScene"></canvas>
+        <div class="volume-viewer__bar">
+          <div class="volume-viewer__title" id="remainingViewerTitle">仅显示剩余体积，可旋转、平移、缩放</div>
+          <div class="volume-viewer__actions">
+            <button id="resetRemainingCamera" type="button">重置视角</button>
+            <button id="closeRemainingViewer" type="button">关闭</button>
+          </div>
+        </div>
+      </div>
+      <div class="mini-volume-viewer" id="savedVolumeViewer" role="dialog" aria-modal="true" aria-labelledby="savedVolumeViewerTitle" aria-hidden="true">
+        <canvas id="savedVolumeScene"></canvas>
+        <div class="mini-volume-viewer__bar">
+          <div class="mini-volume-viewer__title" id="savedVolumeViewerTitle">体积预览</div>
+          <div class="mini-volume-viewer__actions">
+            <button id="closeSavedVolumeViewer" type="button">关闭</button>
+          </div>
+        </div>
+      </div>
+      <div class="heatmap-viewer" id="heatmapViewer" role="dialog" aria-modal="true" aria-labelledby="heatmapViewerTitle" aria-hidden="true">
+        <canvas id="heatmapScene"></canvas>
+        <div class="heatmap-viewer__bar">
+          <div class="heatmap-viewer__title" id="heatmapViewerTitle">剩余体积叠加热力图</div>
+          <div class="heatmap-viewer__actions">
+            <button id="exportHeatmapStl" type="button">导出阈值STL</button>
+            <button id="closeHeatmapViewer" type="button">关闭</button>
+          </div>
+        </div>
+        <div class="heatmap-viewer__controls">
+          <label for="heatmapThreshold">导出重叠阈值：<span id="heatmapThresholdLabel">≥ 1 / 0</span></label>
+          <input id="heatmapThreshold" type="range" min="0" max="10" step="1" value="0">
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.164.1/build/three.module.js"
+      }
+    }
+  </script>
+
+  <script type="module">
+    import * as THREE from "three";
+    import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/controls/OrbitControls.js";
+
+    const state = {
+      roadWidthIn: 6,
+      roadWidthOut: 6,
+      chamferX: 4,
+      chamferY: 4,
+      prismHeight: 4,
+      cabLength: 2.4,
+      cabFrontOverhang: 0.3,
+      cabRearOverhang: 0.7,
+      hitchGap: 0.4,
+      cabWidth: 2.1,
+      cabHeight: 2.1,
+      trailerLength: 5.1,
+      trailerFrontOverhang: 0.1,
+      trailerRearOverhang: 1.9,
+      trailerWidth: 2.9,
+      sideProtrusion: 0.1,
+      deckHeight: 0.15,
+      chassisHeight: 0.5,
+      wheelTrack: 2,
+      wheelWidth: 0.36,
+      wheelRadius: 0.45,
+      cargoEnabled: true,
+      cargoLength: 4.9,
+      cargoFrontOverhang: 0,
+      cargoBaseOffset: 0,
+      cargoHeight: 2.7,
+      progress: 0,
+      turnRadius: 2.9,
+      turnStartX: -1.5,
+      stopY: 21.2,
+      maxArticulation: 38,
+      sweepSamples: 42,
+      gridResolution: 26,
+      heightSlices: 12,
+      smoothVolume: true,
+      showRemaining: true,
+      showIntersection: true,
+      showSwept: true
+    };
+
+    const savedVolumeLimit = 20;
+
+    let currentLanguage = "jp";
+
+    const i18n = {
+      jp: {
+        langButton: "JP",
+        langLabel: "表示言語：日本語",
+        brand: "トラッ角",
+        title: "トラッ角解析",
+        subtitle: "パラメータを調整してトラクタとトレーラーの連動旋回を再現し、トラッ角の三角柱から掃引体積を差し引いた残余体積を算出します。",
+        totalVolume: "原体積 m³",
+        cutVolume: "掃引体との交差 m³",
+        remainVolume: "残余体積 m³",
+        remainRatio: "残余率",
+        vehicleMatch: "車両データ自動入力",
+        match: "検索",
+        vehicleSearchPlaceholder: "トラックのメーカー・型式を入力（例：Volvo FH16）",
+        dimensionPlaceholder: "車両寸法資料を貼り付けることもできます。例：外形寸法 5995×2550×3950mm、ホイールベース 3400mm、前オーバーハング 1.2m、後オーバーハング 0.9m",
+        lookupIdle: "",
+        parseText: "テキストから読取",
+        cornerSection: "道路",
+        roadWidthIn: "進入道路幅 m",
+        roadWidthOut: "退出道路幅 m",
+        chamferX: "トラッ角 X 方向長さ m",
+        chamferY: "トラッ角 Y 方向長さ m",
+        prismHeight: "立上げ高さ m",
+        cabSection: "トラクタ寸法",
+        cabLength: "トラクタ長さ m",
+        cabFrontOverhang: "前オーバーハング m",
+        cabRearOverhang: "後オーバーハング m",
+        hitchGap: "後端から連結点まで m",
+        cabWidth: "トラクタ幅 m",
+        cabHeight: "トラクタ高さ m",
+        trailerSection: "トレーラー寸法",
+        trailerLength: "トレーラー長さ m",
+        trailerFrontOverhang: "トレーラー前方張出し m",
+        trailerRearOverhang: "トレーラー後方張出し m",
+        trailerWidth: "トレーラー幅 m",
+        sideProtrusion: "片側張出し量 m",
+        deckHeight: "トレーラー床板厚 m",
+        chassisHeight: "シャシー高さ m",
+        wheelTrack: "タイヤトレッド m",
+        wheelWidth: "タイヤ幅 m",
+        wheelRadius: "タイヤ半径 m",
+        cargoSection: "荷箱",
+        cargoEnabled: "表示して計算に含める",
+        cargoLength: "荷箱長さ m",
+        cargoFrontOverhang: "荷箱前方張出し m",
+        cargoBaseOffset: "荷箱のデッキ上高さ m",
+        cargoHeight: "荷箱高さ m",
+        turnSection: "旋回・計算",
+        progress: "旋回進捗 %",
+        turnRadius: "牽引点旋回半径 m",
+        turnStartX: "X 軸方向の旋回開始位置 m",
+        stopY: "Y 軸方向の停止位置 m",
+        maxArticulation: "最大連結角 °",
+        sweepSamples: "旋回サンプル数",
+        gridResolution: "平面サンプル精度",
+        heightSlices: "高さ方向分割数",
+        displaySection: "表示",
+        smoothVolume: "平滑体積モード",
+        showRemaining: "残余体積を表示",
+        showIntersection: "掃引占有体積を表示",
+        showSwept: "掃引軌跡を表示",
+        play: "再生",
+        pause: "一時停止",
+        smoothButton: "平滑体積",
+        voxelButton: "体素体積",
+        remainingView: "残余体積ビュー",
+        exportStl: "STL出力",
+        topView: "平面図",
+        resetView: "視点リセット",
+        legendRemaining: "残余体積",
+        legendCut: "トラック掃引占有",
+        legendTruck: "現在の車両姿勢",
+        legendPrism: "トラッ角三角柱境界",
+        volumeLibrary: "残余体積ライブラリ",
+        saveCurrent: "現在値を保存",
+        overlapAnalysis: "重ね合わせ解析",
+        remainingViewerTitle: "残余体積のみ表示。回転・移動・ズームできます。",
+        close: "閉じる",
+        previewTitle: "体積プレビュー",
+        heatmapTitle: "残余体積重ね合わせヒートマップ",
+        exportHeatmap: "閾値STL出力",
+        thresholdPrefix: "重ね合わせ閾値：",
+        noSaved: "保存された残余体積はありません。",
+        view: "表示",
+        delete: "削除",
+        rename: "残余体積の名前を変更",
+        voxel: "体素",
+        pose: "姿勢",
+        savedName: index => `体積${index}`,
+        heatmapTitleWithCount: count => `残余体積重ね合わせヒートマップ · ${count}案`,
+        statusSmooth: "現在は平滑表示です。",
+        statusVoxel: "現在は体素表示です。",
+        pasteFirst: "先に車両寸法資料を貼り付けてください。",
+        parsedApplied: applied => `貼り付けたテキストから認識して入力しました：${applied.join("、")}。記載のない値は変更していません。`,
+        parsedNone: "自動入力できません：貼り付けたテキストから利用可能な寸法を認識できませんでした。",
+        enterModel: "トラックのメーカー・型式を入力してください。",
+        searching: "車両寸法データを検索しています…",
+        matched: (label, applied) => `${label} を照合し、自動入力しました：${applied.join("、")}。対象の型式・年式に適したデータか確認してください。`,
+        noUsableData: "自動入力できません：利用可能な長さ・幅・高さ・ホイールベースを見つけられませんでした。",
+        lookupFailed: error => `自動入力できません：${error || "オンライン検索に失敗しました"}。`,
+        smoothAria: "現在は平滑体積です。クリックすると体素体積に切り替わります。",
+        voxelAria: "現在は体素体積です。クリックすると平滑体積に切り替わります。"
+      },
+      cn: {
+        langButton: "CN",
+        langLabel: "显示语言：中文",
+        brand: "トラッ角",
+        title: "トラッ角演示",
+        subtitle: "用可调参数模拟车头与挂车联动转弯，并估算トラッ角三角柱被扫掠体切掉后的剩余体积。",
+        totalVolume: "原始体积 m³",
+        cutVolume: "与扫掠体交集 m³",
+        remainVolume: "剩余体积 m³",
+        remainRatio: "剩余比例",
+        vehicleMatch: "车型自动匹配",
+        match: "匹配",
+        vehicleSearchPlaceholder: "输入货车品牌型号，例如 Volvo FH16",
+        dimensionPlaceholder: "也可以粘贴车辆尺寸资料，例如：外形尺寸 5995×2550×3950mm，轴距 3400mm，前悬 1.2m，后悬 0.9m",
+        lookupIdle: "",
+        parseText: "从文本识别",
+        cornerSection: "街角",
+        roadWidthIn: "入口道路宽度 m",
+        roadWidthOut: "出口道路宽度 m",
+        chamferX: "トラッ角 X 向长度 m",
+        chamferY: "トラッ角 Y 向长度 m",
+        prismHeight: "向上延伸高度 m",
+        cabSection: "车头尺寸",
+        cabLength: "车头长度 m",
+        cabFrontOverhang: "车头前悬 m",
+        cabRearOverhang: "车头后悬 m",
+        hitchGap: "车头后端到挂点距离 m",
+        cabWidth: "车头宽度 m",
+        cabHeight: "车头高度 m",
+        trailerSection: "挂车尺寸",
+        trailerLength: "挂车长度 m",
+        trailerFrontOverhang: "挂车前伸 m",
+        trailerRearOverhang: "挂车尾悬 m",
+        trailerWidth: "挂车宽度 m",
+        sideProtrusion: "每侧外扩量 m",
+        deckHeight: "挂车底盘厚度 m",
+        chassisHeight: "底盘高度 m",
+        wheelTrack: "轮胎轮距 m",
+        wheelWidth: "轮胎宽度 m",
+        wheelRadius: "轮胎半径 m",
+        cargoSection: "货箱",
+        cargoEnabled: "显示并参与计算",
+        cargoLength: "货箱长度 m",
+        cargoFrontOverhang: "货箱前伸 m",
+        cargoBaseOffset: "货箱离底盘高度 m",
+        cargoHeight: "货箱高度 m",
+        turnSection: "转弯与计算",
+        progress: "转弯进度 %",
+        turnRadius: "牵引点转弯半径 m",
+        turnStartX: "X 轴开始转向位置 m",
+        stopY: "Y 轴停车位置 m",
+        maxArticulation: "最大折角 °",
+        sweepSamples: "转弯采样帧数",
+        gridResolution: "平面采样精度",
+        heightSlices: "高度切片数",
+        displaySection: "显示",
+        smoothVolume: "平滑体积模式",
+        showRemaining: "显示剩余体积",
+        showIntersection: "显示扫掠占用体积",
+        showSwept: "显示扫掠影子",
+        play: "播放",
+        pause: "暂停",
+        smoothButton: "平滑体积",
+        voxelButton: "体素体积",
+        remainingView: "剩余体积视图",
+        exportStl: "导出STL",
+        topView: "顶视图",
+        resetView: "重置视角",
+        legendRemaining: "剩余体积",
+        legendCut: "被卡车扫掠占用",
+        legendTruck: "当前卡车姿态",
+        legendPrism: "トラッ角三角柱边界",
+        volumeLibrary: "剩余体积库",
+        saveCurrent: "保存当前",
+        overlapAnalysis: "叠加分析",
+        remainingViewerTitle: "仅显示剩余体积，可旋转、平移、缩放",
+        close: "关闭",
+        previewTitle: "体积预览",
+        heatmapTitle: "剩余体积叠加热力图",
+        exportHeatmap: "导出阈值STL",
+        thresholdPrefix: "导出重叠阈值：",
+        noSaved: "还没有保存的剩余体积。",
+        view: "查看",
+        delete: "删除",
+        rename: "重命名剩余体积",
+        voxel: "体素",
+        pose: "姿态",
+        savedName: index => `体积${index}`,
+        heatmapTitleWithCount: count => `剩余体积叠加热力图 · ${count} 个方案`,
+        statusSmooth: "当前为平滑显示。",
+        statusVoxel: "当前为体素显示。",
+        pasteFirst: "请先粘贴车辆尺寸资料。",
+        parsedApplied: applied => `已从粘贴文本识别并填入：${applied.join("、")}。未出现的数值保持不变。`,
+        parsedNone: "无法自动输入数值：粘贴文本中没有识别到可用尺寸。",
+        enterModel: "请输入货车品牌型号。",
+        searching: "正在查找车型尺寸数据…",
+        matched: (label, applied) => `已匹配 ${label}，自动填入：${applied.join("、")}。请核对来源数据是否适合你的具体车型/年份。`,
+        noUsableData: "无法自动输入数值：没有找到可用的长、宽、高或轴距数据。",
+        lookupFailed: error => `无法自动输入数值：${error || "联网查询失败"}。`,
+        smoothAria: "当前为平滑体积，点击切换为体素体积",
+        voxelAria: "当前为体素体积，点击切换为平滑体积"
+      }
+    };
+
+    const fieldKeys = {
+      cabLength: "cabLength",
+      trailerLength: "trailerLength",
+      cabWidth: "cabWidth",
+      trailerWidth: "trailerWidth",
+      cabHeight: "cabHeight",
+      cabFrontOverhang: "cabFrontOverhang",
+      cabRearOverhang: "cabRearOverhang",
+      hitchGap: "hitchGap",
+      trailerFrontOverhang: "trailerFrontOverhang",
+      trailerRearOverhang: "trailerRearOverhang",
+      chassisHeight: "chassisHeight",
+      deckHeight: "deckHeight",
+      wheelTrack: "wheelTrack",
+      wheelWidth: "wheelWidth",
+      wheelRadius: "wheelRadius",
+      sideProtrusion: "sideProtrusion",
+      cargoLength: "cargoLength",
+      cargoFrontOverhang: "cargoFrontOverhang",
+      cargoBaseOffset: "cargoBaseOffset",
+      cargoHeight: "cargoHeight"
+    };
+
+    function tr(key, ...args) {
+      const value = i18n[currentLanguage][key];
+      return typeof value === "function" ? value(...args) : value;
+    }
+
+    function termHTML(text) {
+      return String(text).replaceAll("トラッ角", '<strong class="brand-term">トラッ角</strong>');
+    }
+
+    function setText(selector, key) {
+      const element = document.querySelector(selector);
+      if (element) element.textContent = tr(key);
+    }
+
+    function setHTML(selector, key) {
+      const element = document.querySelector(selector);
+      if (element) element.innerHTML = termHTML(tr(key));
+    }
+
+    function setPlaceholder(selector, key) {
+      const element = document.querySelector(selector);
+      if (element) element.setAttribute("placeholder", tr(key));
+    }
+
+    function setLegendItem(index, key) {
+      const span = document.querySelector(`.legend span:nth-child(${index})`);
+      const swatch = span?.querySelector("i");
+      if (!span || !swatch) return;
+      span.innerHTML = "";
+      span.append(swatch);
+      span.insertAdjacentHTML("beforeend", termHTML(tr(key)));
+    }
+
+    function fieldLabel(key) {
+      const label = tr(fieldKeys[key] || key).replace(/\s*m$|\s*%$|\s*°$/g, "");
+      return label;
+    }
+
+    function applyLanguage(language = currentLanguage) {
+      currentLanguage = language;
+      document.documentElement.lang = currentLanguage === "jp" ? "ja" : "zh-CN";
+      document.title = tr("title");
+      const button = document.querySelector("#languageToggle");
+      if (button) {
+        button.textContent = tr("langButton");
+        button.setAttribute("aria-label", tr("langLabel"));
+        button.classList.toggle("is-jp", currentLanguage === "jp");
+        button.classList.toggle("is-cn", currentLanguage === "cn");
+      }
+
+      setHTML("#brandKicker", "brand");
+      setHTML("h1", "title");
+      setHTML(".subtitle", "subtitle");
+      setHTML(".metrics .metric:nth-child(1) span", "totalVolume");
+      setHTML(".metrics .metric:nth-child(2) span", "cutVolume");
+      setHTML(".metrics .metric:nth-child(3) span", "remainVolume");
+      setHTML("#remainRatioCard span", "remainRatio");
+
+      const detailKeys = ["vehicleMatch", "cornerSection", "cabSection", "trailerSection", "cargoSection", "turnSection", "displaySection"];
+      document.querySelectorAll(".controls > details > summary").forEach((summary, index) => {
+        if (detailKeys[index]) summary.innerHTML = termHTML(tr(detailKeys[index]));
+      });
+
+      for (const key of Object.keys(fieldKeys)) {
+        const label = document.querySelector(`.control[data-param="${key}"] label`);
+        if (label) label.innerHTML = termHTML(tr(fieldKeys[key]));
+      }
+      for (const key of ["roadWidthIn", "roadWidthOut", "chamferX", "chamferY", "prismHeight", "progress", "turnRadius", "turnStartX", "stopY", "maxArticulation", "sweepSamples", "gridResolution", "heightSlices"]) {
+        const label = document.querySelector(`.control[data-param="${key}"] label`);
+        if (label) label.innerHTML = termHTML(tr(key));
+      }
+      setHTML('label[for="cargoEnabled"]', "cargoEnabled");
+      setHTML('label[for="smoothVolume"]', "smoothVolume");
+      setHTML('label[for="showRemaining"]', "showRemaining");
+      setHTML('label[for="showIntersection"]', "showIntersection");
+      setHTML('label[for="showSwept"]', "showSwept");
+
+      setPlaceholder("#vehicleSearchQuery", "vehicleSearchPlaceholder");
+      setPlaceholder("#vehicleDimensionText", "dimensionPlaceholder");
+      setText("#vehicleSearchButton", "match");
+      setText("#parseDimensionButton", "parseText");
+      const lookupStatus = document.querySelector("#vehicleLookupStatus");
+      if (lookupStatus && !lookupStatus.dataset.customStatus) lookupStatus.textContent = tr("lookupIdle");
+
+      setText("#playButton span", playing ? "pause" : "play");
+      setText("#openRemainingViewer span", "remainingView");
+      setText("#exportStl span", "exportStl");
+      setText("#topViewCamera span", "topView");
+      setText("#resetCamera span", "resetView");
+      setLegendItem(1, "legendRemaining");
+      setLegendItem(2, "legendCut");
+      setLegendItem(3, "legendTruck");
+      setLegendItem(4, "legendPrism");
+      const volumeSummary = document.querySelector("#volumeLibrary > summary");
+      if (volumeSummary) {
+        let volumeCount = document.querySelector("#savedVolumeCount");
+        volumeSummary.innerHTML = termHTML(tr("volumeLibrary"));
+        if (!volumeCount) {
+          volumeCount = document.createElement("span");
+          volumeCount.id = "savedVolumeCount";
+        }
+        volumeSummary.append(" ", volumeCount);
+      }
+      setText("#saveRemainingVolume span", "saveCurrent");
+      setText("#openHeatmapViewer span", "overlapAnalysis");
+      setHTML("#remainingViewerTitle", "remainingViewerTitle");
+      setText("#closeRemainingViewer", "close");
+      setText("#resetRemainingCamera", "resetView");
+      setHTML("#savedVolumeViewerTitle", "previewTitle");
+      setText("#closeSavedVolumeViewer", "close");
+      setHTML("#heatmapViewerTitle", "heatmapTitle");
+      setText("#exportHeatmapStl", "exportHeatmap");
+      setText("#closeHeatmapViewer", "close");
+      updateHeatmapThresholdLabel();
+      syncSmoothModeControls();
+      renderSavedVolumeList();
+    }
+
+    const canvas = document.querySelector("#scene");
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0xe9eef2, 1);
+
+    const axisCanvas = document.querySelector("#axisGizmoScene");
+    const axisRenderer = new THREE.WebGLRenderer({ canvas: axisCanvas, antialias: true, alpha: true });
+    axisRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    axisRenderer.setClearColor(0x000000, 0);
+    const axisScene = new THREE.Scene();
+    const axisCamera = new THREE.OrthographicCamera(-1.35, 1.35, 1.35, -1.35, 0.1, 8);
+    axisCamera.position.set(0, 0, 4);
+    axisCamera.lookAt(0, 0, 0);
+    const axisGroup = new THREE.Group();
+    axisScene.add(axisGroup);
+
+    function makeAxisArrow(direction, color) {
+      const group = new THREE.Group();
+      const material = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.96 });
+      const shaft = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.82, 14), material);
+      shaft.position.y = 0.41;
+      const head = new THREE.Mesh(new THREE.ConeGeometry(0.075, 0.22, 18), material);
+      head.position.y = 0.93;
+      group.add(shaft, head);
+      group.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction.clone().normalize());
+      return group;
+    }
+
+    function makeAxisLabel(text, position, color) {
+      const size = 96;
+      const labelCanvas = document.createElement("canvas");
+      labelCanvas.width = size;
+      labelCanvas.height = size;
+      const context = labelCanvas.getContext("2d");
+      context.font = "700 44px Inter, Segoe UI, Arial, sans-serif";
+      context.textAlign = "center";
+      context.textBaseline = "middle";
+      context.lineWidth = 7;
+      context.strokeStyle = "rgba(247,250,252,.88)";
+      context.strokeText(text, size / 2, size / 2);
+      context.fillStyle = `#${color.toString(16).padStart(6, "0")}`;
+      context.fillText(text, size / 2, size / 2);
+      const texture = new THREE.CanvasTexture(labelCanvas);
+      texture.needsUpdate = true;
+      const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false }));
+      sprite.position.copy(position);
+      sprite.scale.set(0.34, 0.34, 0.34);
+      return sprite;
+    }
+
+    axisGroup.add(
+      makeAxisArrow(new THREE.Vector3(1, 0, 0), 0xb7ff2f),
+      makeAxisArrow(new THREE.Vector3(0, 1, 0), 0x050505),
+      makeAxisArrow(new THREE.Vector3(0, 0, 1), 0xffffff),
+      makeAxisLabel("X", new THREE.Vector3(1.18, 0, 0), 0xb7ff2f),
+      makeAxisLabel("Z", new THREE.Vector3(0, 1.18, 0), 0x050505),
+      makeAxisLabel("Y", new THREE.Vector3(0, 0, 1.18), 0xffffff),
+      new THREE.Mesh(new THREE.SphereGeometry(0.045, 18, 12), new THREE.MeshBasicMaterial({ color: 0x111721 }))
+    );
+
+    const scene = new THREE.Scene();
+    scene.fog = new THREE.Fog(0xe9eef2, 38, 92);
+
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 220);
+    const topCamera = new THREE.OrthographicCamera(-10, 10, 10, -10, 0.1, 260);
+    topCamera.up.set(0, 0, -1);
+    let activeCamera = camera;
+    let topViewActive = false;
+    const controls = new OrbitControls(camera, canvas);
+    controls.enableDamping = true;
+    controls.target.set(-0.25, 1.08, -1.15);
+    controls.maxPolarAngle = Math.PI * 0.49;
+
+    const groups = {
+      road: new THREE.Group(),
+      prism: new THREE.Group(),
+      truck: new THREE.Group(),
+      swept: new THREE.Group(),
+      voxels: new THREE.Group()
+    };
+    Object.values(groups).forEach(group => scene.add(group));
+
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xcac6bc, 1.8);
+    scene.add(hemi);
+    const sun = new THREE.DirectionalLight(0xffffff, 2.2);
+    sun.position.set(12, 18, 8);
+    scene.add(sun);
+
+    const materials = {
+      road: new THREE.MeshStandardMaterial({ color: 0xe5ebef, roughness: 0.92 }),
+      roadLine: new THREE.MeshBasicMaterial({ color: 0xaeb8c2 }),
+      prism: new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        transparent: true,
+        opacity: 0.08,
+        roughness: 0.6,
+        depthWrite: false,
+        side: THREE.DoubleSide
+      }),
+      prismWire: new THREE.LineBasicMaterial({ color: 0xb7ff2f, transparent: true, opacity: 0.92 }),
+      cab: new THREE.MeshStandardMaterial({ color: 0xb7ff2f, roughness: 0.58, metalness: 0.03 }),
+      trailer: new THREE.MeshStandardMaterial({ color: 0x3f464d, roughness: 0.72, metalness: 0.04 }),
+      cargo: new THREE.MeshStandardMaterial({ color: 0x505961, roughness: 0.76, metalness: 0.03 }),
+      tire: new THREE.MeshStandardMaterial({ color: 0x050505, roughness: 0.84 }),
+      swept: new THREE.MeshBasicMaterial({
+        color: 0x18b7aa,
+        transparent: true,
+        opacity: 0.055,
+        depthWrite: false,
+        polygonOffset: true,
+        polygonOffsetFactor: 1,
+        polygonOffsetUnits: 1
+      }),
+      remaining: new THREE.MeshBasicMaterial({ color: 0x050505, transparent: true, opacity: 0.48, depthWrite: false, side: THREE.DoubleSide }),
+      cut: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.48, depthWrite: false, side: THREE.DoubleSide })
+    };
+
+    const remainingViewer = {
+      root: document.querySelector("#remainingViewer"),
+      canvas: document.querySelector("#remainingScene"),
+      openButton: document.querySelector("#openRemainingViewer"),
+      closeButton: document.querySelector("#closeRemainingViewer"),
+      resetButton: document.querySelector("#resetRemainingCamera"),
+      isOpen: false,
+      lastFocused: null
+    };
+    const remainingRenderer = new THREE.WebGLRenderer({ canvas: remainingViewer.canvas, antialias: true, alpha: true });
+    remainingRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    remainingRenderer.setClearColor(0xe9eef2, 0);
+
+    const remainingScene = new THREE.Scene();
+    const remainingCamera = new THREE.PerspectiveCamera(42, 1, 0.05, 160);
+    const remainingControls = new OrbitControls(remainingCamera, remainingViewer.canvas);
+    remainingControls.enableDamping = true;
+    remainingControls.target.set(-1.8, 1.6, 1.8);
+
+    const remainingViewerGroup = new THREE.Group();
+    remainingScene.add(remainingViewerGroup);
+    remainingScene.add(new THREE.HemisphereLight(0xffffff, 0xcac6bc, 1.9));
+    const remainingSun = new THREE.DirectionalLight(0xffffff, 2.4);
+    remainingSun.position.set(7, 10, 8);
+    remainingScene.add(remainingSun);
+
+    const remainingViewerMaterial = new THREE.MeshStandardMaterial({
+      color: 0x050505,
+      transparent: true,
+      opacity: 0.68,
+      roughness: 0.64,
+      metalness: 0.02,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    let latestVoxelResult = null;
+    let latestSmoothResult = null;
+    let savedVolumeSerial = 1;
+    const savedVolumes = [];
+
+    const savedVolumeViewer = {
+      root: document.querySelector("#savedVolumeViewer"),
+      canvas: document.querySelector("#savedVolumeScene"),
+      closeButton: document.querySelector("#closeSavedVolumeViewer"),
+      title: document.querySelector("#savedVolumeViewerTitle"),
+      isOpen: false,
+      activeId: null
+    };
+    const savedVolumeRenderer = new THREE.WebGLRenderer({ canvas: savedVolumeViewer.canvas, antialias: true, alpha: true });
+    savedVolumeRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    savedVolumeRenderer.setClearColor(0xe9eef2, 0);
+    const savedVolumeScene = new THREE.Scene();
+    const savedVolumeCamera = new THREE.PerspectiveCamera(42, 1, 0.05, 160);
+    const savedVolumeControls = new OrbitControls(savedVolumeCamera, savedVolumeViewer.canvas);
+    savedVolumeControls.enableDamping = true;
+    const savedVolumeGroup = new THREE.Group();
+    savedVolumeScene.add(savedVolumeGroup);
+    savedVolumeScene.add(new THREE.HemisphereLight(0xffffff, 0xcac6bc, 1.8));
+    const savedVolumeSun = new THREE.DirectionalLight(0xffffff, 2.2);
+    savedVolumeSun.position.set(7, 10, 8);
+    savedVolumeScene.add(savedVolumeSun);
+    const savedVolumeMaterial = new THREE.MeshStandardMaterial({
+      color: 0x050505,
+      transparent: true,
+      opacity: 0.72,
+      roughness: 0.64,
+      depthWrite: false,
+      side: THREE.DoubleSide
+    });
+
+    const heatmapViewer = {
+      root: document.querySelector("#heatmapViewer"),
+      canvas: document.querySelector("#heatmapScene"),
+      closeButton: document.querySelector("#closeHeatmapViewer"),
+      openButton: document.querySelector("#openHeatmapViewer"),
+      exportButton: document.querySelector("#exportHeatmapStl"),
+      threshold: document.querySelector("#heatmapThreshold"),
+      thresholdLabel: document.querySelector("#heatmapThresholdLabel"),
+      title: document.querySelector("#heatmapViewerTitle"),
+      isOpen: false
+    };
+    const heatmapRenderer = new THREE.WebGLRenderer({ canvas: heatmapViewer.canvas, antialias: true, alpha: true });
+    heatmapRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    heatmapRenderer.setClearColor(0xe9eef2, 0);
+    const heatmapScene = new THREE.Scene();
+    const heatmapCamera = new THREE.PerspectiveCamera(42, 1, 0.05, 220);
+    const heatmapControls = new OrbitControls(heatmapCamera, heatmapViewer.canvas);
+    heatmapControls.enableDamping = true;
+    const heatmapGroup = new THREE.Group();
+    heatmapScene.add(heatmapGroup);
+    heatmapScene.add(new THREE.HemisphereLight(0xffffff, 0xcac6bc, 1.9));
+    const heatmapSun = new THREE.DirectionalLight(0xffffff, 2.4);
+    heatmapSun.position.set(8, 12, 9);
+    heatmapScene.add(heatmapSun);
+    let latestHeatmap = null;
+
+    function topViewTarget() {
+      return new THREE.Vector3(-0.25, 0, 1.85);
+    }
+
+    function updateTopCameraProjection() {
+      const rect = canvas.getBoundingClientRect();
+      const aspect = rect.width / Math.max(1, rect.height);
+      const halfHeight = 11.5;
+      topCamera.left = -halfHeight * aspect;
+      topCamera.right = halfHeight * aspect;
+      topCamera.top = halfHeight;
+      topCamera.bottom = -halfHeight;
+      topCamera.updateProjectionMatrix();
+    }
+
+    function setTopView(active) {
+      topViewActive = active;
+      activeCamera = topViewActive ? topCamera : camera;
+      controls.object = activeCamera;
+      controls.enableRotate = !topViewActive;
+      controls.screenSpacePanning = topViewActive;
+      document.querySelector("#topViewCamera")?.classList.toggle("is-active", topViewActive);
+      if (topViewActive) {
+        updateTopCameraProjection();
+        const target = topViewTarget();
+        topCamera.position.set(target.x, 28, target.z);
+        controls.target.copy(target);
+        topCamera.lookAt(target);
+      } else {
+        controls.maxPolarAngle = Math.PI * 0.49;
+      }
+      controls.update();
+    }
+
+    function resetCamera() {
+      if (topViewActive) setTopView(false);
+      camera.position.set(10.65, 3.62, -17.65);
+      controls.target.set(-0.25, 1.08, -1.15);
+      controls.object = camera;
+      controls.enableRotate = true;
+      controls.maxPolarAngle = Math.PI * 0.49;
+      controls.update();
+    }
+    resetCamera();
+
+    function clearGroup(group) {
+      while (group.children.length) {
+        const child = group.children.pop();
+        if (child.geometry) child.geometry.dispose();
+        if (child.material && child.material.dispose && !Object.values(materials).includes(child.material)) {
+          child.material.dispose();
+        }
+      }
+    }
+
+    function clearRemainingViewerGroup() {
+      while (remainingViewerGroup.children.length) {
+        const child = remainingViewerGroup.children.pop();
+        if (child.geometry) child.geometry.dispose();
+      }
+    }
+
+    function clearRenderGroup(group, disposeMaterials = false) {
+      while (group.children.length) {
+        const child = group.children.pop();
+        if (child.geometry) child.geometry.dispose();
+        if (disposeMaterials && child.material?.dispose) child.material.dispose();
+      }
+    }
+
+    function fitCameraToObject(mesh, cameraToFit, controlsToFit) {
+      const box = new THREE.Box3().setFromObject(mesh);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      const radius = Math.max(size.x, size.y, size.z, 1);
+      controlsToFit.target.copy(center);
+      cameraToFit.position.set(
+        center.x + radius * 1.45,
+        center.y + radius * 1.15,
+        center.z + radius * 1.45
+      );
+      cameraToFit.near = Math.max(0.01, radius / 100);
+      cameraToFit.far = Math.max(120, radius * 14);
+      cameraToFit.updateProjectionMatrix();
+      controlsToFit.update();
+    }
+
+    function fitRemainingViewerCamera(mesh) {
+      const box = new THREE.Box3().setFromObject(mesh);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      const radius = Math.max(size.x, size.y, size.z, 1);
+      remainingControls.target.copy(center);
+      remainingCamera.position.set(
+        center.x + radius * 1.45,
+        center.y + radius * 1.15,
+        center.z + radius * 1.45
+      );
+      remainingCamera.near = Math.max(0.01, radius / 100);
+      remainingCamera.far = Math.max(80, radius * 12);
+      remainingCamera.updateProjectionMatrix();
+      remainingControls.update();
+    }
+
+    function resizeRemainingViewer() {
+      if (!remainingViewer.isOpen) return;
+      const rect = remainingViewer.canvas.getBoundingClientRect();
+      remainingRenderer.setSize(rect.width, rect.height, false);
+      remainingCamera.aspect = rect.width / Math.max(1, rect.height);
+      remainingCamera.updateProjectionMatrix();
+    }
+
+    function resizeSavedVolumeViewer() {
+      if (!savedVolumeViewer.isOpen) return;
+      const rect = savedVolumeViewer.canvas.getBoundingClientRect();
+      savedVolumeRenderer.setSize(rect.width, rect.height, false);
+      savedVolumeCamera.aspect = rect.width / Math.max(1, rect.height);
+      savedVolumeCamera.updateProjectionMatrix();
+    }
+
+    function resizeHeatmapViewer() {
+      if (!heatmapViewer.isOpen) return;
+      const rect = heatmapViewer.canvas.getBoundingClientRect();
+      heatmapRenderer.setSize(rect.width, rect.height, false);
+      heatmapCamera.aspect = rect.width / Math.max(1, rect.height);
+      heatmapCamera.updateProjectionMatrix();
+    }
+
+    function resizeAxisGizmo() {
+      const rect = axisCanvas.getBoundingClientRect();
+      axisRenderer.setSize(rect.width, rect.height, false);
+    }
+
+    function refreshRemainingViewer(resetView = false) {
+      if (!remainingViewer.isOpen) return;
+      clearRemainingViewerGroup();
+      let mesh = null;
+      const result = latestVoxelResult || computeVoxelResult();
+      if (result.remaining.length) {
+        mesh = state.smoothVolume
+          ? smoothedVoxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, remainingViewerMaterial)
+          : voxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, remainingViewerMaterial);
+      }
+      if (!mesh) return;
+      mesh.renderOrder = 10;
+      remainingViewerGroup.add(mesh);
+      if (resetView) fitRemainingViewerCamera(mesh);
+    }
+
+    function openRemainingViewer() {
+      remainingViewer.lastFocused = document.activeElement;
+      remainingViewer.isOpen = true;
+      remainingViewer.root.classList.add("is-open");
+      remainingViewer.root.setAttribute("aria-hidden", "false");
+      resizeRemainingViewer();
+      refreshRemainingViewer(true);
+      remainingViewer.closeButton.focus();
+    }
+
+    function closeRemainingViewer() {
+      remainingViewer.isOpen = false;
+      remainingViewer.root.classList.remove("is-open");
+      remainingViewer.root.setAttribute("aria-hidden", "true");
+      if (remainingViewer.lastFocused && remainingViewer.lastFocused.focus) {
+        remainingViewer.lastFocused.focus();
+      }
+    }
+
+    function cloneCells(cells) {
+      return cells.map(cell => ({
+        x: cell.x,
+        y: cell.y,
+        z: cell.z,
+        ix: cell.ix,
+        iy: cell.iy,
+        iz: cell.iz
+      }));
+    }
+
+    function cloneVoxelResult(result) {
+      return {
+        remaining: cloneCells(result.remaining),
+        occupied: cloneCells(result.occupied),
+        totalCells: result.totalCells,
+        sampleFrames: result.sampleFrames,
+        dx: result.dx,
+        dPlaneY: result.dPlaneY,
+        dy: result.dy,
+        totalVolume: result.totalVolume,
+        cutVolume: result.cutVolume,
+        remainVolume: result.remainVolume,
+        chamferX: state.chamferX,
+        chamferY: state.chamferY,
+        prismHeight: state.prismHeight
+      };
+    }
+
+    function currentVolumeSnapshot() {
+      const result = computeVoxelResult();
+      return cloneVoxelResult(result);
+    }
+
+    function renderSavedVolumeList() {
+      const count = document.querySelector("#savedVolumeCount");
+      const list = document.querySelector("#savedVolumeList");
+      const saveButton = document.querySelector("#saveRemainingVolume");
+      const heatButton = document.querySelector("#openHeatmapViewer");
+      count.textContent = `${savedVolumes.length}/${savedVolumeLimit}`;
+      saveButton.disabled = savedVolumes.length >= savedVolumeLimit;
+      heatButton.disabled = savedVolumes.length === 0;
+      list.innerHTML = "";
+
+      if (!savedVolumes.length) {
+        const empty = document.createElement("div");
+        empty.className = "lookup-status";
+        empty.textContent = tr("noSaved");
+        list.appendChild(empty);
+        return;
+      }
+
+      for (const item of savedVolumes) {
+        const details = document.createElement("details");
+        details.className = "saved-volume";
+
+        const summary = document.createElement("summary");
+        summary.textContent = `${item.name} · ${item.result.remainVolume.toFixed(1)} m³`;
+        details.appendChild(summary);
+
+        const content = document.createElement("div");
+        content.className = "saved-volume__content";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.value = item.name;
+        input.setAttribute("aria-label", tr("rename"));
+        input.addEventListener("change", () => {
+          item.name = input.value.trim() || item.name;
+          renderSavedVolumeList();
+          if (savedVolumeViewer.activeId === item.id) savedVolumeViewer.title.textContent = item.name;
+        });
+
+        const meta = document.createElement("div");
+        meta.className = "saved-volume__meta";
+        const locale = currentLanguage === "jp" ? "ja-JP" : "zh-CN";
+        meta.innerHTML = `<span>${item.result.remaining.length.toLocaleString(locale)} ${tr("voxel")}</span><span>${item.result.sampleFrames} ${tr("pose")}</span><span>${item.created}</span>`;
+
+        const buttons = document.createElement("div");
+        buttons.className = "saved-volume__buttons";
+
+        const viewButton = document.createElement("button");
+        viewButton.type = "button";
+        viewButton.textContent = tr("view");
+        viewButton.addEventListener("click", () => openSavedVolumeViewer(item.id));
+
+        const deleteButton = document.createElement("button");
+        deleteButton.type = "button";
+        deleteButton.textContent = tr("delete");
+        deleteButton.addEventListener("click", () => {
+          const index = savedVolumes.findIndex(saved => saved.id === item.id);
+          if (index >= 0) savedVolumes.splice(index, 1);
+          if (savedVolumeViewer.activeId === item.id) closeSavedVolumeViewer();
+          latestHeatmap = null;
+          renderSavedVolumeList();
+          refreshHeatmapViewer(true);
+        });
+
+        buttons.append(viewButton, deleteButton);
+        content.append(input, meta, buttons);
+        details.appendChild(content);
+        list.appendChild(details);
+      }
+    }
+
+    function saveCurrentRemainingVolume() {
+      if (savedVolumes.length >= savedVolumeLimit) return;
+      const snapshot = currentVolumeSnapshot();
+      const id = globalThis.crypto?.randomUUID ? crypto.randomUUID() : `saved-${Date.now()}-${Math.random()}`;
+      savedVolumes.push({
+        id,
+        name: tr("savedName", savedVolumeSerial++),
+        result: snapshot,
+        created: new Date().toLocaleTimeString(currentLanguage === "jp" ? "ja-JP" : "zh-CN", { hour: "2-digit", minute: "2-digit" })
+      });
+      latestHeatmap = null;
+      renderSavedVolumeList();
+      refreshHeatmapViewer(true);
+    }
+
+    function openSavedVolumeViewer(id) {
+      const item = savedVolumes.find(saved => saved.id === id);
+      if (!item) return;
+      savedVolumeViewer.activeId = id;
+      savedVolumeViewer.isOpen = true;
+      savedVolumeViewer.title.textContent = item.name;
+      savedVolumeViewer.root.classList.add("is-open");
+      savedVolumeViewer.root.setAttribute("aria-hidden", "false");
+      resizeSavedVolumeViewer();
+      refreshSavedVolumeViewer(true);
+    }
+
+    function closeSavedVolumeViewer() {
+      savedVolumeViewer.isOpen = false;
+      savedVolumeViewer.activeId = null;
+      savedVolumeViewer.root.classList.remove("is-open");
+      savedVolumeViewer.root.setAttribute("aria-hidden", "true");
+      clearRenderGroup(savedVolumeGroup);
+    }
+
+    function refreshSavedVolumeViewer(resetView = false) {
+      if (!savedVolumeViewer.isOpen) return;
+      const item = savedVolumes.find(saved => saved.id === savedVolumeViewer.activeId);
+      clearRenderGroup(savedVolumeGroup);
+      if (!item) return;
+      const result = item.result;
+      const mesh = smoothedVoxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, savedVolumeMaterial, result);
+      savedVolumeGroup.add(mesh);
+      if (resetView) fitCameraToObject(mesh, savedVolumeCamera, savedVolumeControls);
+    }
+
+    function heatmapThresholdCount() {
+      const total = savedVolumes.length;
+      if (!total) return 1;
+      const level = Number(heatmapViewer.threshold.value);
+      return 1 + Math.round(level / 10 * Math.max(0, total - 1));
+    }
+
+    function heatmapColor(count, maxCount) {
+      const t = maxCount <= 1 ? 0 : (count - 1) / (maxCount - 1);
+      const color = new THREE.Color(0xb8ff2f);
+      color.lerp(new THREE.Color(0xff625a), t);
+      return color;
+    }
+
+    function aggregateSavedVolumes() {
+      if (!savedVolumes.length) return null;
+      const dx = Math.max(...savedVolumes.map(item => item.result.dx));
+      const dy = Math.max(...savedVolumes.map(item => item.result.dy));
+      const dz = Math.max(...savedVolumes.map(item => item.result.dPlaneY));
+      const buckets = new Map();
+
+      for (const item of savedVolumes) {
+        const localKeys = new Set();
+        for (const cell of item.result.remaining) {
+          const ix = Math.floor(cell.x / dx);
+          const iy = Math.floor(cell.y / dy);
+          const iz = Math.floor(cell.z / dz);
+          localKeys.add(`${ix},${iy},${iz}`);
+        }
+        for (const key of localKeys) {
+          let bucket = buckets.get(key);
+          if (!bucket) {
+            const [ix, iy, iz] = key.split(",").map(Number);
+            bucket = { ix, iy, iz, x: (ix + 0.5) * dx, y: (iy + 0.5) * dy, z: (iz + 0.5) * dz, count: 0 };
+            buckets.set(key, bucket);
+          }
+          bucket.count++;
+        }
+      }
+
+      return {
+        cells: [...buckets.values()],
+        dx,
+        dy,
+        dz,
+        maxCount: savedVolumes.length
+      };
+    }
+
+    function updateHeatmapThresholdLabel() {
+      const threshold = heatmapThresholdCount();
+      const label = heatmapViewer.thresholdLabel.parentElement;
+      if (label?.firstChild) label.firstChild.textContent = tr("thresholdPrefix");
+      heatmapViewer.thresholdLabel.textContent = `≥ ${threshold} / ${savedVolumes.length}`;
+    }
+
+    function openHeatmapViewer() {
+      if (!savedVolumes.length) return;
+      heatmapViewer.isOpen = true;
+      heatmapViewer.root.classList.add("is-open");
+      heatmapViewer.root.setAttribute("aria-hidden", "false");
+      resizeHeatmapViewer();
+      refreshHeatmapViewer(true);
+    }
+
+    function closeHeatmapViewer() {
+      heatmapViewer.isOpen = false;
+      heatmapViewer.root.classList.remove("is-open");
+      heatmapViewer.root.setAttribute("aria-hidden", "true");
+      clearRenderGroup(heatmapGroup, true);
+    }
+
+    function refreshHeatmapViewer(resetView = false) {
+      updateHeatmapThresholdLabel();
+      if (!heatmapViewer.isOpen) return;
+      clearRenderGroup(heatmapGroup, true);
+      latestHeatmap = aggregateSavedVolumes();
+      if (!latestHeatmap) return;
+      heatmapViewer.title.textContent = tr("heatmapTitleWithCount", savedVolumes.length);
+
+      let fitMesh = null;
+      for (let count = 1; count <= latestHeatmap.maxCount; count++) {
+        const cells = latestHeatmap.cells.filter(cell => cell.count === count);
+        if (!cells.length) continue;
+        const material = new THREE.MeshBasicMaterial({
+          color: heatmapColor(count, latestHeatmap.maxCount),
+          transparent: true,
+          opacity: 0.28 + 0.36 * (count / latestHeatmap.maxCount),
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        const mesh = voxelSurfaceMesh(cells, latestHeatmap.dx, latestHeatmap.dy, latestHeatmap.dz, material);
+        heatmapGroup.add(mesh);
+        if (!fitMesh) fitMesh = mesh;
+      }
+
+      if (resetView && fitMesh) fitCameraToObject(heatmapGroup, heatmapCamera, heatmapControls);
+    }
+
+    function exportHeatmapStl() {
+      const heatmap = latestHeatmap || aggregateSavedVolumes();
+      if (!heatmap) return;
+      const threshold = heatmapThresholdCount();
+      const cells = heatmap.cells.filter(cell => cell.count >= threshold);
+      if (!cells.length) return;
+      const triangles = voxelSurfaceTriangles(cells, heatmap.dx, heatmap.dy, heatmap.dz);
+      exportTrianglesAsStl(triangles, `remaining_overlap_threshold_${threshold}.stl`, `remaining overlap threshold ${threshold}, units: meters`);
+    }
+
+    function makeBox(length, height, width, pose, baseY, material) {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(length, height, width), material);
+      mesh.position.set(pose.cx, baseY + height / 2, pose.cz);
+      mesh.rotation.y = -pose.heading;
+      return mesh;
+    }
+
+    function makeSweptBox(length, height, width, pose, baseY) {
+      const mesh = makeBox(length, height, width, pose, baseY, materials.swept);
+      mesh.renderOrder = 5;
+      return mesh;
+    }
+
+    function cabLength() {
+      return state.cabLength;
+    }
+
+    function trailerLength() {
+      return state.trailerLength;
+    }
+
+    function cabWheelbase() {
+      return Math.max(0.4, state.cabLength - state.cabFrontOverhang - state.cabRearOverhang);
+    }
+
+    function trailerWheelbase() {
+      return Math.max(0.4, state.trailerLength - state.trailerFrontOverhang - state.trailerRearOverhang);
+    }
+
+    function outerWidth(width) {
+      return width + state.sideProtrusion * 2;
+    }
+
+    function centerFromHitch(hitch, heading, localOffset) {
+      return {
+        cx: hitch.x + Math.cos(heading) * localOffset,
+        cz: hitch.z + Math.sin(heading) * localOffset,
+        heading
+      };
+    }
+
+    function cargoPose(pose) {
+      const cargoLength = Math.min(state.cargoLength, trailerLength());
+      return centerFromHitch(pose.hitch, pose.trailerHeading, state.cargoFrontOverhang - cargoLength / 2);
+    }
+
+    function pathLength() {
+      return state.turnRadius * Math.PI / 2 + Math.max(0, state.stopY);
+    }
+
+    function pathPointAtDistance(distance) {
+      const radius = state.turnRadius;
+      const arcLength = radius * Math.PI / 2;
+      if (distance <= arcLength) {
+        const angle = distance / radius;
+        return {
+          hitch: {
+            x: state.turnStartX + radius * Math.sin(angle),
+            z: -radius * Math.cos(angle)
+          },
+          cabHeading: angle
+        };
+      }
+      return {
+        hitch: {
+          x: state.turnStartX + radius,
+          z: distance - arcLength
+        },
+        cabHeading: Math.PI / 2
+      };
+    }
+
+    let kinematicCache = null;
+
+    function kinematicCacheKey() {
+      return [
+        state.turnRadius,
+        state.turnStartX,
+        state.stopY,
+        state.trailerLength,
+        state.trailerFrontOverhang,
+        state.trailerRearOverhang,
+        state.maxArticulation,
+        state.sweepSamples
+      ].join("|");
+    }
+
+    function kinematicSamples() {
+      const key = kinematicCacheKey();
+      if (kinematicCache?.key === key) return kinematicCache.samples;
+
+      const totalLength = Math.max(0.001, pathLength());
+      const steps = Math.max(180, Math.round(state.sweepSamples) * 4);
+      const samples = [];
+      let trailerHeading = 0;
+      const effectiveTrailerWheelbase = Math.max(0.4, trailerWheelbase());
+      const maxDelta = THREE.MathUtils.degToRad(state.maxArticulation);
+
+      for (let i = 0; i <= steps; i++) {
+        const progress = i / steps;
+        const distance = progress * totalLength;
+        const point = pathPointAtDistance(distance);
+
+        if (i > 0) {
+          const previousDistance = (i - 1) / steps * totalLength;
+          const ds = distance - previousDistance;
+          const midpoint = pathPointAtDistance((previousDistance + distance) / 2);
+          trailerHeading += ds / effectiveTrailerWheelbase * Math.sin(midpoint.cabHeading - trailerHeading);
+
+          const delta = point.cabHeading - trailerHeading;
+          if (Math.abs(delta) > maxDelta) {
+            trailerHeading = point.cabHeading - Math.sign(delta) * maxDelta;
+          }
+        }
+
+        samples.push({
+          progress,
+          hitch: point.hitch,
+          cabHeading: point.cabHeading,
+          trailerHeading
+        });
+      }
+
+      kinematicCache = { key, samples };
+      return samples;
+    }
+
+    function poseAt(progress01) {
+      const progress = THREE.MathUtils.clamp(progress01, 0, 1);
+      const samples = kinematicSamples();
+      const scaled = progress * (samples.length - 1);
+      const low = Math.floor(scaled);
+      const high = Math.min(samples.length - 1, low + 1);
+      const t = scaled - low;
+      const a = samples[low];
+      const b = samples[high];
+      const hitch = {
+        x: THREE.MathUtils.lerp(a.hitch.x, b.hitch.x, t),
+        z: THREE.MathUtils.lerp(a.hitch.z, b.hitch.z, t)
+      };
+      const cabHeading = THREE.MathUtils.lerp(a.cabHeading, b.cabHeading, t);
+      const trailerHeading = THREE.MathUtils.lerp(a.trailerHeading, b.trailerHeading, t);
+
+      const cabCenter = centerFromHitch(hitch, cabHeading, state.hitchGap + cabLength() / 2);
+      const trailerCenter = centerFromHitch(
+        hitch,
+        trailerHeading,
+        (state.trailerFrontOverhang - (trailerWheelbase() + state.trailerRearOverhang)) / 2
+      );
+
+      return { hitch, cabHeading, trailerHeading, cabCenter, trailerCenter };
+    }
+
+    function wheelBoxes(pose) {
+      const boxes = [];
+      const wheelY0 = 0;
+      const wheelY1 = state.wheelRadius * 2;
+      const wheelLength = state.wheelRadius * 2;
+      const pairs = [
+        { base: pose.cabCenter, width: outerWidth(state.cabWidth), offsets: axleOffsets(cabLength(), cabWheelbase()) },
+        { base: pose.trailerCenter, width: outerWidth(state.trailerWidth), offsets: axleOffsets(trailerLength(), trailerWheelbase()) }
+      ];
+
+      for (const pair of pairs) {
+        const c = Math.cos(pair.base.heading);
+        const s = Math.sin(pair.base.heading);
+        const track = Math.min(Math.max(state.wheelTrack, state.wheelWidth), pair.width + state.wheelWidth * 2);
+        for (const longOffset of pair.offsets) {
+          for (const side of [-1, 1]) {
+            const lat = side * track / 2;
+            boxes.push({
+              cx: pair.base.cx + c * longOffset - s * lat,
+              cz: pair.base.cz + s * longOffset + c * lat,
+              heading: pair.base.heading,
+              length: wheelLength,
+              width: state.wheelWidth,
+              y0: wheelY0,
+              y1: wheelY1
+            });
+          }
+        }
+      }
+      return boxes;
+    }
+
+    function bodyBoxes(progress01) {
+      const pose = poseAt(progress01);
+      const boxes = [
+        {
+          cx: pose.cabCenter.cx,
+          cz: pose.cabCenter.cz,
+          heading: pose.cabCenter.heading,
+          length: cabLength(),
+          width: outerWidth(state.cabWidth),
+          y0: state.chassisHeight,
+          y1: state.chassisHeight + state.cabHeight
+        },
+        {
+          cx: pose.trailerCenter.cx,
+          cz: pose.trailerCenter.cz,
+          heading: pose.trailerCenter.heading,
+          length: trailerLength(),
+          width: outerWidth(state.trailerWidth),
+          y0: state.chassisHeight,
+          y1: state.chassisHeight + state.deckHeight
+        }
+      ];
+
+      if (state.cargoEnabled) {
+        const currentCargoPose = cargoPose(pose);
+        const currentCargoLength = Math.min(state.cargoLength, trailerLength());
+        boxes.push({
+          cx: currentCargoPose.cx,
+          cz: currentCargoPose.cz,
+          heading: currentCargoPose.heading,
+          length: currentCargoLength,
+          width: outerWidth(state.trailerWidth),
+          y0: state.chassisHeight + state.deckHeight + state.cargoBaseOffset,
+          y1: state.chassisHeight + state.deckHeight + state.cargoBaseOffset + state.cargoHeight
+        });
+      }
+      boxes.push(...wheelBoxes(pose));
+      return boxes;
+    }
+
+    function pointInBox(x, y, z, box) {
+      if (y < box.y0 || y > box.y1) return false;
+      const dx = x - box.cx;
+      const dz = z - box.cz;
+      const c = Math.cos(box.heading);
+      const s = Math.sin(box.heading);
+      const localLong = dx * c + dz * s;
+      const localLat = -dx * s + dz * c;
+      return Math.abs(localLong) <= box.length / 2 && Math.abs(localLat) <= box.width / 2;
+    }
+
+    function pointInAnySweptBox(x, y, z, frames) {
+      for (const frame of frames) {
+        for (const box of frame) {
+          if (pointInBox(x, y, z, box)) return true;
+        }
+      }
+      return false;
+    }
+
+    function buildRoad() {
+      clearGroup(groups.road);
+      const roadThickness = 0.05;
+      const long = 34;
+      const xMin = 3 - long / 2;
+      const xMax = 3 + long / 2;
+      const zMin = 3 - long / 2;
+      const zMax = 3 + long / 2;
+      const inWidth = state.roadWidthIn;
+      const outWidth = state.roadWidthOut;
+      const roadShape = new THREE.Shape();
+      const roadPoints = [
+        [xMin, -inWidth],
+        [0, -inWidth],
+        [0, zMin],
+        [outWidth, zMin],
+        [outWidth, -inWidth],
+        [xMax, -inWidth],
+        [xMax, 0],
+        [outWidth, 0],
+        [outWidth, zMax],
+        [0, zMax],
+        [0, 0],
+        [xMin, 0]
+      ];
+      roadShape.moveTo(roadPoints[0][0], -roadPoints[0][1]);
+      for (const [x, z] of roadPoints.slice(1)) roadShape.lineTo(x, -z);
+      roadShape.closePath();
+      const roadGeometry = new THREE.ExtrudeGeometry(roadShape, {
+        depth: roadThickness,
+        bevelEnabled: false
+      });
+      roadGeometry.rotateX(-Math.PI / 2);
+      roadGeometry.translate(0, -roadThickness, 0);
+      const road = new THREE.Mesh(roadGeometry, materials.road);
+      road.renderOrder = -2;
+      groups.road.add(road);
+
+      const edgeGeom = new THREE.BufferGeometry().setFromPoints([
+        new THREE.Vector3(0, 0.012, -state.roadWidthIn),
+        new THREE.Vector3(0, 0.012, 0),
+        new THREE.Vector3(state.roadWidthOut, 0.012, 0)
+      ]);
+      groups.road.add(new THREE.Line(edgeGeom, new THREE.LineBasicMaterial({ color: 0x9aa6b2, transparent: true, opacity: 0.58 })));
+
+      const axes = new THREE.GridHelper(36, 36, 0xc8d0d8, 0xdde4ea);
+      axes.position.set(6, 0.004, 2);
+      groups.road.add(axes);
+    }
+
+    function prismGeometry(xLength, yLength, height) {
+      const vertices = new Float32Array([
+        0, 0, 0,  -xLength, 0, 0,  0, 0, yLength,
+        0, height, 0,  -xLength, height, 0,  0, height, yLength
+      ]);
+      const indices = [
+        0, 2, 1,
+        3, 4, 5,
+        0, 1, 4, 0, 4, 3,
+        1, 2, 5, 1, 5, 4,
+        2, 0, 3, 2, 3, 5
+      ];
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.BufferAttribute(vertices, 3));
+      geometry.setIndex(indices);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function buildPrism() {
+      clearGroup(groups.prism);
+      const geom = prismGeometry(state.chamferX, state.chamferY, state.prismHeight);
+      const mesh = new THREE.Mesh(geom, materials.prism);
+      mesh.renderOrder = 10;
+      groups.prism.add(mesh);
+
+      const edges = new THREE.EdgesGeometry(geom);
+      const line = new THREE.LineSegments(edges, materials.prismWire);
+      line.renderOrder = 40;
+      groups.prism.add(line);
+    }
+
+    function axleOffsets(bodyLength, wheelbase) {
+      const maxWheelbase = Math.max(0.8, bodyLength - state.wheelRadius * 2.4);
+      const spacing = Math.min(Math.max(0.4, wheelbase), maxWheelbase);
+      return [-spacing / 2, spacing / 2];
+    }
+
+    function addWheels(group, pose) {
+      const wheelPairs = [
+        { base: pose.cabCenter, width: outerWidth(state.cabWidth), offsets: axleOffsets(cabLength(), cabWheelbase()) },
+        { base: pose.trailerCenter, width: outerWidth(state.trailerWidth), offsets: axleOffsets(trailerLength(), trailerWheelbase()) }
+      ];
+
+      for (const pair of wheelPairs) {
+        for (const longOffset of pair.offsets) {
+          for (const side of [-1, 1]) {
+            const c = Math.cos(pair.base.heading);
+            const s = Math.sin(pair.base.heading);
+            const track = Math.min(Math.max(state.wheelTrack, state.wheelWidth), pair.width + state.wheelWidth * 2);
+            const lat = side * track / 2;
+            const x = pair.base.cx + c * longOffset - s * lat;
+            const z = pair.base.cz + s * longOffset + c * lat;
+            const wheel = new THREE.Mesh(
+              new THREE.CylinderGeometry(state.wheelRadius, state.wheelRadius, state.wheelWidth, 20),
+              materials.tire
+            );
+            wheel.position.set(x, state.wheelRadius, z);
+            const axleDirection = new THREE.Vector3(-s, 0, c).normalize();
+            wheel.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axleDirection);
+            group.add(wheel);
+          }
+        }
+      }
+    }
+
+    function buildTruck() {
+      clearGroup(groups.truck);
+      const pose = poseAt(state.progress / 100);
+      groups.truck.add(makeBox(cabLength(), state.cabHeight, outerWidth(state.cabWidth), pose.cabCenter, state.chassisHeight, materials.cab));
+      groups.truck.add(makeBox(trailerLength(), state.deckHeight, outerWidth(state.trailerWidth), pose.trailerCenter, state.chassisHeight, materials.trailer));
+      if (state.cargoEnabled) {
+        const currentCargoPose = cargoPose(pose);
+        groups.truck.add(makeBox(
+          Math.min(state.cargoLength, trailerLength()),
+          state.cargoHeight,
+          outerWidth(state.trailerWidth),
+          currentCargoPose,
+          state.chassisHeight + state.deckHeight + state.cargoBaseOffset,
+          materials.cargo
+        ));
+      }
+      addWheels(groups.truck, pose);
+    }
+
+    function buildSweptGhosts() {
+      clearGroup(groups.swept);
+      if (!state.showSwept) return;
+      const ghostCount = 15;
+      const currentProgress = state.progress / 100;
+      const currentFrameTolerance = 0.55 / (ghostCount - 1);
+      for (let i = 0; i < ghostCount; i++) {
+        const progress = i / (ghostCount - 1);
+        if (Math.abs(progress - currentProgress) < currentFrameTolerance) continue;
+        const pose = poseAt(progress);
+        const cab = makeSweptBox(cabLength(), state.cabHeight, outerWidth(state.cabWidth), pose.cabCenter, state.chassisHeight);
+        const deck = makeSweptBox(trailerLength(), state.deckHeight, outerWidth(state.trailerWidth), pose.trailerCenter, state.chassisHeight);
+        groups.swept.add(cab, deck);
+        if (state.cargoEnabled) {
+          const currentCargoPose = cargoPose(pose);
+          groups.swept.add(makeSweptBox(
+            Math.min(state.cargoLength, trailerLength()),
+            state.cargoHeight,
+            outerWidth(state.trailerWidth),
+            currentCargoPose,
+            state.chassisHeight + state.deckHeight + state.cargoBaseOffset
+          ));
+        }
+      }
+    }
+
+    function buildVoxels() {
+      clearGroup(groups.voxels);
+      const result = computeVoxelResult();
+      latestVoxelResult = result;
+      latestSmoothResult = null;
+      setMetrics(result.totalVolume, result.cutVolume, result.remainVolume);
+
+      if (state.showRemaining && result.remaining.length) {
+        const mesh = state.smoothVolume
+          ? smoothedVoxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, materials.remaining)
+          : voxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, materials.remaining);
+        mesh.renderOrder = 30;
+        groups.voxels.add(mesh);
+      }
+      if (state.showIntersection && result.occupied.length) {
+        const mesh = state.smoothVolume
+          ? smoothedVoxelSurfaceMesh(result.occupied, result.dx, result.dy, result.dPlaneY, materials.cut)
+          : voxelSurfaceMesh(result.occupied, result.dx, result.dy, result.dPlaneY, materials.cut);
+        mesh.renderOrder = 31;
+        groups.voxels.add(mesh);
+      }
+
+      const currentStatus = document.querySelector("#status");
+      currentStatus.textContent = state.smoothVolume
+        ? tr("statusSmooth")
+        : tr("statusVoxel");
+      refreshRemainingViewer();
+      return;
+      const frames = [];
+      const sampleFrames = Math.max(2, Math.round(state.sweepSamples));
+      for (let i = 0; i < sampleFrames; i++) {
+        frames.push(bodyBoxes(i / (sampleFrames - 1)));
+      }
+
+      const res = Math.max(4, Math.round(state.gridResolution));
+      const slices = Math.max(2, Math.round(state.heightSlices));
+      const dx = state.chamferX / res;
+      const dPlaneY = state.chamferY / res;
+      const dy = state.prismHeight / slices;
+      const cellVolume = dx * dPlaneY * dy;
+      const occupied = [];
+      const remaining = [];
+      let totalCells = 0;
+
+      for (let ix = 0; ix < res; ix++) {
+        const x = -(ix + 0.5) * dx;
+        for (let iz = 0; iz < res; iz++) {
+          const planeY = -(iz + 0.5) * dPlaneY;
+          const z = -planeY;
+          if (Math.abs(x) / state.chamferX + Math.abs(planeY) / state.chamferY > 1) continue;
+          for (let iy = 0; iy < slices; iy++) {
+            const y = (iy + 0.5) * dy;
+            totalCells++;
+            const record = { x, y, z, ix, iy, iz };
+            if (pointInAnySweptBox(x, y, z, frames)) occupied.push(record);
+            else remaining.push(record);
+          }
+        }
+      }
+
+      const totalVolume = 0.5 * state.chamferX * state.chamferY * state.prismHeight;
+      const cutVolume = occupied.length * cellVolume;
+      const remainVolume = Math.max(0, totalVolume - cutVolume);
+      setMetrics(totalVolume, cutVolume, remainVolume);
+
+      const cube = new THREE.BoxGeometry(dx * 0.82, dy * 0.82, dPlaneY * 0.82);
+      if (state.showRemaining && remaining.length) {
+        const mesh = new THREE.InstancedMesh(cube, materials.remaining, remaining.length);
+        mesh.frustumCulled = false;
+        placeInstances(mesh, remaining);
+        mesh.renderOrder = 30;
+        groups.voxels.add(mesh);
+      }
+      if (state.showIntersection && occupied.length) {
+        const mesh = new THREE.InstancedMesh(cube, materials.cut, occupied.length);
+        mesh.frustumCulled = false;
+        placeInstances(mesh, occupied);
+        mesh.renderOrder = 31;
+        groups.voxels.add(mesh);
+      }
+
+      const status = document.querySelector("#status");
+      status.textContent = state.smoothVolume ? tr("statusSmooth") : tr("statusVoxel");
+    }
+
+    function placeInstances(mesh, cells) {
+      const matrix = new THREE.Matrix4();
+      for (let i = 0; i < cells.length; i++) {
+        matrix.makeTranslation(cells[i].x, cells[i].y, cells[i].z);
+        mesh.setMatrixAt(i, matrix);
+      }
+      mesh.instanceMatrix.needsUpdate = true;
+    }
+
+    function computeVoxelResult() {
+      const frames = [];
+      const sampleFrames = Math.max(2, Math.round(state.sweepSamples));
+      for (let i = 0; i < sampleFrames; i++) {
+        frames.push(bodyBoxes(i / (sampleFrames - 1)));
+      }
+
+      const res = Math.max(4, Math.round(state.gridResolution));
+      const slices = Math.max(2, Math.round(state.heightSlices));
+      const dx = state.chamferX / res;
+      const dPlaneY = state.chamferY / res;
+      const dy = state.prismHeight / slices;
+      const cellVolume = dx * dPlaneY * dy;
+      const occupied = [];
+      const remaining = [];
+      let totalCells = 0;
+
+      for (let ix = 0; ix < res; ix++) {
+        const x = -(ix + 0.5) * dx;
+        for (let iz = 0; iz < res; iz++) {
+          const planeY = -(iz + 0.5) * dPlaneY;
+          const z = -planeY;
+          if (Math.abs(x) / state.chamferX + Math.abs(planeY) / state.chamferY > 1) continue;
+          for (let iy = 0; iy < slices; iy++) {
+            const y = (iy + 0.5) * dy;
+            totalCells++;
+            const record = { x, y, z, ix, iy, iz };
+            if (pointInAnySweptBox(x, y, z, frames)) occupied.push(record);
+            else remaining.push(record);
+          }
+        }
+      }
+
+      const totalVolume = 0.5 * state.chamferX * state.chamferY * state.prismHeight;
+      const cutVolume = occupied.length * cellVolume;
+      const remainVolume = Math.max(0, totalVolume - cutVolume);
+      return { remaining, occupied, totalCells, sampleFrames, dx, dPlaneY, dy, totalVolume, cutVolume, remainVolume };
+    }
+
+    function closeRing(points) {
+      if (!points.length) return points;
+      const first = points[0];
+      const last = points[points.length - 1];
+      if (Math.abs(first[0] - last[0]) < 1e-8 && Math.abs(first[1] - last[1]) < 1e-8) return points;
+      return [...points, [first[0], first[1]]];
+    }
+
+    function stableCoord(value) {
+      return Math.round(value * 1000) / 1000;
+    }
+
+    function stablePoint(point) {
+      return [stableCoord(point[0]), stableCoord(point[1])];
+    }
+
+    function sanitizeRing(ring) {
+      const open = ring.slice(0, -1).map(stablePoint);
+      const clean = [];
+      for (const point of open) {
+        const previous = clean[clean.length - 1];
+        if (!previous || Math.hypot(point[0] - previous[0], point[1] - previous[1]) > 1e-6) clean.push(point);
+      }
+      if (clean.length > 2) {
+        const first = clean[0];
+        const last = clean[clean.length - 1];
+        if (Math.hypot(first[0] - last[0], first[1] - last[1]) < 1e-6) clean.pop();
+      }
+      return clean.length >= 3 ? closeRing(clean) : [];
+    }
+
+    function sanitizeMultiPolygon(multiPolygon) {
+      const result = [];
+      for (const polygon of multiPolygon || []) {
+        const rings = polygon.map(sanitizeRing).filter(ring => ring.length >= 4);
+        if (rings.length) result.push(rings);
+      }
+      return result;
+    }
+
+    function chamferMultiPolygon() {
+      return [[closeRing([
+        [0, 0],
+        [0, state.chamferY],
+        [-state.chamferX, 0]
+      ])]];
+    }
+
+    function boxPolygon(box) {
+      const c = Math.cos(box.heading);
+      const s = Math.sin(box.heading);
+      const halfLong = box.length / 2;
+      const halfLat = box.width / 2;
+      const corners = [
+        [-halfLong, -halfLat],
+        [halfLong, -halfLat],
+        [halfLong, halfLat],
+        [-halfLong, halfLat]
+      ].map(([long, lat]) => [
+        box.cx + c * long - s * lat,
+        box.cz + s * long + c * lat
+      ]);
+      return [sanitizeRing(corners)];
+    }
+
+    function unionMany(polygons) {
+      if (!polygons.length) return [];
+      const unique = [];
+      const seen = new Set();
+      for (const polygon of polygons) {
+        const sanitized = sanitizeMultiPolygon([polygon]);
+        if (!sanitized.length) continue;
+        const key = JSON.stringify(sanitized);
+        if (seen.has(key)) continue;
+        seen.add(key);
+        unique.push(sanitized);
+      }
+      if (!unique.length) return [];
+
+      const chunkSize = 10;
+      let result = unique[0];
+      for (let i = 1; i < unique.length; i += chunkSize) {
+        result = sanitizeMultiPolygon(polygonClipping.union(result, ...unique.slice(i, i + chunkSize)));
+      }
+      return result || [];
+    }
+
+    function convexHull(points) {
+      const unique = [];
+      const seen = new Set();
+      for (const point of points.map(stablePoint)) {
+        const key = `${point[0]},${point[1]}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        unique.push(point);
+      }
+      unique.sort((a, b) => a[0] === b[0] ? a[1] - b[1] : a[0] - b[0]);
+      if (unique.length < 3) return [];
+      const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+      const lower = [];
+      for (const point of unique) {
+        while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0) lower.pop();
+        lower.push(point);
+      }
+      const upper = [];
+      for (let i = unique.length - 1; i >= 0; i--) {
+        const point = unique[i];
+        while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0) upper.pop();
+        upper.push(point);
+      }
+      return lower.slice(0, -1).concat(upper.slice(0, -1));
+    }
+
+    function envelopeMultiPolygon(polygons) {
+      const points = [];
+      for (const polygon of polygons) {
+        for (const ring of polygon) {
+          for (let i = 0; i < ring.length - 1; i++) points.push(ring[i]);
+        }
+      }
+      const hull = convexHull(points);
+      return hull.length >= 3 ? [[closeRing(hull)]] : [];
+    }
+
+    function computeLayerBoolean(chamfer, activePolygons) {
+      if (!activePolygons.length) {
+        return { occupied: [], remaining: chamfer, method: "empty" };
+      }
+
+      let swept;
+      let method = "boolean";
+      try {
+        swept = unionMany(activePolygons);
+      } catch (error) {
+        swept = envelopeMultiPolygon(activePolygons);
+        method = "envelope";
+      }
+
+      if (!swept.length) return { occupied: [], remaining: chamfer, method };
+
+      try {
+        const occupied = sanitizeMultiPolygon(polygonClipping.intersection(chamfer, swept));
+        const remaining = occupied.length
+          ? sanitizeMultiPolygon(polygonClipping.difference(chamfer, occupied))
+          : chamfer;
+        return { occupied, remaining, method };
+      } catch (error) {
+        const envelope = envelopeMultiPolygon(activePolygons);
+        if (!envelope.length) return { occupied: [], remaining: chamfer, method: "empty" };
+        try {
+          const occupied = sanitizeMultiPolygon(polygonClipping.intersection(chamfer, envelope));
+          const remaining = occupied.length
+            ? sanitizeMultiPolygon(polygonClipping.difference(chamfer, occupied))
+            : chamfer;
+          return { occupied, remaining, method: "envelope" };
+        } catch (fallbackError) {
+          return { occupied: [], remaining: chamfer, method: "empty" };
+        }
+      }
+    }
+
+    function multiPolygonArea(multiPolygon) {
+      let area = 0;
+      for (const polygon of multiPolygon || []) {
+        for (let ringIndex = 0; ringIndex < polygon.length; ringIndex++) {
+          const ring = polygon[ringIndex];
+          let ringArea = 0;
+          for (let i = 0; i < ring.length - 1; i++) {
+            ringArea += ring[i][0] * ring[i + 1][1] - ring[i + 1][0] * ring[i][1];
+          }
+          area += (ringIndex === 0 ? 1 : -1) * Math.abs(ringArea) / 2;
+        }
+      }
+      return Math.max(0, area);
+    }
+
+    function uniqueSorted(values) {
+      const sorted = [...values]
+        .filter(value => Number.isFinite(value))
+        .sort((a, b) => a - b);
+      const result = [];
+      for (const value of sorted) {
+        if (!result.length || Math.abs(value - result[result.length - 1]) > 1e-6) result.push(value);
+      }
+      return result;
+    }
+
+    function computeSmoothVolumeResult() {
+      const requestedFrames = Math.max(2, Math.round(state.sweepSamples));
+      const sampleFrames = Math.min(28, requestedFrames);
+      const frames = [];
+      const yBreaks = new Set([0, state.prismHeight]);
+      for (let i = 0; i < sampleFrames; i++) {
+        const boxes = bodyBoxes(i / (sampleFrames - 1));
+        frames.push(boxes);
+        for (const box of boxes) {
+          const y0 = Math.max(0, Math.min(state.prismHeight, box.y0));
+          const y1 = Math.max(0, Math.min(state.prismHeight, box.y1));
+          if (y1 > y0) {
+            yBreaks.add(y0);
+            yBreaks.add(y1);
+          }
+        }
+      }
+
+      const chamfer = chamferMultiPolygon();
+      const remainingSolids = [];
+      const occupiedSolids = [];
+      let cutVolume = 0;
+      let envelopeFallbacks = 0;
+      const breaks = uniqueSorted([...yBreaks]);
+
+      for (let i = 0; i < breaks.length - 1; i++) {
+        const y0 = breaks[i];
+        const y1 = breaks[i + 1];
+        if (y1 - y0 < 1e-6) continue;
+        const activePolygons = [];
+        for (const frame of frames) {
+          for (const box of frame) {
+            if (box.y0 < y1 && box.y1 > y0) activePolygons.push(boxPolygon(box));
+          }
+        }
+
+        const layer = computeLayerBoolean(chamfer, activePolygons);
+        const occupied = layer.occupied;
+        const remaining = layer.remaining;
+        if (layer.method === "envelope") envelopeFallbacks++;
+
+        if (occupied.length) {
+          occupiedSolids.push({ multiPolygon: occupied, y0, y1 });
+          cutVolume += multiPolygonArea(occupied) * (y1 - y0);
+        }
+        if (remaining.length) remainingSolids.push({ multiPolygon: remaining, y0, y1 });
+      }
+
+      const totalVolume = 0.5 * state.chamferX * state.chamferY * state.prismHeight;
+      const remainVolume = Math.max(0, totalVolume - cutVolume);
+      return {
+        mode: "smooth",
+        remainingSolids,
+        occupiedSolids,
+        totalVolume,
+        cutVolume,
+        remainVolume,
+        sampleFrames,
+        requestedFrames,
+        envelopeFallbacks,
+        slabCount: Math.max(0, breaks.length - 1)
+      };
+    }
+
+    function cleanRing(ring) {
+      if (!ring || ring.length < 4) return [];
+      const openRing = ring.slice(0, -1);
+      const result = [];
+      for (const point of openRing) {
+        const previous = result[result.length - 1];
+        if (!previous || Math.hypot(point[0] - previous[0], point[1] - previous[1]) > 1e-7) {
+          result.push(point);
+        }
+      }
+      if (result.length > 1) {
+        const first = result[0];
+        const last = result[result.length - 1];
+        if (Math.hypot(first[0] - last[0], first[1] - last[1]) < 1e-7) result.pop();
+      }
+      return result;
+    }
+
+    function addVertex(positions, x, y, z) {
+      positions.push(x, y, z);
+    }
+
+    function addExtrudedRingSides(positions, ring, y0, y1) {
+      for (let i = 0; i < ring.length; i++) {
+        const a = ring[i];
+        const b = ring[(i + 1) % ring.length];
+        addVertex(positions, a[0], y0, a[1]);
+        addVertex(positions, b[0], y0, b[1]);
+        addVertex(positions, b[0], y1, b[1]);
+        addVertex(positions, a[0], y0, a[1]);
+        addVertex(positions, b[0], y1, b[1]);
+        addVertex(positions, a[0], y1, a[1]);
+      }
+    }
+
+    function extrudedSolidsGeometry(solids) {
+      const positions = [];
+      for (const solid of solids) {
+        for (const polygon of solid.multiPolygon || []) {
+          const contourRing = cleanRing(polygon[0]);
+          if (contourRing.length < 3) continue;
+          const holeRings = polygon.slice(1).map(cleanRing).filter(ring => ring.length >= 3);
+          const contour = contourRing.map(([x, z]) => new THREE.Vector2(x, z));
+          const holes = holeRings.map(ring => ring.map(([x, z]) => new THREE.Vector2(x, z)));
+          const flatPoints = [...contour, ...holes.flat()];
+          const faces = THREE.ShapeUtils.triangulateShape(contour, holes);
+
+          for (const face of faces) {
+            const a = flatPoints[face[0]];
+            const b = flatPoints[face[1]];
+            const c = flatPoints[face[2]];
+            addVertex(positions, a.x, solid.y1, a.y);
+            addVertex(positions, b.x, solid.y1, b.y);
+            addVertex(positions, c.x, solid.y1, c.y);
+            addVertex(positions, c.x, solid.y0, c.y);
+            addVertex(positions, b.x, solid.y0, b.y);
+            addVertex(positions, a.x, solid.y0, a.y);
+          }
+
+          addExtrudedRingSides(positions, contourRing, solid.y0, solid.y1);
+          for (const holeRing of holeRings) addExtrudedRingSides(positions, holeRing, solid.y1, solid.y0);
+        }
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      return geometry;
+    }
+
+    function extrudedSolidsMesh(solids, material) {
+      const mesh = new THREE.Mesh(extrudedSolidsGeometry(solids), material);
+      mesh.frustumCulled = false;
+      return mesh;
+    }
+
+    function cubeVertices(cell, dx, dy, dz) {
+      const hx = dx / 2;
+      const hy = dy / 2;
+      const hz = dz / 2;
+      return [
+        [cell.x - hx, cell.y - hy, cell.z - hz],
+        [cell.x + hx, cell.y - hy, cell.z - hz],
+        [cell.x + hx, cell.y + hy, cell.z - hz],
+        [cell.x - hx, cell.y + hy, cell.z - hz],
+        [cell.x - hx, cell.y - hy, cell.z + hz],
+        [cell.x + hx, cell.y - hy, cell.z + hz],
+        [cell.x + hx, cell.y + hy, cell.z + hz],
+        [cell.x - hx, cell.y + hy, cell.z + hz]
+      ];
+    }
+
+    function voxelSurfaceTriangles(cells, dx, dy, dz) {
+      const cellSet = new Set(cells.map(cell => `${cell.ix},${cell.iy},${cell.iz}`));
+      const faceMaps = {
+        px: new Map(),
+        nx: new Map(),
+        py: new Map(),
+        ny: new Map(),
+        pz: new Map(),
+        nz: new Map()
+      };
+      const triangles = [];
+
+      const addFace = (map, plane, u, v) => {
+        if (!map.has(plane)) map.set(plane, new Set());
+        map.get(plane).add(`${u},${v}`);
+      };
+
+      for (const cell of cells) {
+        if (!cellSet.has(`${cell.ix - 1},${cell.iy},${cell.iz}`)) addFace(faceMaps.px, cell.ix, cell.iy, cell.iz);
+        if (!cellSet.has(`${cell.ix + 1},${cell.iy},${cell.iz}`)) addFace(faceMaps.nx, cell.ix + 1, cell.iy, cell.iz);
+        if (!cellSet.has(`${cell.ix},${cell.iy + 1},${cell.iz}`)) addFace(faceMaps.py, cell.iy + 1, cell.ix, cell.iz);
+        if (!cellSet.has(`${cell.ix},${cell.iy - 1},${cell.iz}`)) addFace(faceMaps.ny, cell.iy, cell.ix, cell.iz);
+        if (!cellSet.has(`${cell.ix},${cell.iy},${cell.iz + 1}`)) addFace(faceMaps.pz, cell.iz + 1, cell.ix, cell.iy);
+        if (!cellSet.has(`${cell.ix},${cell.iy},${cell.iz - 1}`)) addFace(faceMaps.nz, cell.iz, cell.ix, cell.iy);
+      }
+
+      const pushQuad = (normal, vertices) => {
+        triangles.push({ normal, vertices: [vertices[0], vertices[1], vertices[2]] });
+        triangles.push({ normal, vertices: [vertices[0], vertices[2], vertices[3]] });
+      };
+
+      const mergePlaneFaces = (map, emitRect) => {
+        for (const [plane, faceSet] of map.entries()) {
+          const remaining = new Set(faceSet);
+          while (remaining.size) {
+            const first = remaining.values().next().value;
+            const [u0, v0] = first.split(",").map(Number);
+            let width = 1;
+            while (remaining.has(`${u0 + width},${v0}`)) width++;
+
+            let height = 1;
+            let canGrow = true;
+            while (canGrow) {
+              for (let u = u0; u < u0 + width; u++) {
+                if (!remaining.has(`${u},${v0 + height}`)) {
+                  canGrow = false;
+                  break;
+                }
+              }
+              if (canGrow) height++;
+            }
+
+            for (let u = u0; u < u0 + width; u++) {
+              for (let v = v0; v < v0 + height; v++) {
+                remaining.delete(`${u},${v}`);
+              }
+            }
+            emitRect(plane, u0, v0, width, height);
+          }
+        }
+      };
+
+      mergePlaneFaces(faceMaps.px, (plane, u, v, width, height) => {
+        const x = -plane * dx;
+        const y0 = u * dy;
+        const y1 = (u + width) * dy;
+        const z0 = v * dz;
+        const z1 = (v + height) * dz;
+        pushQuad([1, 0, 0], [[x, y0, z0], [x, y1, z0], [x, y1, z1], [x, y0, z1]]);
+      });
+      mergePlaneFaces(faceMaps.nx, (plane, u, v, width, height) => {
+        const x = -plane * dx;
+        const y0 = u * dy;
+        const y1 = (u + width) * dy;
+        const z0 = v * dz;
+        const z1 = (v + height) * dz;
+        pushQuad([-1, 0, 0], [[x, y0, z0], [x, y0, z1], [x, y1, z1], [x, y1, z0]]);
+      });
+      mergePlaneFaces(faceMaps.py, (plane, u, v, width, height) => {
+        const y = plane * dy;
+        const x0 = -(u + width) * dx;
+        const x1 = -u * dx;
+        const z0 = v * dz;
+        const z1 = (v + height) * dz;
+        pushQuad([0, 1, 0], [[x0, y, z0], [x0, y, z1], [x1, y, z1], [x1, y, z0]]);
+      });
+      mergePlaneFaces(faceMaps.ny, (plane, u, v, width, height) => {
+        const y = plane * dy;
+        const x0 = -(u + width) * dx;
+        const x1 = -u * dx;
+        const z0 = v * dz;
+        const z1 = (v + height) * dz;
+        pushQuad([0, -1, 0], [[x0, y, z0], [x1, y, z0], [x1, y, z1], [x0, y, z1]]);
+      });
+      mergePlaneFaces(faceMaps.pz, (plane, u, v, width, height) => {
+        const z = plane * dz;
+        const x0 = -(u + width) * dx;
+        const x1 = -u * dx;
+        const y0 = v * dy;
+        const y1 = (v + height) * dy;
+        pushQuad([0, 0, 1], [[x0, y0, z], [x1, y0, z], [x1, y1, z], [x0, y1, z]]);
+      });
+      mergePlaneFaces(faceMaps.nz, (plane, u, v, width, height) => {
+        const z = plane * dz;
+        const x0 = -(u + width) * dx;
+        const x1 = -u * dx;
+        const y0 = v * dy;
+        const y1 = (v + height) * dy;
+        pushQuad([0, 0, -1], [[x0, y0, z], [x0, y1, z], [x1, y1, z], [x1, y0, z]]);
+      });
+
+      return triangles;
+    }
+
+    function voxelSurfaceMesh(cells, dx, dy, dz, material) {
+      const triangles = voxelSurfaceTriangles(cells, dx, dy, dz);
+      const positions = [];
+      const normals = [];
+      for (const triangle of triangles) {
+        for (const vertex of triangle.vertices) {
+          positions.push(vertex[0], vertex[1], vertex[2]);
+          normals.push(triangle.normal[0], triangle.normal[1], triangle.normal[2]);
+        }
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
+      geometry.computeBoundingSphere();
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.frustumCulled = false;
+      return mesh;
+    }
+
+    function smoothedVoxelSurfaceGeometry(cells, dx, dy, dz, bounds = state) {
+      const triangles = voxelSurfaceTriangles(cells, dx, dy, dz);
+      const vertices = [];
+      const indices = [];
+      const vertexMap = new Map();
+      const keyOf = vertex => vertex.map(value => Math.round(value * 10000) / 10000).join(",");
+
+      const getIndex = vertex => {
+        const key = keyOf(vertex);
+        if (vertexMap.has(key)) return vertexMap.get(key);
+        const index = vertices.length;
+        vertices.push(new THREE.Vector3(vertex[0], vertex[1], vertex[2]));
+        vertexMap.set(key, index);
+        return index;
+      };
+
+      for (const triangle of triangles) {
+        indices.push(...triangle.vertices.map(getIndex));
+      }
+
+      const adjacency = vertices.map(() => new Set());
+      for (let i = 0; i < indices.length; i += 3) {
+        const a = indices[i];
+        const b = indices[i + 1];
+        const c = indices[i + 2];
+        adjacency[a].add(b); adjacency[a].add(c);
+        adjacency[b].add(a); adjacency[b].add(c);
+        adjacency[c].add(a); adjacency[c].add(b);
+      }
+
+      const isLocked = vertex => {
+        const onGroundOrTop = vertex.y < 1e-5 || Math.abs(vertex.y - bounds.prismHeight) < 1e-5;
+        const onXEdge = Math.abs(vertex.x) < 1e-5 || Math.abs(vertex.x + bounds.chamferX) < 1e-5;
+        const onZEdge = Math.abs(vertex.z) < 1e-5 || Math.abs(vertex.z - bounds.chamferY) < 1e-5;
+        const onChamferFace = Math.abs((-vertex.x / bounds.chamferX) + (vertex.z / bounds.chamferY) - 1) < Math.max(dx, dz) * 0.55;
+        return onGroundOrTop || onXEdge || onZEdge || onChamferFace;
+      };
+
+      let smoothed = vertices.map(vertex => vertex.clone());
+      for (let pass = 0; pass < 3; pass++) {
+        const next = smoothed.map(vertex => vertex.clone());
+        for (let i = 0; i < smoothed.length; i++) {
+          if (isLocked(vertices[i]) || adjacency[i].size < 3) continue;
+          const average = new THREE.Vector3();
+          for (const neighbor of adjacency[i]) average.add(smoothed[neighbor]);
+          average.multiplyScalar(1 / adjacency[i].size);
+          next[i].lerp(average, 0.34);
+        }
+        smoothed = next;
+      }
+
+      const positions = [];
+      for (const index of indices) {
+        const vertex = smoothed[index];
+        positions.push(vertex.x, vertex.y, vertex.z);
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      return geometry;
+    }
+
+    function smoothedVoxelSurfaceMesh(cells, dx, dy, dz, material, bounds = state) {
+      const mesh = new THREE.Mesh(smoothedVoxelSurfaceGeometry(cells, dx, dy, dz, bounds), material);
+      mesh.frustumCulled = false;
+      return mesh;
+    }
+
+    function downloadText(filename, text, type = "text/plain;charset=utf-8") {
+      const blob = new Blob([text], { type });
+      downloadBlob(filename, blob);
+    }
+
+    function downloadBlob(filename, blob) {
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function geometryToTriangles(geometry) {
+      const position = geometry.getAttribute("position");
+      const triangles = [];
+      for (let i = 0; i < position.count; i += 3) {
+        const vertices = [
+          [position.getX(i), position.getY(i), position.getZ(i)],
+          [position.getX(i + 1), position.getY(i + 1), position.getZ(i + 1)],
+          [position.getX(i + 2), position.getY(i + 2), position.getZ(i + 2)]
+        ];
+        triangles.push({ vertices });
+      }
+      return triangles;
+    }
+
+    function exportTrianglesAsStl(triangles, filename, headerText) {
+      const buffer = new ArrayBuffer(84 + triangles.length * 50);
+      const view = new DataView(buffer);
+      for (let i = 0; i < Math.min(80, headerText.length); i++) {
+        view.setUint8(i, headerText.charCodeAt(i));
+      }
+      view.setUint32(80, triangles.length, true);
+      let offset = 84;
+
+      for (const triangle of triangles) {
+        const vertices = triangle.vertices.map(toSketchupStlAxes);
+        const normal = triangleNormal(vertices[0], vertices[1], vertices[2]);
+        for (const value of normal) {
+          view.setFloat32(offset, value, true);
+          offset += 4;
+        }
+        for (const vertex of vertices) {
+          for (const value of vertex) {
+            view.setFloat32(offset, value, true);
+            offset += 4;
+          }
+        }
+        view.setUint16(offset, 0, true);
+        offset += 2;
+      }
+      downloadBlob(filename, new Blob([buffer], { type: "application/octet-stream" }));
+    }
+
+    function exportRemainingStl() {
+      let triangles;
+      if (state.smoothVolume) {
+        const result = latestVoxelResult || computeVoxelResult();
+        const geometry = smoothedVoxelSurfaceGeometry(result.remaining, result.dx, result.dy, result.dPlaneY);
+        triangles = geometryToTriangles(geometry);
+        geometry.dispose();
+      }
+      if (!triangles) {
+        const result = computeVoxelResult();
+        triangles = voxelSurfaceTriangles(result.remaining, result.dx, result.dy, result.dPlaneY);
+      }
+      const header = state.smoothVolume
+        ? "remaining_chamfer_volume smoothed voxel surface, units: meters"
+        : "remaining_chamfer_volume voxel surface, units: meters";
+      exportTrianglesAsStl(triangles, "remaining_chamfer_volume.stl", header);
+    }
+
+    function toSketchupStlAxes(vertex) {
+      return [-vertex[0], vertex[2], vertex[1]];
+    }
+
+    function triangleNormal(a, b, c) {
+      const ux = b[0] - a[0];
+      const uy = b[1] - a[1];
+      const uz = b[2] - a[2];
+      const vx = c[0] - a[0];
+      const vy = c[1] - a[1];
+      const vz = c[2] - a[2];
+      const nx = uy * vz - uz * vy;
+      const ny = uz * vx - ux * vz;
+      const nz = ux * vy - uy * vx;
+      const length = Math.hypot(nx, ny, nz) || 1;
+      return [nx / length, ny / length, nz / length];
+    }
+
+    function setMetrics(total, cut, remain) {
+      const ratio = total > 0 ? Math.max(0, Math.min(100, remain / total * 100)) : 0;
+      document.querySelector("#totalVolume").textContent = total.toFixed(1);
+      document.querySelector("#cutVolume").textContent = cut.toFixed(1);
+      document.querySelector("#remainVolume").textContent = remain.toFixed(1);
+      document.querySelector("#remainRatio").textContent = `${ratio.toFixed(0)}%`;
+      document.querySelector("#remainRatioCard").style.setProperty("--ratio-fill", `${ratio}%`);
+    }
+
+    let rafPending = false;
+    function updateScene() {
+      if (rafPending) return;
+      rafPending = true;
+      requestAnimationFrame(() => {
+        rafPending = false;
+        buildRoad();
+        buildPrism();
+        buildSweptGhosts();
+        buildTruck();
+        buildVoxels();
+      });
+    }
+
+    function bindControls() {
+      for (const wrapper of document.querySelectorAll(".control[data-param]")) {
+        const key = wrapper.dataset.param;
+        const number = wrapper.querySelector("input[type='number']");
+        const range = wrapper.querySelector("input[type='range']");
+        number.value = state[key];
+        range.value = state[key];
+        const setValue = value => {
+          const parsed = Number(value);
+          if (!Number.isFinite(parsed)) return;
+          state[key] = parsed;
+          number.value = parsed;
+          range.value = parsed;
+          updateScene();
+        };
+        number.addEventListener("change", () => setValue(number.value));
+        range.addEventListener("input", () => setValue(range.value));
+      }
+
+      for (const key of ["cargoEnabled", "smoothVolume", "showRemaining", "showIntersection", "showSwept"]) {
+        const input = document.querySelector(`#${key}`);
+        input.checked = state[key];
+        input.addEventListener("change", () => {
+          state[key] = input.checked;
+          if (key === "smoothVolume") syncSmoothModeControls();
+          updateScene();
+        });
+      }
+    }
+
+    function setControlValue(key, value) {
+      const wrapper = document.querySelector(`.control[data-param="${key}"]`);
+      if (!wrapper) return false;
+      const number = wrapper.querySelector("input[type='number']");
+      const range = wrapper.querySelector("input[type='range']");
+      const min = Number(range.min);
+      const max = Number(range.max);
+      const step = Number(range.step) || 0.1;
+      const clamped = Math.max(min, Math.min(max, value));
+      const rounded = Math.round(clamped / step) * step;
+      const normalized = Number(rounded.toFixed(4));
+      state[key] = normalized;
+      number.value = normalized;
+      range.value = normalized;
+      return true;
+    }
+
+    function convertUnitToMeters(amount, unitUrl) {
+      const unitId = String(unitUrl || "").split("/").pop();
+      const value = Number(amount);
+      if (!Number.isFinite(value)) return null;
+      const multipliers = {
+        Q11573: 1,
+        Q174789: 0.001,
+        Q174728: 0.01,
+        Q3710: 0.3048,
+        Q218593: 0.0254
+      };
+      return value * (multipliers[unitId] ?? 1);
+    }
+
+    async function wikidataSearch(query, language) {
+      const url = new URL("https://www.wikidata.org/w/api.php");
+      url.search = new URLSearchParams({
+        action: "wbsearchentities",
+        search: query,
+        language,
+        uselang: language,
+        format: "json",
+        origin: "*",
+        limit: "6"
+      }).toString();
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("搜索服务暂时不可用");
+      const data = await response.json();
+      return data.search || [];
+    }
+
+    async function fetchWikidataDimensions(entityId) {
+      const query = `
+        SELECT ?itemLabel ?length ?lengthUnit ?width ?widthUnit ?height ?heightUnit ?wheelbase ?wheelbaseUnit WHERE {
+          VALUES ?item { wd:${entityId} }
+          OPTIONAL { ?item p:P2043/psv:P2043 ?lengthNode. ?lengthNode wikibase:quantityAmount ?length; wikibase:quantityUnit ?lengthUnit. }
+          OPTIONAL { ?item p:P2049/psv:P2049 ?widthNode. ?widthNode wikibase:quantityAmount ?width; wikibase:quantityUnit ?widthUnit. }
+          OPTIONAL { ?item p:P2048/psv:P2048 ?heightNode. ?heightNode wikibase:quantityAmount ?height; wikibase:quantityUnit ?heightUnit. }
+          OPTIONAL { ?item p:P3039/psv:P3039 ?wheelbaseNode. ?wheelbaseNode wikibase:quantityAmount ?wheelbase; wikibase:quantityUnit ?wheelbaseUnit. }
+          SERVICE wikibase:label { bd:serviceParam wikibase:language "zh,en". }
+        }
+        LIMIT 1
+      `;
+      const url = new URL("https://query.wikidata.org/sparql");
+      url.search = new URLSearchParams({ query, format: "json" }).toString();
+      const response = await fetch(url, { headers: { Accept: "application/sparql-results+json" } });
+      if (!response.ok) throw new Error("尺寸数据服务暂时不可用");
+      const data = await response.json();
+      const row = data.results?.bindings?.[0];
+      if (!row) return null;
+      return {
+        label: row.itemLabel?.value || entityId,
+        length: convertUnitToMeters(row.length?.value, row.lengthUnit?.value),
+        width: convertUnitToMeters(row.width?.value, row.widthUnit?.value),
+        height: convertUnitToMeters(row.height?.value, row.heightUnit?.value),
+        wheelbase: convertUnitToMeters(row.wheelbase?.value, row.wheelbaseUnit?.value)
+      };
+    }
+
+    function applyVehicleDimensions(dimensions) {
+      const applied = [];
+      if (dimensions.length && setControlValue("cabLength", dimensions.length)) applied.push(fieldLabel("cabLength"));
+      if (dimensions.width) {
+        if (setControlValue("cabWidth", dimensions.width)) applied.push(fieldLabel("cabWidth"));
+        if (setControlValue("trailerWidth", dimensions.width)) applied.push(fieldLabel("trailerWidth"));
+        if (setControlValue("wheelTrack", dimensions.width * 0.82)) applied.push(fieldLabel("wheelTrack"));
+      }
+      if (dimensions.height && setControlValue("cabHeight", dimensions.height)) applied.push(fieldLabel("cabHeight"));
+      if (dimensions.wheelbase && dimensions.length) {
+        const rearOverhang = dimensions.length - state.cabFrontOverhang - dimensions.wheelbase;
+        if (rearOverhang > 0 && setControlValue("cabRearOverhang", rearOverhang)) applied.push(fieldLabel("cabRearOverhang"));
+      }
+      return applied;
+    }
+
+    function normalizeDimensionUnit(value, unit) {
+      const number = Number(String(value).replace(",", "."));
+      if (!Number.isFinite(number)) return null;
+      const normalizedUnit = String(unit || "").toLowerCase();
+      if (/mm|毫米/.test(normalizedUnit)) return number / 1000;
+      if (/cm|厘米/.test(normalizedUnit)) return number / 100;
+      if (/inch|in|英寸/.test(normalizedUnit)) return number * 0.0254;
+      if (/ft|feet|foot|英尺/.test(normalizedUnit)) return number * 0.3048;
+      if (/m|米/.test(normalizedUnit)) return number;
+      if (number > 80) return number / 1000;
+      return number;
+    }
+
+    function findLabeledDimension(text, labels) {
+      const labelPattern = labels.join("|");
+      const regex = new RegExp(`(?:${labelPattern})[^0-9\\n\\r]{0,24}([0-9]+(?:[.,][0-9]+)?)\\s*(mm|毫米|cm|厘米|m|米|inch|in|英寸|ft|feet|foot|英尺)?`, "i");
+      const match = text.match(regex);
+      return match ? normalizeDimensionUnit(match[1], match[2]) : null;
+    }
+
+    function parseDimensionTriplet(text) {
+      const regex = /(?:外形尺寸|整车尺寸|车辆尺寸|尺寸|长宽高|长×宽×高|长x宽x高|l\s*[x×/]\s*w\s*[x×/]\s*h|dimensions|overall dimensions)[^0-9\n\r]{0,32}([0-9]+(?:[.,][0-9]+)?)\s*[x×*\/]\s*([0-9]+(?:[.,][0-9]+)?)\s*[x×*\/]\s*([0-9]+(?:[.,][0-9]+)?)\s*(mm|毫米|cm|厘米|m|米|inch|in|英寸|ft|feet|foot|英尺)?/i;
+      const match = text.match(regex);
+      if (!match) return {};
+      return {
+        length: normalizeDimensionUnit(match[1], match[4]),
+        width: normalizeDimensionUnit(match[2], match[4]),
+        height: normalizeDimensionUnit(match[3], match[4])
+      };
+    }
+
+    function parseDimensionsFromText(text) {
+      const cleanText = text.replace(/[：]/g, ":").replace(/[，]/g, ",").replace(/[　]/g, " ");
+      const triplet = parseDimensionTriplet(cleanText);
+      return {
+        length: findLabeledDimension(cleanText, [
+          "车头长度", "牵引车长度", "牵引头长度", "拖头长度", "驾驶室长度", "驾驶舱长度", "车头总长", "牵引车总长", "牵引头总长",
+          "tractor length", "tractor unit length", "prime mover length", "cab length", "truck head length", "tractor overall length"
+        ]) ?? triplet.length,
+        trailerLength: findLabeledDimension(cleanText, [
+          "挂车长度", "半挂车长度", "拖挂长度", "挂车总长", "半挂车总长", "车厢总长", "厢体总长",
+          "trailer length", "semi trailer length", "semi-trailer length", "trailer overall length"
+        ]),
+        width: findLabeledDimension(cleanText, [
+          "车头宽度", "牵引车宽度", "牵引头宽度", "拖头宽度", "车宽", "总宽", "整车宽度", "车辆宽度", "宽度",
+          "overall width", "vehicle width", "tractor width", "cab width", "width"
+        ]) ?? triplet.width,
+        trailerWidth: findLabeledDimension(cleanText, [
+          "挂车宽度", "半挂车宽度", "货箱宽度", "箱体宽度", "厢体宽度", "车厢宽度",
+          "trailer width", "semi trailer width", "semi-trailer width", "cargo width", "body width"
+        ]),
+        height: findLabeledDimension(cleanText, [
+          "车头高度", "牵引车高度", "牵引头高度", "拖头高度", "车高", "总高", "整车高度", "车辆高度", "高度",
+          "overall height", "vehicle height", "tractor height", "cab height", "height"
+        ]) ?? triplet.height,
+        wheelbase: findLabeledDimension(cleanText, [
+          "轴距", "牵引车轴距", "车头轴距", "拖头轴距", "驾驶室轴距", "wheelbase", "tractor wheelbase", "cab wheelbase"
+        ]),
+        frontOverhang: findLabeledDimension(cleanText, [
+          "车头前悬", "牵引车前悬", "牵引头前悬", "拖头前悬", "前悬", "前悬长", "前悬长度",
+          "front overhang", "tractor front overhang", "cab front overhang"
+        ]),
+        rearOverhang: findLabeledDimension(cleanText, [
+          "车头后悬", "牵引车后悬", "牵引头后悬", "拖头后悬", "后悬", "后悬长", "后悬长度",
+          "rear overhang", "tractor rear overhang", "cab rear overhang"
+        ]),
+        hitchGap: findLabeledDimension(cleanText, [
+          "车头后端到挂点距离", "后端到挂点距离", "后端至鞍座距离", "后端至牵引销距离", "鞍座后移量", "挂点距离",
+          "rear to hitch", "rear to fifth wheel", "rear to kingpin", "hitch gap"
+        ]),
+        trailerFrontOverhang: findLabeledDimension(cleanText, [
+          "挂车前伸", "挂车前悬", "半挂车前悬", "前伸", "前伸量", "牵引销至前端", "牵引销到前端", "牵引销前悬", "牵引销前伸",
+          "kingpin to front", "king pin to front", "trailer front overhang", "front swing clearance"
+        ]),
+        trailerRearOverhang: findLabeledDimension(cleanText, [
+          "挂车尾悬", "挂车后悬", "半挂车后悬", "尾悬", "尾悬长", "后悬长", "牵引销至尾端", "牵引销到尾端",
+          "trailer rear overhang", "rear overhang", "kingpin to rear", "king pin to rear"
+        ]),
+        chassisHeight: findLabeledDimension(cleanText, [
+          "底盘高度", "车架高度", "离地高度", "离地间隙", "底盘离地", "车架离地", "ground clearance", "chassis height", "frame height"
+        ]),
+        deckHeight: findLabeledDimension(cleanText, [
+          "底盘厚度", "挂车底盘厚度", "车架厚度", "平台厚度", "deck height", "deck thickness", "frame thickness"
+        ]),
+        wheelTrack: findLabeledDimension(cleanText, [
+          "轮距", "前轮距", "后轮距", "轮胎轮距", "轮胎中心距", "track width", "wheel track", "tread"
+        ]),
+        wheelWidth: findLabeledDimension(cleanText, [
+          "轮胎宽度", "胎宽", "轮胎断面宽", "tire width", "tyre width", "section width"
+        ]),
+        wheelRadius: findLabeledDimension(cleanText, [
+          "轮胎半径", "车轮半径", "轮径半径", "tire radius", "tyre radius", "wheel radius"
+        ]),
+        sideProtrusion: findLabeledDimension(cleanText, [
+          "每侧外扩量", "外扩量", "后视镜外扩", "侧防护外扩", "车身外扩", "side protrusion", "mirror protrusion"
+        ]),
+        cargoLength: findLabeledDimension(cleanText, [
+          "货箱长度", "箱体长度", "厢体长度", "车厢长度", "货厢长度", "货箱内长", "箱内长", "内长",
+          "cargo length", "body length", "box length", "van body length"
+        ]),
+        cargoWidth: findLabeledDimension(cleanText, [
+          "货箱宽度", "箱体宽度", "厢体宽度", "车厢宽度", "货厢宽度", "货箱内宽", "箱内宽", "内宽",
+          "cargo width", "box width", "van body width"
+        ]),
+        cargoHeight: findLabeledDimension(cleanText, [
+          "货箱高度", "箱体高度", "厢体高度", "车厢高度", "货厢高度", "货箱内高", "箱内高", "内高",
+          "cargo height", "body height", "box height", "van body height"
+        ]),
+        cargoFrontOverhang: findLabeledDimension(cleanText, [
+          "货箱前伸", "箱体前伸", "厢体前伸", "货箱前悬", "box front overhang", "cargo front overhang"
+        ]),
+        cargoBaseOffset: findLabeledDimension(cleanText, [
+          "货箱离底盘高度", "箱体离底盘高度", "货箱底高", "货箱安装高度", "cargo base offset", "box floor above chassis"
+        ])
+      };
+    }
+
+    function applyParsedDimensions(dimensions) {
+      const applied = [];
+      const apply = (key, value) => {
+        if (value && setControlValue(key, value)) applied.push(fieldLabel(key));
+      };
+      apply("cabLength", dimensions.length);
+      apply("trailerLength", dimensions.trailerLength);
+      apply("cabWidth", dimensions.width);
+      apply("trailerWidth", dimensions.trailerWidth ?? dimensions.cargoWidth ?? dimensions.width);
+      apply("cabHeight", dimensions.height);
+      apply("cabFrontOverhang", dimensions.frontOverhang);
+      apply("cabRearOverhang", dimensions.rearOverhang);
+      apply("hitchGap", dimensions.hitchGap);
+      apply("trailerFrontOverhang", dimensions.trailerFrontOverhang);
+      apply("trailerRearOverhang", dimensions.trailerRearOverhang);
+      apply("chassisHeight", dimensions.chassisHeight);
+      apply("deckHeight", dimensions.deckHeight);
+      apply("wheelTrack", dimensions.wheelTrack);
+      apply("wheelWidth", dimensions.wheelWidth);
+      apply("wheelRadius", dimensions.wheelRadius);
+      apply("sideProtrusion", dimensions.sideProtrusion);
+      apply("cargoLength", dimensions.cargoLength);
+      apply("cargoFrontOverhang", dimensions.cargoFrontOverhang);
+      apply("cargoBaseOffset", dimensions.cargoBaseOffset);
+      apply("cargoHeight", dimensions.cargoHeight);
+
+      if (!dimensions.wheelTrack && dimensions.width) apply("wheelTrack", dimensions.width * 0.82);
+      if (dimensions.wheelbase && dimensions.length) {
+        const rearOverhang = dimensions.length - state.cabFrontOverhang - dimensions.wheelbase;
+        if (rearOverhang > 0) apply("cabRearOverhang", rearOverhang);
+      }
+      return [...new Set(applied)];
+    }
+
+    function parseManualDimensionText() {
+      const text = document.querySelector("#vehicleDimensionText").value.trim();
+      const status = document.querySelector("#vehicleLookupStatus");
+      status.dataset.customStatus = "true";
+      if (!text) {
+        status.textContent = tr("pasteFirst");
+        return;
+      }
+      const dimensions = parseDimensionsFromText(text);
+      const applied = applyParsedDimensions(dimensions);
+      if (applied.length) {
+        updateScene();
+        status.textContent = tr("parsedApplied", applied);
+      } else {
+        status.textContent = tr("parsedNone");
+      }
+    }
+
+    async function lookupVehicle() {
+      const input = document.querySelector("#vehicleSearchQuery");
+      const status = document.querySelector("#vehicleLookupStatus");
+      const button = document.querySelector("#vehicleSearchButton");
+      const query = input.value.trim();
+      status.dataset.customStatus = "true";
+      if (!query) {
+        status.textContent = tr("enterModel");
+        return;
+      }
+      button.disabled = true;
+      status.textContent = tr("searching");
+      try {
+        const results = [
+          ...(await wikidataSearch(query, "zh")),
+          ...(await wikidataSearch(query, "en"))
+        ];
+        const seen = new Set();
+        for (const result of results) {
+          if (!result.id || seen.has(result.id)) continue;
+          seen.add(result.id);
+          const dimensions = await fetchWikidataDimensions(result.id);
+          if (!dimensions) continue;
+          const hasUsableData = [dimensions.length, dimensions.width, dimensions.height, dimensions.wheelbase].some(Boolean);
+          if (!hasUsableData) continue;
+          const applied = applyVehicleDimensions(dimensions);
+          if (applied.length) {
+            updateScene();
+            status.textContent = tr("matched", dimensions.label, applied);
+            return;
+          }
+        }
+        status.textContent = tr("noUsableData");
+      } catch (error) {
+        status.textContent = tr("lookupFailed", error.message);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    let playing = false;
+    let lastTime = 0;
+    function animate(time) {
+      requestAnimationFrame(animate);
+      controls.update();
+      if (playing) {
+        if (!lastTime) lastTime = time;
+        const delta = time - lastTime;
+        lastTime = time;
+        state.progress = (state.progress + delta * 0.018) % 101;
+        syncProgressInputs();
+        buildTruck();
+      } else {
+        lastTime = time;
+      }
+      renderer.render(scene, activeCamera);
+      axisGroup.quaternion.copy(activeCamera.quaternion).invert();
+      axisRenderer.render(axisScene, axisCamera);
+      if (remainingViewer.isOpen) {
+        remainingControls.update();
+        remainingRenderer.render(remainingScene, remainingCamera);
+      }
+      if (savedVolumeViewer.isOpen) {
+        savedVolumeControls.update();
+        savedVolumeRenderer.render(savedVolumeScene, savedVolumeCamera);
+      }
+      if (heatmapViewer.isOpen) {
+        heatmapControls.update();
+        heatmapRenderer.render(heatmapScene, heatmapCamera);
+      }
+    }
+
+    function syncProgressInputs() {
+      const wrapper = document.querySelector('.control[data-param="progress"]');
+      const value = Math.round(state.progress);
+      wrapper.querySelector("input[type='number']").value = value;
+      wrapper.querySelector("input[type='range']").value = value;
+    }
+
+    function syncSmoothModeControls() {
+      const checkbox = document.querySelector("#smoothVolume");
+      const button = document.querySelector("#toggleSmoothVolume");
+      checkbox.checked = state.smoothVolume;
+      button.classList.toggle("is-active", state.smoothVolume);
+      button.querySelector("span").textContent = state.smoothVolume ? tr("smoothButton") : tr("voxelButton");
+      button.setAttribute("aria-label", state.smoothVolume ? tr("smoothAria") : tr("voxelAria"));
+      button.setAttribute("aria-pressed", String(state.smoothVolume));
+    }
+
+    document.querySelector("#playButton").addEventListener("click", event => {
+      playing = !playing;
+      const label = event.currentTarget.querySelector("span");
+      label.textContent = playing ? tr("pause") : tr("play");
+      event.currentTarget.setAttribute("aria-label", playing ? tr("pause") : tr("play"));
+    });
+    document.querySelector("#toggleSmoothVolume").addEventListener("click", () => {
+      state.smoothVolume = !state.smoothVolume;
+      syncSmoothModeControls();
+      updateScene();
+    });
+    document.querySelector("#vehicleSearchButton").addEventListener("click", lookupVehicle);
+    document.querySelector("#vehicleSearchQuery").addEventListener("keydown", event => {
+      if (event.key === "Enter") lookupVehicle();
+    });
+    document.querySelector("#parseDimensionButton").addEventListener("click", parseManualDimensionText);
+    document.querySelector("#languageToggle").addEventListener("click", () => {
+      applyLanguage(currentLanguage === "jp" ? "cn" : "jp");
+    });
+    remainingViewer.openButton.addEventListener("click", openRemainingViewer);
+    remainingViewer.closeButton.addEventListener("click", closeRemainingViewer);
+    remainingViewer.resetButton.addEventListener("click", () => refreshRemainingViewer(true));
+    document.querySelector("#saveRemainingVolume").addEventListener("click", saveCurrentRemainingVolume);
+    savedVolumeViewer.closeButton.addEventListener("click", closeSavedVolumeViewer);
+    heatmapViewer.openButton.addEventListener("click", openHeatmapViewer);
+    heatmapViewer.closeButton.addEventListener("click", closeHeatmapViewer);
+    heatmapViewer.threshold.addEventListener("input", () => {
+      updateHeatmapThresholdLabel();
+    });
+    heatmapViewer.exportButton.addEventListener("click", exportHeatmapStl);
+    document.querySelector("#exportStl").addEventListener("click", exportRemainingStl);
+    document.querySelector("#topViewCamera").addEventListener("click", () => setTopView(!topViewActive));
+    document.querySelector("#resetCamera").addEventListener("click", resetCamera);
+    window.addEventListener("keydown", event => {
+      if (event.key === "Escape" && remainingViewer.isOpen) closeRemainingViewer();
+      if (event.key === "Escape" && savedVolumeViewer.isOpen) closeSavedVolumeViewer();
+      if (event.key === "Escape" && heatmapViewer.isOpen) closeHeatmapViewer();
+    });
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      renderer.setSize(rect.width, rect.height, false);
+      camera.aspect = rect.width / Math.max(1, rect.height);
+      camera.updateProjectionMatrix();
+      updateTopCameraProjection();
+      resizeAxisGizmo();
+      resizeRemainingViewer();
+      resizeSavedVolumeViewer();
+      resizeHeatmapViewer();
+    }
+
+    window.addEventListener("resize", resize);
+    bindControls();
+    resize();
+    applyLanguage("jp");
+    updateScene();
+    requestAnimationFrame(animate);
+  </script>
+</body>
+</html>
