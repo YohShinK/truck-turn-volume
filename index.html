@@ -370,6 +370,60 @@
       font-size: 13px;
     }
 
+    .lookup-search-field {
+      position: relative;
+      min-width: 0;
+    }
+
+    .lookup-search-field input {
+      width: 100%;
+      padding-right: 48px;
+    }
+
+    .vehicle-preset-select {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 42px;
+      height: 40px;
+      border: 0;
+      opacity: 0;
+      cursor: pointer;
+      touch-action: manipulation;
+      z-index: 2;
+    }
+
+    .vehicle-preset-select:focus-visible {
+      opacity: .01;
+      outline: 2px solid var(--accent);
+      outline-offset: -2px;
+    }
+
+    .vehicle-preset-trigger {
+      position: absolute;
+      top: 0;
+      right: 0;
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 40px;
+      border-left: 1px solid var(--line);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      background: rgba(255, 255, 255, .52);
+      color: var(--text);
+      pointer-events: none;
+    }
+
+    .vehicle-preset-trigger svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
     .lookup-text {
       width: 100%;
       min-height: 96px;
@@ -390,6 +444,12 @@
       color: var(--quiet);
       font-size: 12px;
       line-height: 1.5;
+    }
+
+    .lookup-status a {
+      color: var(--text);
+      font-weight: 700;
+      text-underline-offset: 2px;
     }
 
     .lookup-footer {
@@ -662,6 +722,10 @@
       gap: 8px;
     }
 
+    .volume-library__actions .report-action {
+      grid-column: 1 / -1;
+    }
+
     .volume-library__list {
       display: grid;
       gap: 7px;
@@ -671,6 +735,15 @@
       border: 1px solid rgba(255, 255, 255, .72);
       border-radius: 10px;
       background: rgba(255, 255, 255, .38);
+    }
+
+    .saved-volume__swatch {
+      width: 10px;
+      height: 10px;
+      margin-right: 7px;
+      border: 1px solid rgba(17, 23, 33, .18);
+      border-radius: 50%;
+      flex: 0 0 auto;
     }
 
     .saved-volume summary {
@@ -807,14 +880,85 @@
       bottom: 12px;
       z-index: 2;
       display: grid;
-      grid-template-columns: minmax(0, 1fr) auto;
-      gap: 10px;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 7px;
       align-items: center;
       padding: 10px 12px;
     }
 
     .heatmap-viewer__controls input[type="range"] {
       width: 100%;
+    }
+
+    .heatmap-density-key {
+      display: grid;
+      grid-template-columns: auto minmax(80px, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      color: var(--quiet);
+      font-size: 11px;
+    }
+
+    .heatmap-density-key i {
+      display: block;
+      height: 7px;
+      border: 1px solid rgba(128, 141, 154, .24);
+      border-radius: 999px;
+      background:
+        radial-gradient(circle, rgba(255, 255, 255, .92) 0 24%, transparent 26%) 0 0 / 7px 7px,
+        linear-gradient(90deg, rgba(255, 255, 255, .86), rgba(42, 116, 224, .96));
+    }
+
+    .heatmap-viewer__actions svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      vertical-align: -2px;
+    }
+
+    .heatmap-viewer__actions button.is-active {
+      border-color: rgba(183, 255, 47, .88);
+      background: rgba(183, 255, 47, .7);
+    }
+
+    .rotate-device-notice {
+      display: none;
+    }
+
+    .rotate-device-notice__icon {
+      width: 112px;
+      height: 112px;
+      color: #35404a;
+      animation: rotate-device-hint 2.8s ease-in-out infinite;
+    }
+
+    .rotate-device-notice__icon rect {
+      fill: rgba(255, 255, 255, .28);
+      stroke: currentColor;
+      stroke-width: 2.2;
+    }
+
+    .rotate-device-notice__icon path,
+    .rotate-device-notice__icon circle {
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .rotate-device-notice__icon circle {
+      fill: var(--accent);
+      stroke: none;
+    }
+
+    @keyframes rotate-device-hint {
+      0%, 22% { transform: rotate(0deg); }
+      58%, 100% { transform: rotate(-90deg); }
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -919,9 +1063,226 @@
         grid-template-columns: 1fr;
       }
     }
+
+    @media (max-width: 600px) and (orientation: portrait),
+      (max-width: 760px) and (orientation: portrait) and (pointer: coarse) {
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 0;
+        overflow: hidden;
+        background: #cfd5da;
+      }
+
+      .app {
+        visibility: hidden;
+      }
+
+      .rotate-device-notice {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 20px;
+        padding: 32px;
+        background:
+          radial-gradient(circle at 50% 38%, rgba(255,255,255,.4), transparent 38%),
+          #cfd5da;
+        color: #26313a;
+        text-align: center;
+      }
+
+      .rotate-device-notice strong {
+        font-size: 16px;
+        line-height: 1.45;
+        letter-spacing: 0;
+      }
+
+      .rotate-device-notice span {
+        color: #5c6873;
+        font-size: 12px;
+        line-height: 1.5;
+      }
+    }
+
+    @media (max-height: 600px) and (orientation: landscape),
+      (max-width: 1024px) and (orientation: landscape) and (pointer: coarse) {
+      body {
+        padding: 6px;
+        overflow: hidden;
+      }
+
+      .app {
+        grid-template-columns: minmax(276px, 31vw) minmax(0, 1fr);
+        height: calc(100vh - 12px);
+        border-radius: 14px;
+      }
+
+      aside {
+        min-height: 0;
+        border-right: 1px solid rgba(126, 140, 154, .24);
+        border-bottom: 0;
+      }
+
+      header {
+        padding: 15px 14px 9px;
+      }
+
+      h1 {
+        margin-bottom: 7px;
+        font-size: 27px;
+      }
+
+      .subtitle {
+        max-width: 29em;
+        font-size: 10px;
+        line-height: 1.45;
+      }
+
+      .language-toggle {
+        top: 13px;
+        right: 13px;
+        min-width: 44px;
+        min-height: 32px;
+        padding: 0 10px;
+      }
+
+      .metrics {
+        gap: 6px;
+        padding: 3px 11px 10px;
+      }
+
+      .metric {
+        padding: 9px 10px 8px;
+        border-radius: 10px;
+      }
+
+      .metric strong {
+        min-height: 19px;
+        margin-bottom: 3px;
+        font-size: 21px;
+      }
+
+      .metric span {
+        font-size: 10px;
+      }
+
+      .controls {
+        padding: 2px 10px 12px;
+      }
+
+      details {
+        margin-bottom: 8px;
+        padding: 8px 10px 10px;
+        border-radius: 11px;
+      }
+
+      summary {
+        min-height: 34px;
+        font-size: 11px;
+      }
+
+      main {
+        height: auto;
+        min-height: 0;
+        padding: 10px;
+      }
+
+      #scene {
+        border-radius: 13px;
+      }
+
+      .toolbar {
+        top: 14px;
+        right: 14px;
+        bottom: auto;
+        left: auto;
+        max-width: calc(100% - 118px);
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 5px;
+      }
+
+      .toolbar button {
+        min-height: 32px;
+        padding: 0 8px;
+        gap: 5px;
+        font-size: 10px;
+      }
+
+      .toolbar button svg {
+        width: 14px;
+        height: 14px;
+      }
+
+      .axis-gizmo {
+        top: 14px;
+        left: 14px;
+        width: 82px;
+        height: 82px;
+        border-radius: 14px;
+      }
+
+      .legend {
+        right: auto;
+        bottom: 14px;
+        left: 14px;
+        max-width: calc(100% - 306px);
+        gap: 7px 9px;
+        padding: 8px 10px;
+        font-size: 10px;
+      }
+
+      .volume-library {
+        right: 14px;
+        bottom: 14px;
+        left: auto;
+        width: 278px;
+        max-height: min(220px, calc(100% - 28px));
+      }
+
+      .volume-library__body {
+        gap: 7px;
+        padding: 8px;
+      }
+
+      .volume-library__actions {
+        gap: 6px;
+      }
+
+      .volume-library__actions button {
+        min-height: 31px;
+        font-size: 10px;
+      }
+
+      .mini-volume-viewer {
+        right: 14px;
+        bottom: 246px;
+        left: auto;
+        width: 278px;
+        height: 180px;
+      }
+
+      .volume-viewer,
+      .heatmap-viewer {
+        inset: 10px;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="rotate-device-notice" role="status" aria-live="polite">
+    <svg class="rotate-device-notice__icon" viewBox="0 0 120 120" aria-hidden="true">
+      <rect x="42" y="22" width="36" height="62" rx="7"/>
+      <circle cx="60" cy="75" r="2.5"/>
+    </svg>
+    <strong>スマートフォンを横向きにしてください</strong>
+    <span>请将手机旋转为横屏</span>
+  </div>
   <div class="app">
     <aside>
       <header>
@@ -954,7 +1315,15 @@
         <details open>
           <summary>车型自动匹配</summary>
           <div class="lookup">
-            <input id="vehicleSearchQuery" type="search" placeholder="输入货车品牌型号，例如 Volvo FH16" autocomplete="off">
+            <div class="lookup-search-field">
+              <input id="vehicleSearchQuery" type="search" placeholder="输入货车品牌型号，例如 Volvo FH16" autocomplete="off">
+              <select class="vehicle-preset-select" id="vehiclePresetSelect" aria-label="市场常用车型">
+                <option value=""></option>
+              </select>
+              <span class="vehicle-preset-trigger" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><path d="m7 9 5 5 5-5"/></svg>
+              </span>
+            </div>
             <button id="vehicleSearchButton" type="button">匹配</button>
           </div>
           <textarea id="vehicleDimensionText" class="lookup-text" placeholder="也可以粘贴车辆尺寸资料，例如：外形尺寸 5995×2550×3950mm，轴距 3400mm，前悬 1.2m，后悬 0.9m"></textarea>
@@ -964,7 +1333,7 @@
           </div>
         </details>
 
-        <details open>
+        <details>
           <summary>街角</summary>
           <div class="control" data-param="roadWidthIn">
             <label>入口道路宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="3" max="12" step="0.1">
@@ -983,7 +1352,7 @@
           </div>
         </details>
 
-        <details open>
+        <details>
           <summary>车头尺寸</summary>
           <div class="control" data-param="cabLength">
             <label>车头长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.2" max="8" step="0.1">
@@ -1005,7 +1374,7 @@
           </div>
         </details>
 
-        <details open>
+        <details>
           <summary>挂车尺寸</summary>
           <div class="control" data-param="trailerLength">
             <label>挂车长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.5" max="18" step="0.1">
@@ -1039,14 +1408,14 @@
           </div>
         </details>
 
-        <details open>
+        <details>
           <summary>货箱</summary>
           <div class="toggle-row">
             <label for="cargoEnabled">显示并参与计算</label>
             <input id="cargoEnabled" type="checkbox" checked>
           </div>
           <div class="control" data-param="cargoLength">
-            <label>货箱长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="2" max="18" step="0.1">
+            <label>货箱长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1" max="18" step="0.1">
           </div>
           <div class="control" data-param="cargoFrontOverhang">
             <label>货箱前伸 m</label><input class="value" type="number" step="0.1"><input type="range" min="0" max="3" step="0.1">
@@ -1067,23 +1436,21 @@
           <div class="control" data-param="turnRadius">
             <label>牵引点转弯半径 m</label><input class="value" type="number" step="0.1"><input type="range" min="2" max="14" step="0.1">
           </div>
+          <div class="control" data-param="entryLaneOffset">
+            <label>入口车道横向偏移 m</label><input class="value" type="number" step="0.1"><input type="range" min="-3" max="3" step="0.1">
+          </div>
           <div class="control" data-param="turnStartX">
             <label>X 轴开始转向位置 m</label><input class="value" type="number" step="0.1"><input type="range" min="-14" max="8" step="0.1">
           </div>
           <div class="control" data-param="stopY">
             <label>Y 轴停车位置 m</label><input class="value" type="number" step="0.1"><input type="range" min="0" max="26" step="0.1">
           </div>
-          <div class="control" data-param="maxArticulation">
-            <label>最大折角 °</label><input class="value" type="number" step="1"><input type="range" min="0" max="70" step="1">
+          <div class="control" data-param="calculationDetail">
+            <label>计算精细度 %</label><input class="value" type="number" step="1"><input type="range" min="0" max="100" step="1">
           </div>
-          <div class="control" data-param="sweepSamples">
-            <label>转弯采样帧数</label><input class="value" type="number" step="1"><input type="range" min="12" max="90" step="1">
-          </div>
-          <div class="control" data-param="gridResolution">
-            <label>平面采样精度</label><input class="value" type="number" step="1"><input type="range" min="12" max="46" step="1">
-          </div>
-          <div class="control" data-param="heightSlices">
-            <label>高度切片数</label><input class="value" type="number" step="1"><input type="range" min="4" max="24" step="1">
+          <div class="toggle-row">
+            <label for="counterTraffic">包含对向来车扫掠</label>
+            <input id="counterTraffic" type="checkbox">
           </div>
         </details>
 
@@ -1159,6 +1526,10 @@
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17c3-6 5 2 8-4s5 1 8-6"/><path d="M4 21h16"/></svg>
               <span>叠加分析</span>
             </button>
+            <button class="report-action" id="exportA4Report" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
+              <span>导出报告</span>
+            </button>
           </div>
           <div class="volume-library__list" id="savedVolumeList"></div>
         </div>
@@ -1188,12 +1559,24 @@
           <div class="heatmap-viewer__title" id="heatmapViewerTitle">剩余体积叠加热力图</div>
           <div class="heatmap-viewer__actions">
             <button id="exportHeatmapStl" type="button">导出阈值STL</button>
+            <button id="lockHeatmapView" type="button" aria-pressed="false">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <rect x="5" y="10" width="14" height="10" rx="2"></rect>
+                <path d="M8 10V7a4 4 0 0 1 8 0v3"></path>
+              </svg>
+              <span>锁定视角</span>
+            </button>
             <button id="closeHeatmapViewer" type="button">关闭</button>
           </div>
         </div>
         <div class="heatmap-viewer__controls">
           <label for="heatmapThreshold">导出重叠阈值：<span id="heatmapThresholdLabel">≥ 1 / 0</span></label>
           <input id="heatmapThreshold" type="range" min="0" max="10" step="1" value="0">
+          <div class="heatmap-density-key">
+            <span id="heatmapDensityLow">低重叠：混合白点</span>
+            <i aria-hidden="true"></i>
+            <span id="heatmapDensityHigh">全部重叠：蓝色</span>
+          </div>
         </div>
       </div>
     </main>
@@ -1240,12 +1623,18 @@
       cargoHeight: 2.7,
       progress: 0,
       turnRadius: 2.9,
+      entryLaneOffset: 0,
+      maxSteeringAngle: 38,
+      turnEaseRatio: 28,
       turnStartX: -1.5,
       stopY: 21.2,
       maxArticulation: 38,
+      rigidBody: false,
+      calculationDetail: 50,
       sweepSamples: 42,
       gridResolution: 26,
       heightSlices: 12,
+      counterTraffic: false,
       smoothVolume: true,
       showRemaining: true,
       showIntersection: true,
@@ -1255,6 +1644,139 @@
     const savedVolumeLimit = 20;
 
     let currentLanguage = "jp";
+
+    function integratedVanCabLength(config) {
+      if (config.cabVisualLength) return config.cabVisualLength;
+      if (config.width <= 1.5) return config.id === "honda-nvan" ? 1.42 : 1.35;
+      if (config.length <= 4.12) return 1.55;
+      if (config.length <= 4.22) return 1.68;
+      if (config.length <= 4.35) return 1.75;
+      if (config.length <= 4.52) return 1.78;
+      return 1.62;
+    }
+
+    function makeDeliveryPreset(config) {
+      const cargoInnerLength = Math.max(1, config.cargoLength);
+      const integralVan = ["keiVan", "compactVan", "deliveryVan", "international"].includes(config.group);
+      const cabLength = Math.max(1.2, Math.min(8, integralVan
+        ? integratedVanCabLength(config)
+        : config.length - (config.bodyLength || cargoInnerLength)));
+      const trailerLength = Math.max(1.5, config.bodyLength || (integralVan
+        ? config.length - cabLength
+        : cargoInnerLength));
+      const cargoLength = integralVan ? trailerLength : (config.bodyLength || cargoInnerLength);
+      const chassisHeight = config.chassisHeight || 0.42;
+      const deckHeight = config.deckHeight || 0.18;
+      const cabHeight = config.cabHeight || (integralVan
+        ? Math.max(1, config.height - chassisHeight)
+        : (config.width <= 1.5 ? 1.38 : 1.72));
+      const cargoHeight = config.bodyHeight || (integralVan
+        ? Math.max(0.5, config.height - chassisHeight - deckHeight)
+        : (config.cargoHeight || 0.5));
+      const trailerWidth = config.bodyWidth || config.width;
+      const turnRadius = config.turnRadius || 4.5;
+      const estimatedWheelbase = Math.max(2.1, config.length - Math.max(0.85, config.length * 0.22));
+      const maxSteeringAngle = config.maxSteeringAngle || Math.round(THREE.MathUtils.clamp(
+        THREE.MathUtils.radToDeg(Math.atan(estimatedWheelbase / turnRadius)),
+        32,
+        44
+      ));
+      const rigidBody = config.rigidBody ?? integralVan;
+      const maxArticulation = rigidBody
+        ? 0
+        : (config.maxArticulation || Math.round(THREE.MathUtils.clamp(
+            44 - Math.max(0, trailerLength - 3.5) * 3,
+            40,
+            44
+          )));
+      return {
+        ...config,
+        integralVan,
+        cargoInnerLength,
+        cargoInnerWidth: config.cargoWidth || null,
+        cargoInnerHeight: config.cargoHeight || null,
+        values: {
+          cabLength,
+          cabFrontOverhang: Math.min(0.6, Math.max(0.2, cabLength * 0.24)),
+          cabRearOverhang: Math.min(0.7, Math.max(0.2, cabLength * 0.28)),
+          hitchGap: 0,
+          cabWidth: config.width,
+          cabHeight: Math.min(4.2, cabHeight),
+          trailerLength,
+          trailerFrontOverhang: 0,
+          trailerRearOverhang: Math.min(1.1, Math.max(0.5, trailerLength * 0.24)),
+          trailerWidth,
+          sideProtrusion: 0,
+          deckHeight,
+          chassisHeight,
+          wheelTrack: Math.min(3.5, config.width * 0.82),
+          wheelWidth: config.wheelWidth || 0.22,
+          wheelRadius: config.wheelRadius || 0.34,
+          cargoEnabled: config.enclosed !== false,
+          cargoLength,
+          cargoFrontOverhang: 0,
+          cargoBaseOffset: 0,
+          cargoHeight: Math.max(0.5, cargoHeight),
+          progress: 0,
+          turnRadius,
+          maxSteeringAngle,
+          turnEaseRatio: config.turnEaseRatio || 28,
+          maxArticulation,
+          rigidBody
+        }
+      };
+    }
+
+    const retiredCompactVehiclePresets = [
+      makeDeliveryPreset({ id: "suzuki-carry-kc", group: "keiTruck", nameJp: "スズキ キャリイ KC 平ボディ", nameCn: "铃木 Carry KC 平板轻卡", query: "Suzuki Carry KC", length: 3.395, width: 1.475, height: 1.765, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www.suzuki.co.jp/car/carry/detail/pdf/detail.pdf" }),
+      makeDeliveryPreset({ id: "suzuki-carry-cold", group: "temperature", nameJp: "スズキ キャリイ 冷蔵・冷凍車（架装参考）", nameCn: "铃木 Carry 冷藏冷冻车（改装参考）", query: "Suzuki Carry refrigerated", length: 3.395, width: 1.475, height: 2.02, cargoLength: 1.82, bodyWidth: 1.46, bodyHeight: 1.42, cargoHeight: 1.28, enclosed: true, wheelRadius: 0.28, turnRadius: 3.6, estimatedBody: true, source: "https://www.suzuki.co.jp/car/carry_customized/base/detail/" }),
+      makeDeliveryPreset({ id: "daihatsu-hijet-truck", group: "keiTruck", nameJp: "ダイハツ ハイゼット トラック スタンダード", nameCn: "大发 Hijet Truck 标准版", query: "Daihatsu Hijet Truck Standard", length: 3.395, width: 1.475, height: 1.78, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www.daihatsu.co.jp/lineup/truck/index.htm" }),
+      makeDeliveryPreset({ id: "daihatsu-hijet-panel", group: "keiTruck", nameJp: "ダイハツ ハイゼット パネルバン（架装参考）", nameCn: "大发 Hijet 厢式轻卡（改装参考）", query: "Daihatsu Hijet panel van", length: 3.395, width: 1.475, height: 2.02, cargoLength: 1.82, bodyWidth: 1.46, bodyHeight: 1.43, cargoHeight: 1.3, enclosed: true, wheelRadius: 0.28, turnRadius: 3.6, estimatedBody: true, source: "https://www.daihatsu.co.jp/lineup/truck/index.htm" }),
+      makeDeliveryPreset({ id: "nissan-clipper-truck", group: "keiTruck", nameJp: "日産 クリッパートラック DX", nameCn: "日产 Clipper Truck DX", query: "Nissan Clipper Truck DX", length: 3.395, width: 1.475, height: 1.765, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www3.nissan.co.jp/vehicles/new/clippertruck/specifications.html" }),
+      makeDeliveryPreset({ id: "subaru-sambar-truck", group: "keiTruck", nameJp: "SUBARU サンバートラック TB", nameCn: "斯巴鲁 Sambar Truck TB", query: "Subaru Sambar Truck TB", length: 3.395, width: 1.475, height: 1.78, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www.subaru.jp/sambar-truck/specification/" }),
+      makeDeliveryPreset({ id: "suzuki-every", group: "keiVan", nameJp: "スズキ エブリイ PAリミテッド", nameCn: "铃木 Every PA Limited 厢式货运车", query: "Suzuki Every PA Limited", length: 3.395, width: 1.475, height: 1.895, cargoLength: 1.91, cargoHeight: 1.24, enclosed: true, wheelRadius: 0.28, turnRadius: 4.1, source: "https://www.suzuki.co.jp/car/every/detail/pdf/detail.pdf" }),
+      makeDeliveryPreset({ id: "daihatsu-hijet-cargo", group: "keiVan", nameJp: "ダイハツ ハイゼット カーゴ デラックス", nameCn: "大发 Hijet Cargo Deluxe", query: "Daihatsu Hijet Cargo Deluxe", length: 3.395, width: 1.475, height: 1.89, cargoLength: 1.915, cargoHeight: 1.25, enclosed: true, wheelRadius: 0.28, turnRadius: 4.2, source: "https://www.daihatsu.co.jp/lineup/cargo/pdf/specifications.pdf" }),
+      makeDeliveryPreset({ id: "toyota-pixis-van", group: "keiVan", nameJp: "トヨタ ピクシス バン デラックス", nameCn: "丰田 Pixis Van Deluxe", query: "Toyota Pixis Van Deluxe", length: 3.395, width: 1.475, height: 1.89, cargoLength: 1.915, cargoHeight: 1.25, enclosed: true, wheelRadius: 0.28, turnRadius: 4.2, source: "https://toyota.jp/pages/contents/pixisvan/002_b_001/4.0/pdf/spec/pixisvan_spec_202112.pdf" }),
+      makeDeliveryPreset({ id: "subaru-sambar-van", group: "keiVan", nameJp: "SUBARU サンバーバン VB", nameCn: "斯巴鲁 Sambar Van VB", query: "Subaru Sambar Van VB", length: 3.395, width: 1.475, height: 1.89, cargoLength: 1.915, cargoHeight: 1.25, enclosed: true, wheelRadius: 0.28, turnRadius: 4.2, source: "https://www.subaru.jp/sambar-van/specification/" }),
+      makeDeliveryPreset({ id: "honda-nvan", group: "keiVan", nameJp: "Honda N-VAN G", nameCn: "本田 N-VAN G", query: "Honda N-VAN G", length: 3.395, width: 1.475, height: 1.945, cargoLength: 1.51, cargoHeight: 1.365, enclosed: true, wheelRadius: 0.28, turnRadius: 4.6, source: "https://www.honda.co.jp/N-VAN/common/pdf/nvan_spec_list.pdf" }),
+      makeDeliveryPreset({ id: "toyota-townace-van", group: "compactVan", nameJp: "トヨタ タウンエース バン DX", nameCn: "丰田 TownAce Van DX", query: "Toyota TownAce Van DX", length: 4.065, width: 1.665, height: 1.93, cargoLength: 2.045, cargoHeight: 1.305, enclosed: true, wheelRadius: 0.31, turnRadius: 4.9, source: "https://toyota.jp/pages/contents/townacevan/004_b_010/4.0/pdf/spec/townacevan_spec_202506.pdf" }),
+      makeDeliveryPreset({ id: "mazda-bongo-van", group: "compactVan", nameJp: "マツダ ボンゴバン DX", nameCn: "马自达 Bongo Van DX", query: "Mazda Bongo Van DX", length: 4.065, width: 1.665, height: 1.93, cargoLength: 2.045, cargoHeight: 1.305, enclosed: true, wheelRadius: 0.31, turnRadius: 4.9, source: "https://www.mazda.co.jp/globalassets/assets/cars/bongo-van/common/pdf/bongovan_specification_202508.pdf" }),
+      makeDeliveryPreset({ id: "nissan-nv200", group: "compactVan", nameJp: "日産 NV200バネット DX 2WD", nameCn: "日产 NV200 Vanette DX 2WD", query: "Nissan NV200 Vanette DX 2WD", length: 4.4, width: 1.695, height: 1.855, cargoLength: 1.9, cargoHeight: 1.365, enclosed: true, wheelRadius: 0.32, turnRadius: 5.2, source: "https://www3.nissan.co.jp/content/dam/Nissan/jp/vehicles/nv200vannete/2107/pdf/nv200vanette_2107_specsheet.pdf" }),
+      makeDeliveryPreset({ id: "toyota-hiace-dx", group: "deliveryVan", nameJp: "トヨタ ハイエース バン DX 標準ボディ", nameCn: "丰田 HiAce Van DX 标准车身", query: "Toyota HiAce Van DX standard body", length: 4.695, width: 1.695, height: 1.98, cargoLength: 3, cargoHeight: 1.32, enclosed: true, wheelRadius: 0.34, turnRadius: 5, source: "https://toyota.jp/sc_files/media/images/carlineup/hiace/005_b_013/spec/spec/van/image/spec_van.pdf" }),
+      makeDeliveryPreset({ id: "nissan-caravan-dx", group: "deliveryVan", nameJp: "日産 キャラバン バン DX 標準幅", nameCn: "日产 Caravan Van DX 标准宽度", query: "Nissan Caravan Van DX standard width", length: 4.695, width: 1.695, height: 1.99, cargoLength: 3.055, cargoHeight: 1.325, enclosed: true, wheelRadius: 0.34, turnRadius: 5.2, source: "https://www3.nissan.co.jp/vehicles/new/caravan/loadability_comfort/loadability.html" }),
+      makeDeliveryPreset({ id: "isuzu-elfmio-flatbed", group: "smallTruck", nameJp: "いすゞ エルフミオ 1.0t 平ボディ", nameCn: "五十铃 ELF mio 1.0t 平板车", query: "Isuzu ELF mio 1.0t flatbed", length: 4.69, width: 1.695, height: 1.965, cargoLength: 3.115, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.36, turnRadius: 4.4, source: "https://www.isuzu.co.jp/product/elfmio/assets/pdf/ELFmio_store_specification.pdf" }),
+      makeDeliveryPreset({ id: "isuzu-elf-flatbed", group: "smallTruck", nameJp: "いすゞ エルフ 1.5t 標準キャブ 平ボディ", nameCn: "五十铃 ELF 1.5t 标准驾驶室平板车", query: "Isuzu ELF 1.5t standard cab flatbed", length: 4.69, width: 1.695, height: 1.97, cargoLength: 3.12, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.38, turnRadius: 4.5, source: "https://www.isuzu.co.jp/support/data/pdf/elf/06shogen.pdf" }),
+      makeDeliveryPreset({ id: "hino-dutro-cold", group: "temperature", nameJp: "日野デュトロ 標準幅 冷凍車（架装参考）", nameCn: "日野 Dutro 标准宽冷冻车（改装参考）", query: "Hino Dutro standard refrigerated truck", length: 4.69, width: 1.695, height: 2.9, cargoLength: 3.05, bodyLength: 3.16, bodyWidth: 1.82, bodyHeight: 2.15, cargoWidth: 1.72, cargoHeight: 2.05, cabHeight: 1.68, chassisHeight: 0.58, deckHeight: 0.22, enclosed: true, wheelRadius: 0.38, turnRadius: 4.5, estimatedBody: true, source: "https://www.hino.co.jp/dutro/lineup/cool/index.html" }),
+      makeDeliveryPreset({ id: "fuso-canter-alumivan", group: "smallTruck", nameJp: "三菱ふそう キャンター 標準キャブ アルミバン（架装参考）", nameCn: "三菱扶桑 Canter 标准驾驶室铝厢车（改装参考）", query: "Mitsubishi Fuso Canter standard cab aluminum van", length: 4.69, width: 1.695, height: 2.85, cargoLength: 3.1, bodyLength: 3.18, bodyWidth: 1.84, bodyHeight: 1.95, cargoWidth: 1.78, cargoHeight: 1.845, cabHeight: 1.68, chassisHeight: 0.58, deckHeight: 0.22, enclosed: true, wheelRadius: 0.38, turnRadius: 4.5, estimatedBody: true, source: "https://www.mitsubishi-fuso.com/ja/product/canter/variation/" }),
+      makeDeliveryPreset({ id: "renault-kangoo-van", group: "international", nameJp: "Renault Kangoo Van 標準ボディ", nameCn: "雷诺 Kangoo Van 标准车身", query: "Renault Kangoo Van standard body", length: 4.282, width: 1.829, height: 1.801, cargoLength: 1.86, cargoHeight: 1.155, enclosed: true, wheelRadius: 0.32, turnRadius: 5.4, source: "https://www.renault.ps/en/cars/kangoo/dimensions.html" }),
+      makeDeliveryPreset({ id: "vw-caddy-cargo", group: "international", nameJp: "Volkswagen Caddy Cargo", nameCn: "大众 Caddy Cargo", query: "Volkswagen Caddy Cargo", length: 4.5, width: 1.86, height: 1.84, cargoLength: 1.797, cargoHeight: 1.259, enclosed: true, wheelRadius: 0.32, turnRadius: 5.6, source: "https://www.volkswagen-nutzfahrzeuge.at/caddy-cargo/caddy-cargo/technische-daten/caddy-cargo" }),
+      makeDeliveryPreset({ id: "citroen-berlingo-m", group: "international", nameJp: "Citroën Berlingo Van M", nameCn: "雪铁龙 Berlingo Van M", query: "Citroen Berlingo Van M", length: 4.403, width: 1.848, height: 1.86, cargoLength: 1.817, cargoHeight: 1.2, enclosed: true, wheelRadius: 0.32, turnRadius: 5.5, source: "https://www.citroen.co.uk/content/dam/citroen/uk/b2c/tools/brochure/pdf/brochures/Citroen-Berlingo-Van-Brochure-January-2023.pdf" }),
+      makeDeliveryPreset({ id: "peugeot-partner-city-short", group: "international", nameJp: "Peugeot Partner City Short", nameCn: "标致 Partner City Short", query: "Peugeot Partner City Short", length: 4.403, width: 1.848, height: 1.86, cargoLength: 1.817, cargoHeight: 1.2, enclosed: true, wheelRadius: 0.32, turnRadius: 5.5, source: "https://www.peugeot.com.au/our-range/partner-van/specifications.html" }),
+      makeDeliveryPreset({ id: "ford-transit-courier", group: "international", nameJp: "Ford Transit Courier", nameCn: "福特 Transit Courier", query: "Ford Transit Courier", length: 4.157, width: 1.764, height: 1.77, cargoLength: 1.62, cargoHeight: 1.24, enclosed: true, wheelRadius: 0.31, turnRadius: 5.3, source: "https://media.ford.com/content/dam/fordmedia/Europe/documents/productReleases/Transit%20Courier/TransitCourier_Specifications_EU.pdf" })
+    ];
+
+    const vehiclePresets = [
+      makeDeliveryPreset({ id: "hino-dutro-wide-flatbed", group: "wideFlatbed", nameJp: "日野 デュトロ ワイドキャブ 平ボディ（架装参考）", nameCn: "日野 Dutro 宽体驾驶室平板车（改装参考）", query: "Hino Dutro wide cab flatbed", length: 5.19, width: 1.995, height: 2.1, cargoLength: 3.5, bodyLength: 3.5, bodyWidth: 2.08, cargoHeight: 0.5, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: false, wheelRadius: 0.39, turnRadius: 5.1, estimatedBody: true, source: "https://www.hino.co.jp/dutro/specifications/" }),
+      makeDeliveryPreset({ id: "hino-dutro-wide-alumivan", group: "boxDelivery", nameJp: "日野 デュトロ ワイドキャブ アルミバン（架装参考）", nameCn: "日野 Dutro 宽体驾驶室铝厢车（改装参考）", query: "Hino Dutro wide cab aluminum van", length: 5.5, width: 1.995, height: 3.02, cargoLength: 3.65, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.hino.co.jp/dutro/lineup/standard/" }),
+      makeDeliveryPreset({ id: "hino-dutro-wide-cold", group: "temperature", nameJp: "日野 デュトロ ワイドキャブ 冷蔵冷凍車（架装参考）", nameCn: "日野 Dutro 宽体驾驶室冷藏冷冻车（改装参考）", query: "Hino Dutro wide cab refrigerated truck", length: 5.5, width: 1.995, height: 3.12, cargoLength: 3.62, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.25, cargoWidth: 2, cargoHeight: 2.13, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.hino.co.jp/dutro/lineup/cool/index.html" }),
+      makeDeliveryPreset({ id: "hino-dutro-wide-tailgate", group: "boxDelivery", nameJp: "日野 デュトロ ワイドキャブ テールゲートリフター付バン（架装参考）", nameCn: "日野 Dutro 宽体驾驶室尾板配送厢车（改装参考）", query: "Hino Dutro wide cab tail lift delivery van", length: 5.7, width: 1.995, height: 3.02, cargoLength: 3.78, bodyLength: 3.9, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.3, estimatedBody: true, source: "https://www.hino.co.jp/dutro/lineup/standard/" }),
+      makeDeliveryPreset({ id: "fuso-canter-wide-flatbed", group: "wideFlatbed", nameJp: "三菱ふそう キャンター ワイドキャブ 平ボディ（架装参考）", nameCn: "三菱扶桑 Canter 宽体驾驶室平板车（改装参考）", query: "Mitsubishi Fuso Canter wide cab flatbed", length: 5.19, width: 1.995, height: 2.1, cargoLength: 3.5, bodyLength: 3.5, bodyWidth: 2.07, cargoHeight: 0.5, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: false, wheelRadius: 0.39, turnRadius: 5.1, estimatedBody: true, source: "https://www.mitsubishi-fuso.com/ja/product/canter/variation/" }),
+      makeDeliveryPreset({ id: "fuso-canter-wide-alumivan", group: "boxDelivery", nameJp: "三菱ふそう キャンター ワイドキャブ アルミバン（架装参考）", nameCn: "三菱扶桑 Canter 宽体驾驶室铝厢车（改装参考）", query: "Mitsubishi Fuso Canter wide cab aluminum van", length: 5.5, width: 1.995, height: 3.02, cargoLength: 3.65, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.mitsubishi-fuso.com/ja/product/canter/variation/" }),
+      makeDeliveryPreset({ id: "fuso-canter-wide-cold", group: "temperature", nameJp: "三菱ふそう キャンター ワイドキャブ 冷蔵冷凍車（架装参考）", nameCn: "三菱扶桑 Canter 宽体驾驶室冷藏冷冻车（改装参考）", query: "Mitsubishi Fuso Canter wide cab refrigerated truck", length: 5.5, width: 1.995, height: 3.12, cargoLength: 3.62, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.25, cargoWidth: 2, cargoHeight: 2.13, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.mitsubishi-fuso.com/ja/product/canter/variation/" }),
+      makeDeliveryPreset({ id: "fuso-canter-wide-wing", group: "specialBody", nameJp: "三菱ふそう キャンター ワイドキャブ ウイングボディ（架装参考）", nameCn: "三菱扶桑 Canter 宽体驾驶室翼展厢车（改装参考）", query: "Mitsubishi Fuso Canter wide cab wing body", length: 6.05, width: 1.995, height: 3.12, cargoLength: 4.18, bodyLength: 4.3, bodyWidth: 2.18, bodyHeight: 2.25, cargoWidth: 2.08, cargoHeight: 2.12, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.5, estimatedBody: true, source: "https://www.mitsubishi-fuso.com/ja/product/canter/variation/" }),
+      makeDeliveryPreset({ id: "isuzu-elf-wide-flatbed", group: "wideFlatbed", nameJp: "いすゞ エルフ ワイドキャブ 平ボディ（架装参考）", nameCn: "五十铃 ELF 宽体驾驶室平板车（改装参考）", query: "Isuzu ELF wide cab flatbed", length: 5.19, width: 1.995, height: 2.1, cargoLength: 3.5, bodyLength: 3.5, bodyWidth: 2.08, cargoHeight: 0.5, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: false, wheelRadius: 0.39, turnRadius: 5.1, estimatedBody: true, source: "https://www.isuzu.co.jp/product/elf/" }),
+      makeDeliveryPreset({ id: "isuzu-elf-wide-alumivan", group: "boxDelivery", nameJp: "いすゞ エルフ ワイドキャブ アルミバン（架装参考）", nameCn: "五十铃 ELF 宽体驾驶室铝厢车（改装参考）", query: "Isuzu ELF wide cab aluminum van", length: 5.5, width: 1.995, height: 3.02, cargoLength: 3.65, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.isuzu.co.jp/product/elf/" }),
+      makeDeliveryPreset({ id: "isuzu-elf-wide-cold", group: "temperature", nameJp: "いすゞ エルフ ワイドキャブ 冷蔵冷凍車（架装参考）", nameCn: "五十铃 ELF 宽体驾驶室冷藏冷冻车（改装参考）", query: "Isuzu ELF wide cab refrigerated truck", length: 5.5, width: 1.995, height: 3.12, cargoLength: 3.62, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.25, cargoWidth: 2, cargoHeight: 2.13, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.isuzu.co.jp/product/elf_post/assets/pdf/ELF_JIREI.pdf" }),
+      makeDeliveryPreset({ id: "isuzu-elf-wide-wing", group: "specialBody", nameJp: "いすゞ エルフ ワイドキャブ ウイングボディ（架装参考）", nameCn: "五十铃 ELF 宽体驾驶室翼展厢车（改装参考）", query: "Isuzu ELF wide cab wing body", length: 6.05, width: 1.995, height: 3.12, cargoLength: 4.18, bodyLength: 4.3, bodyWidth: 2.18, bodyHeight: 2.25, cargoWidth: 2.08, cargoHeight: 2.12, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.5, estimatedBody: true, source: "https://www.isuzu.co.jp/product/elf_post/assets/pdf/ELF_JIREI.pdf" }),
+      makeDeliveryPreset({ id: "isuzu-elf-wide-dump", group: "specialBody", nameJp: "いすゞ エルフ ワイドキャブ ダンプ（架装参考）", nameCn: "五十铃 ELF 宽体驾驶室自卸车（改装参考）", query: "Isuzu ELF wide cab dump truck", length: 5.05, width: 1.995, height: 2.1, cargoLength: 3.25, bodyLength: 3.25, bodyWidth: 2.08, cargoHeight: 0.72, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.28, enclosed: false, wheelRadius: 0.39, turnRadius: 5.1, estimatedBody: true, source: "https://www.isuzu.co.jp/product/elf_post/assets/pdf/ELF_JIREI.pdf" }),
+      makeDeliveryPreset({ id: "ud-kazet-wide-flatbed", group: "wideFlatbed", nameJp: "UDトラックス カゼット ワイドキャブ 平ボディ（架装参考）", nameCn: "UD Trucks Kazet 宽体驾驶室平板车（改装参考）", query: "UD Trucks Kazet wide cab flatbed", length: 5.19, width: 1.995, height: 2.1, cargoLength: 3.5, bodyLength: 3.5, bodyWidth: 2.08, cargoHeight: 0.5, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: false, wheelRadius: 0.39, turnRadius: 5.1, estimatedBody: true, source: "https://www.udtrucks.com/japan/kazet" }),
+      makeDeliveryPreset({ id: "ud-kazet-wide-alumivan", group: "boxDelivery", nameJp: "UDトラックス カゼット ワイドキャブ アルミバン（架装参考）", nameCn: "UD Trucks Kazet 宽体驾驶室铝厢车（改装参考）", query: "UD Trucks Kazet wide cab aluminum van", length: 5.5, width: 1.995, height: 3.02, cargoLength: 3.65, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.udtrucks.com/japan/kazet" }),
+      makeDeliveryPreset({ id: "ud-kazet-wide-tailgate", group: "boxDelivery", nameJp: "UDトラックス カゼット ワイドキャブ テールゲートリフター付バン（架装参考）", nameCn: "UD Trucks Kazet 宽体驾驶室尾板配送厢车（改装参考）", query: "UD Trucks Kazet wide cab tail lift delivery van", length: 5.7, width: 1.995, height: 3.02, cargoLength: 3.78, bodyLength: 3.9, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.3, estimatedBody: true, source: "https://www.udtrucks.com/japan/kazet" }),
+      makeDeliveryPreset({ id: "mercedes-sprinter-l2h2", group: "international", nameJp: "Mercedes-Benz Sprinter Panel Van L2H2", nameCn: "梅赛德斯-奔驰 Sprinter 厢式车 L2H2", query: "Mercedes-Benz Sprinter Panel Van L2H2", length: 5.932, width: 2.02, height: 2.62, cargoLength: 3.272, cargoHeight: 1.94, enclosed: true, wheelRadius: 0.38, turnRadius: 6.25, source: "https://www.mercedes-benz.co.uk/content/dam/hq/vans/models/sprinter/panel-van/overview/mercedes-benz-sprinter-panel-van-rwd-fwd-awd-technical-data.pdf" }),
+      makeDeliveryPreset({ id: "ford-transit-l2h2", group: "international", nameJp: "Ford Transit Panel Van L2H2", nameCn: "福特 Transit 厢式车 L2H2", query: "Ford Transit Panel Van L2H2", length: 5.531, width: 2.052, height: 2.49, cargoLength: 3.044, cargoHeight: 1.886, enclosed: true, wheelRadius: 0.38, turnRadius: 6, source: "https://media.ford.com/content/dam/fordmedia/Europe/en/2019/04/Transit%20press%20kit/Transit_Technical_Specifications_EU.pdf" }),
+      makeDeliveryPreset({ id: "vw-crafter-mwb-high", group: "international", nameJp: "Volkswagen Crafter Panel Van MWB High Roof", nameCn: "大众 Crafter 厢式车中轴高顶版", query: "Volkswagen Crafter Panel Van MWB High Roof", length: 5.986, width: 2.04, height: 2.59, cargoLength: 3.45, cargoHeight: 1.961, enclosed: true, wheelRadius: 0.38, turnRadius: 6, source: "https://www.volkswagen-vans.co.uk/idhub/content/dam/onehub_nfz/importers/gb/downloads/product-guides/crafter-panel-van-product-guide.pdf" }),
+      makeDeliveryPreset({ id: "iveco-daily-l2h2", group: "international", nameJp: "IVECO Daily Van L2H2", nameCn: "依维柯 Daily 厢式车 L2H2", query: "IVECO Daily Van L2H2", length: 6.087, width: 2.052, height: 2.66, cargoLength: 3.54, cargoHeight: 1.9, enclosed: true, wheelRadius: 0.39, turnRadius: 6.15, source: "https://www.iveco.com/uk/-/media/IVECOdotcom/PDF/IVECO-UK/Daily/IVECO-Daily-Brochure.ashx" })
+    ];
 
     const i18n = {
       jp: {
@@ -1305,13 +1827,18 @@
         cargoHeight: "荷箱高さ m",
         turnSection: "旋回・計算",
         progress: "旋回進捗 %",
-        turnRadius: "牽引点旋回半径 m",
+        turnRadius: "旋回半径 m",
+        entryLaneOffset: "進入車線横オフセット m",
+        maxSteeringAngle: "最大前輪操舵角 °",
+        turnEaseRatio: "旋回緩和区間 %",
         turnStartX: "X 軸方向の旋回開始位置 m",
         stopY: "Y 軸方向の停止位置 m",
         maxArticulation: "最大連結角 °",
+        calculationDetail: "計算精細度 %",
         sweepSamples: "旋回サンプル数",
         gridResolution: "平面サンプル精度",
         heightSlices: "高さ方向分割数",
+        counterTraffic: "対向車両の掃引を含める",
         displaySection: "表示",
         smoothVolume: "平滑体積モード",
         showRemaining: "残余体積を表示",
@@ -1332,11 +1859,17 @@
         volumeLibrary: "残余体積ライブラリ",
         saveCurrent: "現在値を保存",
         overlapAnalysis: "重ね合わせ解析",
+        exportReport: "レポート出力",
+        reportNoSaved: "先に残余体積を1件以上保存してください。",
         remainingViewerTitle: "残余体積のみ表示。回転・移動・ズームできます。",
         close: "閉じる",
         previewTitle: "体積プレビュー",
-        heatmapTitle: "残余体積重ね合わせヒートマップ",
+        heatmapTitle: "残余体積重ね合わせ密度表示",
         exportHeatmap: "閾値STL出力",
+        lockHeatmapView: "視点を固定",
+        unlockHeatmapView: "固定を解除",
+        heatmapDensityLow: "低重複：白点混合",
+        heatmapDensityHigh: "全案重複：青",
         thresholdPrefix: "重ね合わせ閾値：",
         noSaved: "保存された残余体積はありません。",
         view: "表示",
@@ -1345,7 +1878,7 @@
         voxel: "体素",
         pose: "姿勢",
         savedName: index => `体積${index}`,
-        heatmapTitleWithCount: count => `残余体積重ね合わせヒートマップ · ${count}案`,
+        heatmapTitleWithCount: count => `残余体積重ね合わせ密度表示 · ${count}案`,
         statusSmooth: "現在は平滑表示です。",
         statusVoxel: "現在は体素表示です。",
         pasteFirst: "先に車両寸法資料を貼り付けてください。",
@@ -1407,13 +1940,18 @@
         cargoHeight: "货箱高度 m",
         turnSection: "转弯与计算",
         progress: "转弯进度 %",
-        turnRadius: "牵引点转弯半径 m",
+        turnRadius: "转弯半径 m",
+        entryLaneOffset: "入口车道横向偏移 m",
+        maxSteeringAngle: "最大前轮转角 °",
+        turnEaseRatio: "转向缓和段比例 %",
         turnStartX: "X 轴开始转向位置 m",
         stopY: "Y 轴停车位置 m",
-        maxArticulation: "最大折角 °",
+        maxArticulation: "最大连结折角 °",
+        calculationDetail: "计算精细度 %",
         sweepSamples: "转弯采样帧数",
         gridResolution: "平面采样精度",
         heightSlices: "高度切片数",
+        counterTraffic: "包含对向来车扫掠",
         displaySection: "显示",
         smoothVolume: "平滑体积模式",
         showRemaining: "显示剩余体积",
@@ -1434,11 +1972,17 @@
         volumeLibrary: "剩余体积库",
         saveCurrent: "保存当前",
         overlapAnalysis: "叠加分析",
+        exportReport: "导出报告",
+        reportNoSaved: "请先保存至少一个剩余体积。",
         remainingViewerTitle: "仅显示剩余体积，可旋转、平移、缩放",
         close: "关闭",
         previewTitle: "体积预览",
-        heatmapTitle: "剩余体积叠加热力图",
+        heatmapTitle: "剩余体积叠加密度图",
         exportHeatmap: "导出阈值STL",
+        lockHeatmapView: "锁定视角",
+        unlockHeatmapView: "取消锁定",
+        heatmapDensityLow: "低重叠：混合白点",
+        heatmapDensityHigh: "全部重叠：蓝色",
         thresholdPrefix: "导出重叠阈值：",
         noSaved: "还没有保存的剩余体积。",
         view: "查看",
@@ -1447,7 +1991,7 @@
         voxel: "体素",
         pose: "姿态",
         savedName: index => `体积${index}`,
-        heatmapTitleWithCount: count => `剩余体积叠加热力图 · ${count} 个方案`,
+        heatmapTitleWithCount: count => `剩余体积叠加密度图 · ${count} 个方案`,
         statusSmooth: "当前为平滑显示。",
         statusVoxel: "当前为体素显示。",
         pasteFirst: "请先粘贴车辆尺寸资料。",
@@ -1524,6 +2068,90 @@
       return label;
     }
 
+    const vehiclePresetGroups = {
+      wideFlatbed: { jp: "ワイドキャブ・平ボディ", cn: "宽体驾驶室与平板车" },
+      boxDelivery: { jp: "都市配送・アルミバン", cn: "城市配送与铝厢车" },
+      temperature: { jp: "低温物流・冷蔵冷凍", cn: "低温物流与冷藏冷冻" },
+      specialBody: { jp: "荷役・特殊架装", cn: "装卸与特殊改装车" },
+      international: { jp: "海外の実用参考車種", cn: "海外实用参考车型" }
+    };
+
+    function vehiclePresetName(preset) {
+      return currentLanguage === "jp" ? preset.nameJp : preset.nameCn;
+    }
+
+    function renderVehiclePresetOptions() {
+      const select = document.querySelector("#vehiclePresetSelect");
+      if (!select) return;
+      const selected = select.value || select.dataset.restoreValue || "";
+      select.innerHTML = "";
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "";
+      select.appendChild(placeholder);
+      for (const [groupKey, group] of Object.entries(vehiclePresetGroups)) {
+        const presets = vehiclePresets.filter(preset => preset.group === groupKey);
+        if (!presets.length) continue;
+        const optgroup = document.createElement("optgroup");
+        optgroup.label = currentLanguage === "jp" ? group.jp : group.cn;
+        for (const preset of presets) {
+          const option = document.createElement("option");
+          option.value = preset.id;
+          option.textContent = vehiclePresetName(preset);
+          optgroup.appendChild(option);
+        }
+        select.appendChild(optgroup);
+      }
+      select.value = selected;
+      delete select.dataset.restoreValue;
+      select.title = currentLanguage === "jp" ? "市場でよく使われる車種から選択" : "从装卸市场常用车型中选择";
+      select.setAttribute("aria-label", select.title);
+    }
+
+    function findVehiclePreset(query = "") {
+      const select = document.querySelector("#vehiclePresetSelect");
+      const selected = vehiclePresets.find(preset => preset.id === select?.value);
+      if (selected && (!query || selected.query === query)) return selected;
+      const normalized = query.trim().toLowerCase();
+      if (!normalized) return null;
+      return vehiclePresets.find(preset => [
+        preset.query,
+        preset.nameJp,
+        preset.nameCn
+      ].some(label => label.toLowerCase() === normalized)) || null;
+    }
+
+    function applyVehiclePreset(preset, status) {
+      for (const [key, value] of Object.entries(preset.values)) {
+        if (typeof value === "boolean") {
+          state[key] = value;
+          const input = document.querySelector(`#${key}`);
+          if (input) input.checked = value;
+        } else {
+          if (!setControlValue(key, value)) state[key] = value;
+        }
+      }
+      const select = document.querySelector("#vehiclePresetSelect");
+      const search = document.querySelector("#vehicleSearchQuery");
+      if (select) select.value = preset.id;
+      if (search) search.value = preset.query;
+      updateScene();
+      const note = preset.estimatedBody
+        ? (currentLanguage === "jp" ? "。箱体は一般的な架装寸法の参考値です。" : "。箱体采用常见改装尺寸参考值。")
+        : preset.integralVan
+          ? (currentLanguage === "jp" ? "。荷室内寸は資料値、外部車体の分割は表示用の近似です。" : "。货室内部尺寸来自资料，外部车身分段为展示与扫掠近似值。")
+          : "";
+      status.textContent = currentLanguage === "jp"
+        ? `内蔵車種を反映しました：${vehiclePresetName(preset)}${note} `
+        : `已同步内置车型：${vehiclePresetName(preset)}${note} `;
+      const link = document.createElement("a");
+      link.href = preset.source;
+      link.target = "_blank";
+      link.rel = "noopener noreferrer";
+      link.textContent = currentLanguage === "jp" ? "参照元" : "查看来源";
+      status.appendChild(link);
+    }
+
     function applyLanguage(language = currentLanguage) {
       currentLanguage = language;
       document.documentElement.lang = currentLanguage === "jp" ? "ja" : "zh-CN";
@@ -1553,7 +2181,7 @@
         const label = document.querySelector(`.control[data-param="${key}"] label`);
         if (label) label.innerHTML = termHTML(tr(fieldKeys[key]));
       }
-      for (const key of ["roadWidthIn", "roadWidthOut", "chamferX", "chamferY", "prismHeight", "progress", "turnRadius", "turnStartX", "stopY", "maxArticulation", "sweepSamples", "gridResolution", "heightSlices"]) {
+      for (const key of ["roadWidthIn", "roadWidthOut", "chamferX", "chamferY", "prismHeight", "progress", "turnRadius", "entryLaneOffset", "turnStartX", "stopY", "calculationDetail"]) {
         const label = document.querySelector(`.control[data-param="${key}"] label`);
         if (label) label.innerHTML = termHTML(tr(key));
       }
@@ -1562,9 +2190,11 @@
       setHTML('label[for="showRemaining"]', "showRemaining");
       setHTML('label[for="showIntersection"]', "showIntersection");
       setHTML('label[for="showSwept"]', "showSwept");
+      setHTML('label[for="counterTraffic"]', "counterTraffic");
 
       setPlaceholder("#vehicleSearchQuery", "vehicleSearchPlaceholder");
       setPlaceholder("#vehicleDimensionText", "dimensionPlaceholder");
+      renderVehiclePresetOptions();
       setText("#vehicleSearchButton", "match");
       setText("#parseDimensionButton", "parseText");
       const lookupStatus = document.querySelector("#vehicleLookupStatus");
@@ -1591,6 +2221,7 @@
       }
       setText("#saveRemainingVolume span", "saveCurrent");
       setText("#openHeatmapViewer span", "overlapAnalysis");
+      setText("#exportA4Report span", "exportReport");
       setHTML("#remainingViewerTitle", "remainingViewerTitle");
       setText("#closeRemainingViewer", "close");
       setText("#resetRemainingCamera", "resetView");
@@ -1599,9 +2230,13 @@
       setHTML("#heatmapViewerTitle", "heatmapTitle");
       setText("#exportHeatmapStl", "exportHeatmap");
       setText("#closeHeatmapViewer", "close");
+      setText("#heatmapDensityLow", "heatmapDensityLow");
+      setText("#heatmapDensityHigh", "heatmapDensityHigh");
+      syncHeatmapLockButton();
       updateHeatmapThresholdLabel();
       syncSmoothModeControls();
       renderSavedVolumeList();
+      queueWorkspaceSave();
     }
 
     const canvas = document.querySelector("#scene");
@@ -1761,6 +2396,118 @@
     let latestSmoothResult = null;
     let savedVolumeSerial = 1;
     const savedVolumes = [];
+    const savedVolumeColors = [
+      "#b7ff2f", "#18b7aa", "#ff756b", "#4c7dff", "#f5c242",
+      "#9b7bff", "#37c876", "#ff9c5a", "#67b7dc", "#e965a5",
+      "#8bd450", "#5667d8", "#f08b72", "#35a7a0", "#d3a93b",
+      "#785ad8", "#2f9d68", "#d97845", "#4e91b8", "#c44f86"
+    ];
+    const workspaceStorageKey = "truck-turn-volume-workspace-v1";
+    const volumeLibraryStorageKey = "truck-turn-volume-library-v1";
+    let workspaceSaveTimer = null;
+
+    function persistWorkspace() {
+      try {
+        localStorage.setItem(workspaceStorageKey, JSON.stringify({
+          version: 3,
+          language: currentLanguage,
+          state,
+          form: {
+            vehicleSearchQuery: document.querySelector("#vehicleSearchQuery")?.value || "",
+            vehicleDimensionText: document.querySelector("#vehicleDimensionText")?.value || "",
+            vehiclePresetId: document.querySelector("#vehiclePresetSelect")?.value || ""
+          },
+          heatmapView: lockedHeatmapView
+        }));
+      } catch (error) {
+        console.warn("Unable to save workspace settings.", error);
+      }
+    }
+
+    function queueWorkspaceSave() {
+      window.clearTimeout(workspaceSaveTimer);
+      workspaceSaveTimer = window.setTimeout(persistWorkspace, 240);
+    }
+
+    function persistVolumeLibrary() {
+      try {
+        localStorage.setItem(volumeLibraryStorageKey, JSON.stringify({
+          version: 2,
+          serial: savedVolumeSerial,
+          volumes: savedVolumes.map(item => ({
+            id: item.id,
+            name: item.name,
+            color: item.color,
+            created: item.created,
+            sourceState: item.result.sourceState
+          }))
+        }));
+      } catch (error) {
+        console.warn("Unable to save the remaining-volume library.", error);
+      }
+    }
+
+    function computeSavedResultFromState(sourceState) {
+      const activeState = { ...state };
+      try {
+        Object.assign(state, { entryLaneOffset: 0 }, sourceState);
+        return cloneVoxelResult(computeVoxelResult());
+      } finally {
+        Object.assign(state, activeState);
+      }
+    }
+
+    function restoreLocalMemory() {
+      try {
+        const workspace = JSON.parse(localStorage.getItem(workspaceStorageKey) || "null");
+        if (workspace?.state) {
+          for (const [key, value] of Object.entries(workspace.state)) {
+            if (!(key in state)) continue;
+            if (typeof state[key] === "number" && Number.isFinite(Number(value))) state[key] = Number(value);
+            if (typeof state[key] === "boolean" && typeof value === "boolean") state[key] = value;
+          }
+        }
+        if (workspace?.language === "jp" || workspace?.language === "cn") {
+          currentLanguage = workspace.language;
+        }
+        if (isValidHeatmapCameraView(workspace?.heatmapView)) {
+          lockedHeatmapView = workspace.heatmapView;
+        }
+        if (workspace?.form) {
+          const searchInput = document.querySelector("#vehicleSearchQuery");
+          const dimensionText = document.querySelector("#vehicleDimensionText");
+          const presetSelect = document.querySelector("#vehiclePresetSelect");
+          if (searchInput) searchInput.value = workspace.form.vehicleSearchQuery || "";
+          if (dimensionText) dimensionText.value = workspace.form.vehicleDimensionText || "";
+          if (presetSelect) presetSelect.dataset.restoreValue = workspace.form.vehiclePresetId || "";
+          const restoredPreset = vehiclePresets.find(preset => preset.id === workspace.form.vehiclePresetId);
+          if ((workspace.version || 1) < 3 && restoredPreset) {
+            state.rigidBody = restoredPreset.values.rigidBody;
+            state.maxArticulation = restoredPreset.values.maxArticulation;
+          }
+        }
+      } catch (error) {
+        console.warn("Unable to restore workspace settings.", error);
+      }
+
+      try {
+        const library = JSON.parse(localStorage.getItem(volumeLibraryStorageKey) || "null");
+        if (!Array.isArray(library?.volumes)) return;
+        for (const item of library.volumes.slice(0, savedVolumeLimit)) {
+          if (!item?.sourceState) continue;
+          savedVolumes.push({
+            id: item.id,
+            name: item.name,
+            color: item.color,
+            created: item.created,
+            result: computeSavedResultFromState(item.sourceState)
+          });
+        }
+        savedVolumeSerial = Math.max(Number(library.serial) || 1, savedVolumes.length + 1);
+      } catch (error) {
+        console.warn("Unable to restore the remaining-volume library.", error);
+      }
+    }
 
     const savedVolumeViewer = {
       root: document.querySelector("#savedVolumeViewer"),
@@ -1798,6 +2545,7 @@
       closeButton: document.querySelector("#closeHeatmapViewer"),
       openButton: document.querySelector("#openHeatmapViewer"),
       exportButton: document.querySelector("#exportHeatmapStl"),
+      lockButton: document.querySelector("#lockHeatmapView"),
       threshold: document.querySelector("#heatmapThreshold"),
       thresholdLabel: document.querySelector("#heatmapThresholdLabel"),
       title: document.querySelector("#heatmapViewerTitle"),
@@ -1817,6 +2565,7 @@
     heatmapSun.position.set(8, 12, 9);
     heatmapScene.add(heatmapSun);
     let latestHeatmap = null;
+    let lockedHeatmapView = null;
 
     function topViewTarget() {
       return new THREE.Vector3(-0.25, 0, 1.85);
@@ -1884,7 +2633,10 @@
       while (group.children.length) {
         const child = group.children.pop();
         if (child.geometry) child.geometry.dispose();
-        if (disposeMaterials && child.material?.dispose) child.material.dispose();
+        if (disposeMaterials && child.material?.dispose) {
+          child.material.map?.dispose?.();
+          child.material.dispose();
+        }
       }
     }
 
@@ -1895,9 +2647,9 @@
       const radius = Math.max(size.x, size.y, size.z, 1);
       controlsToFit.target.copy(center);
       cameraToFit.position.set(
-        center.x + radius * 1.45,
-        center.y + radius * 1.15,
-        center.z + radius * 1.45
+        center.x - radius * 1.55,
+        center.y + radius * 1.12,
+        center.z - radius * 1.38
       );
       cameraToFit.near = Math.max(0.01, radius / 100);
       cameraToFit.far = Math.max(120, radius * 14);
@@ -1912,9 +2664,9 @@
       const radius = Math.max(size.x, size.y, size.z, 1);
       remainingControls.target.copy(center);
       remainingCamera.position.set(
-        center.x + radius * 1.45,
-        center.y + radius * 1.15,
-        center.z + radius * 1.45
+        center.x - radius * 1.55,
+        center.y + radius * 1.12,
+        center.z - radius * 1.38
       );
       remainingCamera.near = Math.max(0.01, radius / 100);
       remainingCamera.far = Math.max(80, radius * 12);
@@ -2009,9 +2761,22 @@
         totalVolume: result.totalVolume,
         cutVolume: result.cutVolume,
         remainVolume: result.remainVolume,
+        remainRatio: result.totalVolume > 0 ? result.remainVolume / result.totalVolume * 100 : 0,
         chamferX: state.chamferX,
         chamferY: state.chamferY,
-        prismHeight: state.prismHeight
+        prismHeight: state.prismHeight,
+        sourceState: { ...state },
+        vehicle: {
+          cabLength: state.cabLength,
+          cabWidth: state.cabWidth,
+          cabHeight: state.cabHeight,
+          trailerLength: state.trailerLength,
+          trailerWidth: state.trailerWidth,
+          cargoLength: state.cargoEnabled ? state.cargoLength : 0,
+          cargoHeight: state.cargoEnabled ? state.cargoHeight : 0,
+          turnRadius: state.turnRadius,
+          counterTraffic: state.counterTraffic
+        }
       };
     }
 
@@ -2025,9 +2790,11 @@
       const list = document.querySelector("#savedVolumeList");
       const saveButton = document.querySelector("#saveRemainingVolume");
       const heatButton = document.querySelector("#openHeatmapViewer");
+      const reportButton = document.querySelector("#exportA4Report");
       count.textContent = `${savedVolumes.length}/${savedVolumeLimit}`;
       saveButton.disabled = savedVolumes.length >= savedVolumeLimit;
       heatButton.disabled = savedVolumes.length === 0;
+      reportButton.disabled = savedVolumes.length === 0;
       list.innerHTML = "";
 
       if (!savedVolumes.length) {
@@ -2043,7 +2810,11 @@
         details.className = "saved-volume";
 
         const summary = document.createElement("summary");
+        const swatch = document.createElement("i");
+        swatch.className = "saved-volume__swatch";
+        swatch.style.background = item.color;
         summary.textContent = `${item.name} · ${item.result.remainVolume.toFixed(1)} m³`;
+        summary.prepend(swatch);
         details.appendChild(summary);
 
         const content = document.createElement("div");
@@ -2055,6 +2826,7 @@
         input.setAttribute("aria-label", tr("rename"));
         input.addEventListener("change", () => {
           item.name = input.value.trim() || item.name;
+          persistVolumeLibrary();
           renderSavedVolumeList();
           if (savedVolumeViewer.activeId === item.id) savedVolumeViewer.title.textContent = item.name;
         });
@@ -2080,6 +2852,7 @@
           if (index >= 0) savedVolumes.splice(index, 1);
           if (savedVolumeViewer.activeId === item.id) closeSavedVolumeViewer();
           latestHeatmap = null;
+          persistVolumeLibrary();
           renderSavedVolumeList();
           refreshHeatmapViewer(true);
         });
@@ -2098,10 +2871,12 @@
       savedVolumes.push({
         id,
         name: tr("savedName", savedVolumeSerial++),
+        color: savedVolumeColors[savedVolumes.length % savedVolumeColors.length],
         result: snapshot,
         created: new Date().toLocaleTimeString(currentLanguage === "jp" ? "ja-JP" : "zh-CN", { hour: "2-digit", minute: "2-digit" })
       });
       latestHeatmap = null;
+      persistVolumeLibrary();
       renderSavedVolumeList();
       refreshHeatmapViewer(true);
     }
@@ -2144,11 +2919,117 @@
       return 1 + Math.round(level / 10 * Math.max(0, total - 1));
     }
 
-    function heatmapColor(count, maxCount) {
-      const t = maxCount <= 1 ? 0 : (count - 1) / (maxCount - 1);
-      const color = new THREE.Color(0xb8ff2f);
-      color.lerp(new THREE.Color(0xff625a), t);
-      return color;
+    function heatmapDensityStyle(count, maxCount) {
+      const ratio = maxCount <= 1 ? 1 : count / maxCount;
+      const whiteMix = 1 - ratio;
+      const color = new THREE.Color(0x2a74e0).lerp(new THREE.Color(0xffffff), whiteMix * 0.82);
+      const opacity = THREE.MathUtils.lerp(0.08, 0.7, ratio);
+      return { color, opacity, whiteMix };
+    }
+
+    function isValidHeatmapCameraView(view) {
+      return Array.isArray(view?.position)
+        && view.position.length === 3
+        && view.position.every(Number.isFinite)
+        && Array.isArray(view?.target)
+        && view.target.length === 3
+        && view.target.every(Number.isFinite)
+        && Number.isFinite(view?.fov);
+    }
+
+    function captureHeatmapCameraView() {
+      return {
+        position: heatmapCamera.position.toArray(),
+        target: heatmapControls.target.toArray(),
+        fov: heatmapCamera.fov
+      };
+    }
+
+    function applyHeatmapCameraView(view, cameraToApply = heatmapCamera, controlsToApply = heatmapControls) {
+      if (!isValidHeatmapCameraView(view)) return false;
+      cameraToApply.position.fromArray(view.position);
+      cameraToApply.fov = view.fov;
+      cameraToApply.updateProjectionMatrix();
+      if (controlsToApply) {
+        controlsToApply.target.fromArray(view.target);
+        controlsToApply.update();
+      } else {
+        cameraToApply.lookAt(new THREE.Vector3().fromArray(view.target));
+      }
+      return true;
+    }
+
+    function syncHeatmapLockButton() {
+      const button = heatmapViewer.lockButton;
+      if (!button) return;
+      const isLocked = Boolean(lockedHeatmapView);
+      button.classList.toggle("is-active", isLocked);
+      button.setAttribute("aria-pressed", String(isLocked));
+      const label = button.querySelector("span");
+      if (label) label.textContent = tr(isLocked ? "unlockHeatmapView" : "lockHeatmapView");
+    }
+
+    function toggleHeatmapViewLock() {
+      lockedHeatmapView = lockedHeatmapView ? null : captureHeatmapCameraView();
+      syncHeatmapLockButton();
+      queueWorkspaceSave();
+    }
+
+    function heatmapWhiteDotTexture(whiteMix) {
+      const size = 32;
+      const textureCanvas = document.createElement("canvas");
+      textureCanvas.width = size;
+      textureCanvas.height = size;
+      const context = textureCanvas.getContext("2d");
+      context.clearRect(0, 0, size, size);
+      const dotCount = Math.round(whiteMix * 18);
+      context.fillStyle = `rgba(255,255,255,${THREE.MathUtils.lerp(0.24, 0.9, whiteMix)})`;
+      for (let index = 0; index < dotCount; index++) {
+        const x = (index * 11 + 5) % size;
+        const y = (index * 17 + 9) % size;
+        context.fillRect(x, y, 2, 2);
+      }
+      const texture = new THREE.CanvasTexture(textureCanvas);
+      texture.wrapS = THREE.RepeatWrapping;
+      texture.wrapT = THREE.RepeatWrapping;
+      texture.repeat.set(4, 4);
+      return texture;
+    }
+
+    function addHeatmapDensityMeshes(group, heatmap) {
+      let fitMesh = null;
+      for (let count = 1; count <= heatmap.maxCount; count++) {
+        const cells = heatmap.cells.filter(cell => cell.count === count);
+        if (!cells.length) continue;
+        const style = heatmapDensityStyle(count, heatmap.maxCount);
+        const material = new THREE.MeshBasicMaterial({
+          color: style.color,
+          transparent: true,
+          opacity: style.opacity,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        const mesh = voxelSurfaceMesh(cells, heatmap.dx, heatmap.dy, heatmap.dz, material);
+        group.add(mesh);
+        if (style.whiteMix > 0.001) {
+          const dots = mesh.clone();
+          dots.material = new THREE.MeshBasicMaterial({
+            color: 0xffffff,
+            map: heatmapWhiteDotTexture(style.whiteMix),
+            transparent: true,
+            opacity: THREE.MathUtils.lerp(0.08, 0.44, style.whiteMix),
+            depthWrite: false,
+            side: THREE.DoubleSide,
+            polygonOffset: true,
+            polygonOffsetFactor: -1,
+            polygonOffsetUnits: -1
+          });
+          dots.renderOrder = 10 + count;
+          group.add(dots);
+        }
+        if (!fitMesh) fitMesh = mesh;
+      }
+      return fitMesh;
     }
 
     function aggregateSavedVolumes() {
@@ -2217,23 +3098,11 @@
       if (!latestHeatmap) return;
       heatmapViewer.title.textContent = tr("heatmapTitleWithCount", savedVolumes.length);
 
-      let fitMesh = null;
-      for (let count = 1; count <= latestHeatmap.maxCount; count++) {
-        const cells = latestHeatmap.cells.filter(cell => cell.count === count);
-        if (!cells.length) continue;
-        const material = new THREE.MeshBasicMaterial({
-          color: heatmapColor(count, latestHeatmap.maxCount),
-          transparent: true,
-          opacity: 0.28 + 0.36 * (count / latestHeatmap.maxCount),
-          depthWrite: false,
-          side: THREE.DoubleSide
-        });
-        const mesh = voxelSurfaceMesh(cells, latestHeatmap.dx, latestHeatmap.dy, latestHeatmap.dz, material);
-        heatmapGroup.add(mesh);
-        if (!fitMesh) fitMesh = mesh;
-      }
+      const fitMesh = addHeatmapDensityMeshes(heatmapGroup, latestHeatmap);
 
-      if (resetView && fitMesh) fitCameraToObject(heatmapGroup, heatmapCamera, heatmapControls);
+      if (resetView && fitMesh && !applyHeatmapCameraView(lockedHeatmapView)) {
+        fitCameraToObject(heatmapGroup, heatmapCamera, heatmapControls);
+      }
     }
 
     function exportHeatmapStl() {
@@ -2246,11 +3115,345 @@
       exportTrianglesAsStl(triangles, `remaining_overlap_threshold_${threshold}.stl`, `remaining overlap threshold ${threshold}, units: meters`);
     }
 
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function reportCopy() {
+      return currentLanguage === "jp"
+        ? {
+            title: "トラッ角 残余体積重ね合わせ解析",
+            subtitle: "保存された残余体積モデルの比較・重ね合わせレポート",
+            generated: "作成日時",
+            count: "比較モデル数",
+            figure: "残余体積の重ね合わせ 3D 表示",
+            viewMain: "固定視点",
+            viewRight: "右側視点",
+            viewLeft: "左側視点",
+            viewBottom: "下面視点",
+            overlapLow: "低重複：白点混合",
+            overlapHigh: "全案重複：青",
+            list: "保存モデル一覧",
+            name: "名称",
+            ratio: "残余率",
+            color: "代表色",
+            vehicle: "車両・旋回条件",
+            tractor: "トラクタ",
+            trailer: "トレーラー",
+            cargo: "荷箱",
+            radius: "旋回半径",
+            counter: "対向車両",
+            yes: "あり",
+            no: "なし",
+            none: "なし",
+            footer: "トラッ角解析 / 残余体積比較レポート"
+          }
+        : {
+            title: "トラッ角 剩余体积叠加分析",
+            subtitle: "已保存剩余体积模型的比较与叠加报告",
+            generated: "生成时间",
+            count: "比较模型数",
+            figure: "剩余体积叠加 3D 视图",
+            viewMain: "锁定视角",
+            viewRight: "右侧视角",
+            viewLeft: "左侧视角",
+            viewBottom: "底视图",
+            overlapLow: "低重叠：混合白点",
+            overlapHigh: "全部重叠：蓝色",
+            list: "已保存模型清单",
+            name: "名称",
+            ratio: "剩余率",
+            color: "代表色",
+            vehicle: "车辆与转弯条件",
+            tractor: "车头",
+            trailer: "挂车",
+            cargo: "货箱",
+            radius: "转弯半径",
+            counter: "对向来车",
+            yes: "包含",
+            no: "不包含",
+            none: "无",
+            footer: "トラッ角解析 / 剩余体积比较报告"
+          };
+    }
+
+    function reportVehicleText(vehicle, copy) {
+      if (!vehicle) return "";
+      const cargo = vehicle.cargoLength > 0
+        ? `${vehicle.cargoLength.toFixed(1)}×${vehicle.cargoHeight.toFixed(1)}m`
+        : copy.none;
+      return [
+        `${copy.tractor} ${vehicle.cabLength.toFixed(1)}×${vehicle.cabWidth.toFixed(1)}×${vehicle.cabHeight.toFixed(1)}m`,
+        `${copy.trailer} ${vehicle.trailerLength.toFixed(1)}×${vehicle.trailerWidth.toFixed(1)}m`,
+        `${copy.cargo} ${cargo}`,
+        `${copy.radius} ${vehicle.turnRadius.toFixed(1)}m`,
+        `${copy.counter} ${vehicle.counterTraffic ? copy.yes : copy.no}`
+      ].join(" / ");
+    }
+
+    function renderReportHeatmapImages() {
+      const heatmap = aggregateSavedVolumes();
+      if (!heatmap) return null;
+      const reportCanvas = document.createElement("canvas");
+      reportCanvas.width = 1200;
+      reportCanvas.height = 680;
+      const reportRenderer = new THREE.WebGLRenderer({
+        canvas: reportCanvas,
+        antialias: true,
+        alpha: true,
+        preserveDrawingBuffer: true
+      });
+      reportRenderer.setPixelRatio(1);
+      reportRenderer.setSize(reportCanvas.width, reportCanvas.height, false);
+      reportRenderer.setClearColor(0x000000, 0);
+
+      const reportScene = new THREE.Scene();
+      const reportCamera = new THREE.PerspectiveCamera(38, reportCanvas.width / reportCanvas.height, 0.05, 240);
+      const reportGroup = new THREE.Group();
+      reportScene.add(reportGroup);
+      reportScene.add(new THREE.HemisphereLight(0xffffff, 0xcac6bc, 2));
+      const reportSun = new THREE.DirectionalLight(0xffffff, 2.6);
+      reportSun.position.set(-9, 13, -10);
+      reportScene.add(reportSun);
+
+      addHeatmapDensityMeshes(reportGroup, heatmap);
+
+      const box = new THREE.Box3().setFromObject(reportGroup);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+      const radius = Math.max(size.x, size.y, size.z, 1);
+      if (!applyHeatmapCameraView(lockedHeatmapView, reportCamera, null)) {
+        reportCamera.position.set(
+          center.x - radius * 1.58,
+          center.y + radius * 1.15,
+          center.z - radius * 1.42
+        );
+        reportCamera.lookAt(center);
+      }
+
+      const mainPosition = reportCamera.position.clone();
+      const mainTarget = isValidHeatmapCameraView(lockedHeatmapView)
+        ? new THREE.Vector3().fromArray(lockedHeatmapView.target)
+        : center.clone();
+      const mainOffset = mainPosition.clone().sub(mainTarget);
+      const distance = Math.max(mainOffset.length(), radius * 2.2);
+      const yAxis = new THREE.Vector3(0, 1, 0);
+      const capture = (position, target = mainTarget, up = new THREE.Vector3(0, 1, 0)) => {
+        reportCamera.position.copy(position);
+        reportCamera.up.copy(up);
+        reportCamera.lookAt(target);
+        reportRenderer.render(reportScene, reportCamera);
+        return reportCanvas.toDataURL("image/png");
+      };
+      const images = {
+        main: capture(mainPosition),
+        right: capture(mainTarget.clone().add(mainOffset.clone().applyAxisAngle(yAxis, Math.PI / 2))),
+        left: capture(mainTarget.clone().add(mainOffset.clone().applyAxisAngle(yAxis, -Math.PI / 2))),
+        bottom: capture(mainTarget.clone().add(new THREE.Vector3(0, -distance, 0.001)), mainTarget, new THREE.Vector3(0, 0, 1))
+      };
+
+      for (const mesh of reportGroup.children) {
+        mesh.geometry?.dispose();
+        mesh.material?.map?.dispose?.();
+        mesh.material?.dispose();
+      }
+      reportRenderer.dispose();
+      return images;
+    }
+
+    function exportA4Report() {
+      if (!savedVolumes.length) {
+        alert(tr("reportNoSaved"));
+        return;
+      }
+
+      const copy = reportCopy();
+      const images = renderReportHeatmapImages();
+      const locale = currentLanguage === "jp" ? "ja-JP" : "zh-CN";
+      const generated = new Date().toLocaleString(locale);
+      const rows = savedVolumes.map(item => {
+        const ratio = item.result.remainRatio ?? (item.result.totalVolume > 0 ? item.result.remainVolume / item.result.totalVolume * 100 : 0);
+        return `
+          <tr>
+            <td class="report-name"><i style="background:${item.color}"></i>${escapeHtml(item.name)}</td>
+            <td class="report-ratio">${ratio.toFixed(1)}%</td>
+            <td class="report-color">${escapeHtml(item.color)}</td>
+            <td>${escapeHtml(reportVehicleText(item.result.vehicle, copy))}</td>
+          </tr>`;
+      }).join("");
+      const reportWindow = window.open("", "_blank", "width=980,height=1280");
+      if (!reportWindow) return;
+      reportWindow.document.write(`<!doctype html>
+        <html lang="${currentLanguage === "jp" ? "ja" : "zh-CN"}">
+        <head>
+          <meta charset="utf-8">
+          <title>${escapeHtml(copy.title)}</title>
+          <style>
+            @page { size: A4 portrait; margin: 9mm; }
+            * { box-sizing: border-box; }
+            body { width: 192mm; margin: 0 auto; color: #111721; font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif; }
+            header { display: flex; justify-content: space-between; gap: 12mm; padding: 1mm 0 4mm; border-bottom: 1px solid #b7ff2f; }
+            h1 { margin: 0 0 1mm; font-size: 19px; }
+            p { margin: 0; color: #66717e; font-size: 9px; line-height: 1.45; }
+            .meta { display: grid; gap: 1mm; min-width: 45mm; font-size: 8px; color: #52606c; text-align: right; }
+            .figure { margin-top: 4mm; }
+            h2 { margin: 0 0 2mm; font-size: 12px; }
+            .visual-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, .75fr); grid-template-rows: repeat(3, 35mm); gap: 2mm; }
+            .visual-card { position: relative; overflow: hidden; }
+            .visual-card:first-child { grid-row: 1 / 4; }
+            .visual-card img { display: block; width: 100%; height: 100%; object-fit: contain; }
+            .visual-card b { position: absolute; top: 2mm; left: 2mm; padding: 1mm 1.7mm; border-radius: 99px; background: rgba(255,255,255,.84); color: #33404b; font-size: 7px; line-height: 1; }
+            .heat-scale { display: grid; grid-template-columns: auto minmax(42mm, 1fr) auto; gap: 2.5mm; align-items: center; margin-top: 2mm; color: #66717e; font-size: 8px; }
+            .heat-scale i { display: block; height: 3mm; border: 1px solid #d4dce2; border-radius: 99px; background: radial-gradient(circle, rgba(255,255,255,.92) 0 24%, transparent 26%) 0 0 / 2.2mm 2.2mm, linear-gradient(90deg, rgba(255,255,255,.86), rgba(42,116,224,.96)); }
+            .list { margin-top: 4mm; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 6.3px; }
+            th, td { padding: .7mm .9mm; border-bottom: 1px solid #dde3e7; text-align: left; vertical-align: middle; line-height: 1.18; }
+            th { background: #f3f6f8; color: #4d5965; font-weight: 700; }
+            .report-name { width: 27mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .report-name i { display: inline-block; width: 2.5mm; height: 2.5mm; margin-right: 1.5mm; border: 1px solid rgba(17,23,33,.18); border-radius: 50%; vertical-align: -0.3mm; }
+            .report-ratio { width: 15mm; font-weight: 800; }
+            .report-color { width: 19mm; color: #66717e; font-family: Consolas, monospace; font-size: 6.7px; }
+            footer { margin-top: 3mm; padding-top: 2mm; border-top: 1px solid #dde3e7; color: #7b8792; font-size: 7px; text-align: right; }
+          </style>
+        </head>
+        <body>
+          <header>
+            <div><h1>${escapeHtml(copy.title)}</h1><p>${escapeHtml(copy.subtitle)}</p></div>
+            <div class="meta"><span>${escapeHtml(copy.generated)} ${escapeHtml(generated)}</span><span>${escapeHtml(copy.count)} ${savedVolumes.length}/${savedVolumeLimit}</span></div>
+          </header>
+          <section class="figure">
+            <h2>${escapeHtml(copy.figure)}</h2>
+            <div class="visual-grid">
+              <div class="visual-card"><img src="${images.main}" alt="${escapeHtml(copy.viewMain)}"><b>${escapeHtml(copy.viewMain)}</b></div>
+              <div class="visual-card"><img src="${images.right}" alt="${escapeHtml(copy.viewRight)}"><b>${escapeHtml(copy.viewRight)}</b></div>
+              <div class="visual-card"><img src="${images.left}" alt="${escapeHtml(copy.viewLeft)}"><b>${escapeHtml(copy.viewLeft)}</b></div>
+              <div class="visual-card"><img src="${images.bottom}" alt="${escapeHtml(copy.viewBottom)}"><b>${escapeHtml(copy.viewBottom)}</b></div>
+            </div>
+            <div class="heat-scale"><span>${escapeHtml(copy.overlapLow)}</span><i></i><span>${escapeHtml(copy.overlapHigh)}</span></div>
+          </section>
+          <section class="list">
+            <h2>${escapeHtml(copy.list)}</h2>
+            <table>
+              <thead><tr><th>${escapeHtml(copy.name)}</th><th>${escapeHtml(copy.ratio)}</th><th>${escapeHtml(copy.color)}</th><th>${escapeHtml(copy.vehicle)}</th></tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </section>
+          <footer>${escapeHtml(copy.footer)}</footer>
+          <script>window.addEventListener("load", () => setTimeout(() => window.print(), 250));<\/script>
+        </body>
+        </html>`);
+      reportWindow.document.close();
+      reportWindow.focus();
+    }
+
     function makeBox(length, height, width, pose, baseY, material) {
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(length, height, width), material);
       mesh.position.set(pose.cx, baseY + height / 2, pose.cz);
       mesh.rotation.y = -pose.heading;
       return mesh;
+    }
+
+    function offsetPose(pose, longOffset = 0, lateralOffset = 0) {
+      const c = Math.cos(pose.heading);
+      const s = Math.sin(pose.heading);
+      return {
+        cx: pose.cx + c * longOffset - s * lateralOffset,
+        cz: pose.cz + s * longOffset + c * lateralOffset,
+        heading: pose.heading
+      };
+    }
+
+    function addVisualBox(group, basePose, length, height, width, longOffset, lateralOffset, baseY, material) {
+      group.add(makeBox(length, height, width, offsetPose(basePose, longOffset, lateralOffset), baseY, material));
+    }
+
+    function cabVisualGeometry(length, height, width) {
+      const windshieldSlope = Math.min(0.38, length * 0.24);
+      const bonnetHeight = Math.max(height * 0.58, height - 0.74);
+      const profile = new THREE.Shape();
+      profile.moveTo(-length / 2, 0);
+      profile.lineTo(length / 2, 0);
+      profile.lineTo(length / 2, bonnetHeight);
+      profile.lineTo(length / 2 - windshieldSlope, height);
+      profile.lineTo(-length / 2, height);
+      profile.closePath();
+      const geometry = new THREE.ExtrudeGeometry(profile, {
+        depth: width,
+        bevelEnabled: false,
+        steps: 1
+      });
+      geometry.translate(0, 0, -width / 2);
+      geometry.computeVertexNormals();
+      return geometry;
+    }
+
+    function makeCabVisual(pose) {
+      const mesh = new THREE.Mesh(
+        cabVisualGeometry(cabLength(), state.cabHeight, outerWidth(state.cabWidth)),
+        materials.cab
+      );
+      mesh.position.set(pose.cx, state.chassisHeight, pose.cz);
+      mesh.rotation.y = -pose.heading;
+      return mesh;
+    }
+
+    function addCabVisualDetails(group, pose) {
+      const width = outerWidth(state.cabWidth);
+      const bumperLength = Math.min(0.14, cabLength() * 0.08);
+      addVisualBox(
+        group,
+        pose,
+        bumperLength,
+        Math.min(0.15, state.chassisHeight * 0.35),
+        width + 0.06,
+        cabLength() / 2 - bumperLength / 2,
+        0,
+        Math.max(0.12, state.chassisHeight * 0.45),
+        materials.trailer
+      );
+    }
+
+    function addFlatbedVisualDetails(group, pose) {
+      const length = trailerLength();
+      const width = outerWidth(state.trailerWidth);
+      const railHeight = Math.min(0.28, Math.max(0.16, state.deckHeight * 1.15));
+      const railThickness = Math.min(0.08, Math.max(0.045, width * 0.035));
+      const baseY = state.chassisHeight + state.deckHeight;
+      for (const side of [-1, 1]) {
+        addVisualBox(group, pose, length, railHeight, railThickness, 0, side * (width - railThickness) / 2, baseY, materials.trailer);
+      }
+      addVisualBox(group, pose, railThickness, railHeight, width, -length / 2 + railThickness / 2, 0, baseY, materials.trailer);
+    }
+
+    function addCargoVisual(group, pose) {
+      const length = Math.min(state.cargoLength, trailerLength());
+      const width = outerWidth(state.trailerWidth);
+      const baseY = state.chassisHeight + state.deckHeight + state.cargoBaseOffset;
+      const cargoPoseVisual = cargoPose(pose);
+      group.add(makeBox(length, state.cargoHeight, width, cargoPoseVisual, baseY, materials.cargo));
+
+      const trim = Math.min(0.075, Math.max(0.04, width * 0.025));
+      addVisualBox(group, cargoPoseVisual, length + 0.04, trim, width + 0.05, 0, 0, baseY + state.cargoHeight, materials.cargo);
+      for (const longSide of [-1, 1]) {
+        for (const lateralSide of [-1, 1]) {
+          addVisualBox(
+            group,
+            cargoPoseVisual,
+            trim,
+            state.cargoHeight,
+            trim,
+            longSide * (length - trim) / 2,
+            lateralSide * (width - trim) / 2,
+            baseY,
+            materials.cargo
+          );
+        }
+      }
     }
 
     function makeSweptBox(length, height, width, pose, baseY) {
@@ -2292,29 +3495,127 @@
       return centerFromHitch(pose.hitch, pose.trailerHeading, state.cargoFrontOverhang - cargoLength / 2);
     }
 
+    let turnPathCache = null;
+
+    function rigidFrontAxleOffsetFromHitch() {
+      return state.hitchGap + Math.max(0.42, cabLength() - state.cabFrontOverhang);
+    }
+
+    function rigidRearAxleOffsetFromHitch() {
+      return -Math.max(0.52, trailerLength() - state.trailerRearOverhang);
+    }
+
+    function rigidVehicleWheelbase() {
+      return rigidFrontAxleOffsetFromHitch() - rigidRearAxleOffsetFromHitch();
+    }
+
+    function rigidHitchFromRearAxle(pathPoint) {
+      const offset = -rigidRearAxleOffsetFromHitch();
+      return {
+        x: pathPoint.hitch.x + Math.cos(pathPoint.cabHeading) * offset,
+        z: pathPoint.hitch.z + Math.sin(pathPoint.cabHeading) * offset
+      };
+    }
+
+    function effectiveTurnRadius() {
+      if (!isRigidVehicle()) return state.turnRadius;
+      const steeringAngle = THREE.MathUtils.degToRad(Math.max(1, state.maxSteeringAngle || 38));
+      const steeringLimitedRadius = rigidVehicleWheelbase() / Math.max(0.05, Math.tan(steeringAngle));
+      return Math.max(state.turnRadius, steeringLimitedRadius);
+    }
+
+    function smoothStep01(value) {
+      const t = THREE.MathUtils.clamp(value, 0, 1);
+      return t * t * (3 - 2 * t);
+    }
+
+    function turnCurvatureFactor(t, easeRatio) {
+      if (easeRatio <= 0.0001) return 1;
+      if (t < easeRatio) return smoothStep01(t / easeRatio);
+      if (t > 1 - easeRatio) return smoothStep01((1 - t) / easeRatio);
+      return 1;
+    }
+
+    function turnPath() {
+      const key = [
+        state.turnRadius,
+        state.maxSteeringAngle,
+        state.turnEaseRatio,
+        state.roadWidthIn,
+        state.entryLaneOffset,
+        state.turnStartX,
+        state.cabLength,
+        state.cabFrontOverhang,
+        state.trailerLength,
+        state.trailerRearOverhang,
+        state.hitchGap,
+        state.rigidBody
+      ].join("|");
+      if (turnPathCache?.key === key) return turnPathCache.path;
+
+      const radius = effectiveTurnRadius();
+      const easeRatio = THREE.MathUtils.clamp((state.turnEaseRatio || 0) / 100, 0, 0.45);
+      const curvatureIntegral = Math.max(0.55, 1 - easeRatio);
+      const curveLength = radius * Math.PI / 2 / curvatureIntegral;
+      const steps = 240;
+      const points = [{ distance: 0, x: 0, z: 0, heading: 0, curvature: 0 }];
+      let x = 0;
+      let z = 0;
+      let heading = 0;
+
+      for (let i = 1; i <= steps; i++) {
+        const previousDistance = (i - 1) / steps * curveLength;
+        const distance = i / steps * curveLength;
+        const ds = distance - previousDistance;
+        const t = (i - 0.5) / steps;
+        const curvature = turnCurvatureFactor(t, easeRatio) / radius;
+        const midpointHeading = heading + curvature * ds / 2;
+        x += Math.cos(midpointHeading) * ds;
+        z += Math.sin(midpointHeading) * ds;
+        heading += curvature * ds;
+        points.push({ distance, x, z, heading, curvature });
+      }
+
+      const zOffset = -state.roadWidthIn / 2 + state.entryLaneOffset;
+      for (const point of points) {
+        point.x += state.turnStartX;
+        point.z += zOffset;
+      }
+      const end = points[points.length - 1];
+      const path = { radius, easeRatio, curveLength, points, end };
+      turnPathCache = { key, path };
+      return path;
+    }
+
     function pathLength() {
-      return state.turnRadius * Math.PI / 2 + Math.max(0, state.stopY);
+      return turnPath().curveLength + Math.max(0, state.stopY);
     }
 
     function pathPointAtDistance(distance) {
-      const radius = state.turnRadius;
-      const arcLength = radius * Math.PI / 2;
-      if (distance <= arcLength) {
-        const angle = distance / radius;
+      const path = turnPath();
+      if (distance <= path.curveLength) {
+        const scaled = THREE.MathUtils.clamp(distance / path.curveLength, 0, 1) * (path.points.length - 1);
+        const low = Math.floor(scaled);
+        const high = Math.min(path.points.length - 1, low + 1);
+        const t = scaled - low;
+        const a = path.points[low];
+        const b = path.points[high];
         return {
           hitch: {
-            x: state.turnStartX + radius * Math.sin(angle),
-            z: -radius * Math.cos(angle)
+            x: THREE.MathUtils.lerp(a.x, b.x, t),
+            z: THREE.MathUtils.lerp(a.z, b.z, t)
           },
-          cabHeading: angle
+          cabHeading: THREE.MathUtils.lerp(a.heading, b.heading, t),
+          curvature: THREE.MathUtils.lerp(a.curvature, b.curvature, t)
         };
       }
       return {
         hitch: {
-          x: state.turnStartX + radius,
-          z: distance - arcLength
+          x: path.end.x,
+          z: path.end.z + distance - path.curveLength
         },
-        cabHeading: Math.PI / 2
+        cabHeading: Math.PI / 2,
+        curvature: 0
       };
     }
 
@@ -2323,12 +3624,20 @@
     function kinematicCacheKey() {
       return [
         state.turnRadius,
+        state.maxSteeringAngle,
+        state.turnEaseRatio,
         state.turnStartX,
         state.stopY,
+        state.roadWidthIn,
+        state.entryLaneOffset,
+        state.cabLength,
+        state.cabFrontOverhang,
+        state.hitchGap,
         state.trailerLength,
         state.trailerFrontOverhang,
         state.trailerRearOverhang,
         state.maxArticulation,
+        state.rigidBody,
         state.sweepSamples
       ].join("|");
     }
@@ -2349,7 +3658,9 @@
         const distance = progress * totalLength;
         const point = pathPointAtDistance(distance);
 
-        if (i > 0) {
+        if (isRigidVehicle()) {
+          trailerHeading = point.cabHeading;
+        } else if (i > 0) {
           const previousDistance = (i - 1) / steps * totalLength;
           const ds = distance - previousDistance;
           const midpoint = pathPointAtDistance((previousDistance + distance) / 2);
@@ -2363,9 +3674,15 @@
 
         samples.push({
           progress,
-          hitch: point.hitch,
+          hitch: isRigidVehicle() ? rigidHitchFromRearAxle(point) : point.hitch,
           cabHeading: point.cabHeading,
-          trailerHeading
+          trailerHeading,
+          steeringAngle: isRigidVehicle()
+            ? Math.min(
+                THREE.MathUtils.degToRad(state.maxSteeringAngle || 38),
+                Math.atan(rigidVehicleWheelbase() * Math.abs(point.curvature || 0))
+              )
+            : 0
         });
       }
 
@@ -2373,9 +3690,8 @@
       return samples;
     }
 
-    function poseAt(progress01) {
+    function poseFromSamples(progress01, samples) {
       const progress = THREE.MathUtils.clamp(progress01, 0, 1);
-      const samples = kinematicSamples();
       const scaled = progress * (samples.length - 1);
       const low = Math.floor(scaled);
       const high = Math.min(samples.length - 1, low + 1);
@@ -2388,6 +3704,7 @@
       };
       const cabHeading = THREE.MathUtils.lerp(a.cabHeading, b.cabHeading, t);
       const trailerHeading = THREE.MathUtils.lerp(a.trailerHeading, b.trailerHeading, t);
+      const steeringAngle = THREE.MathUtils.lerp(a.steeringAngle || 0, b.steeringAngle || 0, t);
 
       const cabCenter = centerFromHitch(hitch, cabHeading, state.hitchGap + cabLength() / 2);
       const trailerCenter = centerFromHitch(
@@ -2396,7 +3713,77 @@
         (state.trailerFrontOverhang - (trailerWheelbase() + state.trailerRearOverhang)) / 2
       );
 
-      return { hitch, cabHeading, trailerHeading, cabCenter, trailerCenter };
+      return { hitch, cabHeading, trailerHeading, steeringAngle, cabCenter, trailerCenter };
+    }
+
+    function poseAt(progress01) {
+      return poseFromSamples(progress01, kinematicSamples());
+    }
+
+    function counterPathPointAtDistance(distance) {
+      const point = pathPointAtDistance(distance);
+      return {
+        hitch: {
+          x: -point.hitch.z,
+          z: -point.hitch.x
+        },
+        cabHeading: -Math.PI / 2 - point.cabHeading,
+        curvature: -(point.curvature || 0)
+      };
+    }
+
+    let counterKinematicCache = null;
+
+    function counterKinematicSamples() {
+      const key = kinematicCacheKey();
+      if (counterKinematicCache?.key === key) return counterKinematicCache.samples;
+
+      const totalLength = Math.max(0.001, pathLength());
+      const steps = Math.max(180, Math.round(state.sweepSamples) * 4);
+      const samples = [];
+      let trailerHeading = counterPathPointAtDistance(0).cabHeading;
+      const effectiveTrailerWheelbase = Math.max(0.4, trailerWheelbase());
+      const maxDelta = THREE.MathUtils.degToRad(state.maxArticulation);
+
+      for (let i = 0; i <= steps; i++) {
+        const progress = i / steps;
+        const distance = progress * totalLength;
+        const point = counterPathPointAtDistance(distance);
+
+        if (isRigidVehicle()) {
+          trailerHeading = point.cabHeading;
+        } else if (i > 0) {
+          const previousDistance = (i - 1) / steps * totalLength;
+          const ds = distance - previousDistance;
+          const midpoint = counterPathPointAtDistance((previousDistance + distance) / 2);
+          trailerHeading += ds / effectiveTrailerWheelbase * Math.sin(midpoint.cabHeading - trailerHeading);
+
+          const delta = point.cabHeading - trailerHeading;
+          if (Math.abs(delta) > maxDelta) {
+            trailerHeading = point.cabHeading - Math.sign(delta) * maxDelta;
+          }
+        }
+
+        samples.push({
+          progress,
+          hitch: isRigidVehicle() ? rigidHitchFromRearAxle(point) : point.hitch,
+          cabHeading: point.cabHeading,
+          trailerHeading,
+          steeringAngle: isRigidVehicle()
+            ? -Math.min(
+                THREE.MathUtils.degToRad(state.maxSteeringAngle || 38),
+                Math.atan(rigidVehicleWheelbase() * Math.abs(point.curvature || 0))
+              )
+            : 0
+        });
+      }
+
+      counterKinematicCache = { key, samples };
+      return samples;
+    }
+
+    function counterPoseAt(progress01) {
+      return poseFromSamples(progress01, counterKinematicSamples());
     }
 
     function wheelBoxes(pose) {
@@ -2404,14 +3791,11 @@
       const wheelY0 = 0;
       const wheelY1 = state.wheelRadius * 2;
       const wheelLength = state.wheelRadius * 2;
-      const pairs = [
-        { base: pose.cabCenter, width: outerWidth(state.cabWidth), offsets: axleOffsets(cabLength(), cabWheelbase()) },
-        { base: pose.trailerCenter, width: outerWidth(state.trailerWidth), offsets: axleOffsets(trailerLength(), trailerWheelbase()) }
-      ];
 
-      for (const pair of pairs) {
+      for (const pair of wheelAxlePairs(pose)) {
         const c = Math.cos(pair.base.heading);
         const s = Math.sin(pair.base.heading);
+        const wheelHeading = pair.base.heading + (pair.steeringAngle || 0);
         const track = Math.min(Math.max(state.wheelTrack, state.wheelWidth), pair.width + state.wheelWidth * 2);
         for (const longOffset of pair.offsets) {
           for (const side of [-1, 1]) {
@@ -2419,7 +3803,7 @@
             boxes.push({
               cx: pair.base.cx + c * longOffset - s * lat,
               cz: pair.base.cz + s * longOffset + c * lat,
-              heading: pair.base.heading,
+              heading: wheelHeading,
               length: wheelLength,
               width: state.wheelWidth,
               y0: wheelY0,
@@ -2431,8 +3815,7 @@
       return boxes;
     }
 
-    function bodyBoxes(progress01) {
-      const pose = poseAt(progress01);
+    function bodyBoxesFromPose(pose) {
       const boxes = [
         {
           cx: pose.cabCenter.cx,
@@ -2469,6 +3852,14 @@
       }
       boxes.push(...wheelBoxes(pose));
       return boxes;
+    }
+
+    function bodyBoxes(progress01) {
+      return bodyBoxesFromPose(poseAt(progress01));
+    }
+
+    function counterBodyBoxes(progress01) {
+      return bodyBoxesFromPose(counterPoseAt(progress01));
     }
 
     function pointInBox(x, y, z, box) {
@@ -2579,17 +3970,41 @@
       return [-spacing / 2, spacing / 2];
     }
 
-    function addWheels(group, pose) {
-      const wheelPairs = [
+    function isRigidVehicle() {
+      return state.rigidBody === true;
+    }
+
+    function wheelAxlePairs(pose) {
+      if (isRigidVehicle()) {
+        return [
+          {
+            base: centerFromHitch(pose.hitch, pose.cabHeading, rigidFrontAxleOffsetFromHitch()),
+            width: outerWidth(state.cabWidth),
+            offsets: [0],
+            steeringAngle: pose.steeringAngle || 0
+          },
+          {
+            base: centerFromHitch(pose.hitch, pose.trailerHeading, rigidRearAxleOffsetFromHitch()),
+            width: outerWidth(state.trailerWidth),
+            offsets: [0]
+          }
+        ];
+      }
+      return [
         { base: pose.cabCenter, width: outerWidth(state.cabWidth), offsets: axleOffsets(cabLength(), cabWheelbase()) },
         { base: pose.trailerCenter, width: outerWidth(state.trailerWidth), offsets: axleOffsets(trailerLength(), trailerWheelbase()) }
       ];
+    }
 
-      for (const pair of wheelPairs) {
+    function addWheels(group, pose) {
+      for (const pair of wheelAxlePairs(pose)) {
         for (const longOffset of pair.offsets) {
           for (const side of [-1, 1]) {
             const c = Math.cos(pair.base.heading);
             const s = Math.sin(pair.base.heading);
+            const wheelHeading = pair.base.heading + (pair.steeringAngle || 0);
+            const wheelC = Math.cos(wheelHeading);
+            const wheelS = Math.sin(wheelHeading);
             const track = Math.min(Math.max(state.wheelTrack, state.wheelWidth), pair.width + state.wheelWidth * 2);
             const lat = side * track / 2;
             const x = pair.base.cx + c * longOffset - s * lat;
@@ -2599,9 +4014,17 @@
               materials.tire
             );
             wheel.position.set(x, state.wheelRadius, z);
-            const axleDirection = new THREE.Vector3(-s, 0, c).normalize();
+            const axleDirection = new THREE.Vector3(-wheelS, 0, wheelC).normalize();
             wheel.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), axleDirection);
             group.add(wheel);
+
+            const hub = new THREE.Mesh(
+              new THREE.CylinderGeometry(state.wheelRadius * 0.38, state.wheelRadius * 0.38, state.wheelWidth + 0.012, 20),
+              materials.trailer
+            );
+            hub.position.copy(wheel.position);
+            hub.quaternion.copy(wheel.quaternion);
+            group.add(hub);
           }
         }
       }
@@ -2610,18 +4033,13 @@
     function buildTruck() {
       clearGroup(groups.truck);
       const pose = poseAt(state.progress / 100);
-      groups.truck.add(makeBox(cabLength(), state.cabHeight, outerWidth(state.cabWidth), pose.cabCenter, state.chassisHeight, materials.cab));
+      groups.truck.add(makeCabVisual(pose.cabCenter));
+      addCabVisualDetails(groups.truck, pose.cabCenter);
       groups.truck.add(makeBox(trailerLength(), state.deckHeight, outerWidth(state.trailerWidth), pose.trailerCenter, state.chassisHeight, materials.trailer));
       if (state.cargoEnabled) {
-        const currentCargoPose = cargoPose(pose);
-        groups.truck.add(makeBox(
-          Math.min(state.cargoLength, trailerLength()),
-          state.cargoHeight,
-          outerWidth(state.trailerWidth),
-          currentCargoPose,
-          state.chassisHeight + state.deckHeight + state.cargoBaseOffset,
-          materials.cargo
-        ));
+        addCargoVisual(groups.truck, pose);
+      } else {
+        addFlatbedVisualDetails(groups.truck, pose.trailerCenter);
       }
       addWheels(groups.truck, pose);
     }
@@ -2632,10 +4050,8 @@
       const ghostCount = 15;
       const currentProgress = state.progress / 100;
       const currentFrameTolerance = 0.55 / (ghostCount - 1);
-      for (let i = 0; i < ghostCount; i++) {
-        const progress = i / (ghostCount - 1);
-        if (Math.abs(progress - currentProgress) < currentFrameTolerance) continue;
-        const pose = poseAt(progress);
+
+      const addGhost = pose => {
         const cab = makeSweptBox(cabLength(), state.cabHeight, outerWidth(state.cabWidth), pose.cabCenter, state.chassisHeight);
         const deck = makeSweptBox(trailerLength(), state.deckHeight, outerWidth(state.trailerWidth), pose.trailerCenter, state.chassisHeight);
         groups.swept.add(cab, deck);
@@ -2648,6 +4064,18 @@
             currentCargoPose,
             state.chassisHeight + state.deckHeight + state.cargoBaseOffset
           ));
+        }
+      };
+
+      for (let i = 0; i < ghostCount; i++) {
+        const progress = i / (ghostCount - 1);
+        if (Math.abs(progress - currentProgress) < currentFrameTolerance) continue;
+        addGhost(poseAt(progress));
+      }
+
+      if (state.counterTraffic) {
+        for (let i = 0; i < ghostCount; i++) {
+          addGhost(counterPoseAt(i / (ghostCount - 1)));
         }
       }
     }
@@ -2684,6 +4112,7 @@
       const sampleFrames = Math.max(2, Math.round(state.sweepSamples));
       for (let i = 0; i < sampleFrames; i++) {
         frames.push(bodyBoxes(i / (sampleFrames - 1)));
+        if (state.counterTraffic) frames.push(counterBodyBoxes(i / (sampleFrames - 1)));
       }
 
       const res = Math.max(4, Math.round(state.gridResolution));
@@ -2751,6 +4180,7 @@
       const sampleFrames = Math.max(2, Math.round(state.sweepSamples));
       for (let i = 0; i < sampleFrames; i++) {
         frames.push(bodyBoxes(i / (sampleFrames - 1)));
+        if (state.counterTraffic) frames.push(counterBodyBoxes(i / (sampleFrames - 1)));
       }
 
       const res = Math.max(4, Math.round(state.gridResolution));
@@ -3247,80 +4677,214 @@
       const triangles = voxelSurfaceTriangles(cells, dx, dy, dz);
       const positions = [];
       const normals = [];
+      const uvs = [];
       for (const triangle of triangles) {
         for (const vertex of triangle.vertices) {
           positions.push(vertex[0], vertex[1], vertex[2]);
           normals.push(triangle.normal[0], triangle.normal[1], triangle.normal[2]);
+          if (Math.abs(triangle.normal[0]) > 0.5) uvs.push(vertex[2], vertex[1]);
+          else if (Math.abs(triangle.normal[1]) > 0.5) uvs.push(vertex[0], vertex[2]);
+          else uvs.push(vertex[0], vertex[1]);
         }
       }
       const geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
       geometry.setAttribute("normal", new THREE.Float32BufferAttribute(normals, 3));
+      geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
       geometry.computeBoundingSphere();
       const mesh = new THREE.Mesh(geometry, material);
       mesh.frustumCulled = false;
       return mesh;
     }
 
+    function voxelRegularSurfaceTriangles(cells, dx, dy, dz) {
+      const cellSet = new Set(cells.map(cell => `${cell.ix},${cell.iy},${cell.iz}`));
+      const triangles = [];
+      const pushQuad = vertices => {
+        triangles.push({ vertices: [vertices[0], vertices[1], vertices[2]] });
+        triangles.push({ vertices: [vertices[0], vertices[2], vertices[3]] });
+      };
+
+      for (const cell of cells) {
+        const vertices = cubeVertices(cell, dx, dy, dz);
+        if (!cellSet.has(`${cell.ix - 1},${cell.iy},${cell.iz}`)) pushQuad([vertices[0], vertices[4], vertices[7], vertices[3]]);
+        if (!cellSet.has(`${cell.ix + 1},${cell.iy},${cell.iz}`)) pushQuad([vertices[1], vertices[2], vertices[6], vertices[5]]);
+        if (!cellSet.has(`${cell.ix},${cell.iy - 1},${cell.iz}`)) pushQuad([vertices[0], vertices[1], vertices[5], vertices[4]]);
+        if (!cellSet.has(`${cell.ix},${cell.iy + 1},${cell.iz}`)) pushQuad([vertices[3], vertices[7], vertices[6], vertices[2]]);
+        if (!cellSet.has(`${cell.ix},${cell.iy},${cell.iz - 1}`)) pushQuad([vertices[0], vertices[3], vertices[2], vertices[1]]);
+        if (!cellSet.has(`${cell.ix},${cell.iy},${cell.iz + 1}`)) pushQuad([vertices[4], vertices[5], vertices[6], vertices[7]]);
+      }
+      return triangles;
+    }
+
     function smoothedVoxelSurfaceGeometry(cells, dx, dy, dz, bounds = state) {
-      const triangles = voxelSurfaceTriangles(cells, dx, dy, dz);
-      const vertices = [];
+      // Build a continuous iso-surface from the same occupied voxels used by
+      // the precise mode. This removes the visible staircase without changing
+      // the source calculation or requiring a denser voxel grid.
+      const geometry = new THREE.BufferGeometry();
+      if (!cells.length) {
+        geometry.setAttribute("position", new THREE.Float32BufferAttribute([], 3));
+        return geometry;
+      }
+
+      const padding = 2;
+      let minIx = Infinity;
+      let minIy = Infinity;
+      let minIz = Infinity;
+      let maxIx = -Infinity;
+      let maxIy = -Infinity;
+      let maxIz = -Infinity;
+      for (const cell of cells) {
+        minIx = Math.min(minIx, cell.ix);
+        minIy = Math.min(minIy, cell.iy);
+        minIz = Math.min(minIz, cell.iz);
+        maxIx = Math.max(maxIx, cell.ix);
+        maxIy = Math.max(maxIy, cell.iy);
+        maxIz = Math.max(maxIz, cell.iz);
+      }
+      minIx -= padding;
+      minIy -= padding;
+      minIz -= padding;
+      maxIx += padding;
+      maxIy += padding;
+      maxIz += padding;
+
+      const nx = maxIx - minIx + 1;
+      const ny = maxIy - minIy + 1;
+      const nz = maxIz - minIz + 1;
+      const fieldIndex = (x, y, z) => (z * ny + y) * nx + x;
+      let density = new Float32Array(nx * ny * nz);
+      for (const cell of cells) {
+        density[fieldIndex(cell.ix - minIx, cell.iy - minIy, cell.iz - minIz)] = 1;
+      }
+
+      const sample = (field, x, y, z) => (
+        x < 0 || y < 0 || z < 0 || x >= nx || y >= ny || z >= nz
+          ? 0
+          : field[fieldIndex(x, y, z)]
+      );
+
+      // A compact six-neighbour kernel rounds the boundary while keeping
+      // planar surfaces aligned to the original voxel envelope.
+      const blurred = new Float32Array(density.length);
+      for (let z = 0; z < nz; z++) {
+        for (let y = 0; y < ny; y++) {
+          for (let x = 0; x < nx; x++) {
+            const index = fieldIndex(x, y, z);
+            blurred[index] = (
+              density[index] * 4 +
+              sample(density, x - 1, y, z) +
+              sample(density, x + 1, y, z) +
+              sample(density, x, y - 1, z) +
+              sample(density, x, y + 1, z) +
+              sample(density, x, y, z - 1) +
+              sample(density, x, y, z + 1)
+            ) / 10;
+          }
+        }
+      }
+      density = blurred;
+
+      const isoLevel = 0.5;
+      const cubeOffsets = [
+        [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
+        [0, 0, 1], [1, 0, 1], [1, 1, 1], [0, 1, 1]
+      ];
+      const tetrahedra = [
+        [0, 5, 1, 6], [0, 1, 2, 6], [0, 2, 3, 6],
+        [0, 3, 7, 6], [0, 7, 4, 6], [0, 4, 5, 6]
+      ];
+      const positions = [];
       const indices = [];
       const vertexMap = new Map();
-      const keyOf = vertex => vertex.map(value => Math.round(value * 10000) / 10000).join(",");
-
-      const getIndex = vertex => {
-        const key = keyOf(vertex);
+      const vertexKey = vertex => [
+        Math.round(vertex.x * 100000),
+        Math.round(vertex.y * 100000),
+        Math.round(vertex.z * 100000)
+      ].join(",");
+      const vertexIndex = vertex => {
+        const key = vertexKey(vertex);
         if (vertexMap.has(key)) return vertexMap.get(key);
-        const index = vertices.length;
-        vertices.push(new THREE.Vector3(vertex[0], vertex[1], vertex[2]));
+        const index = positions.length / 3;
+        positions.push(vertex.x, vertex.y, vertex.z);
         vertexMap.set(key, index);
         return index;
       };
-
-      for (const triangle of triangles) {
-        indices.push(...triangle.vertices.map(getIndex));
-      }
-
-      const adjacency = vertices.map(() => new Set());
-      for (let i = 0; i < indices.length; i += 3) {
-        const a = indices[i];
-        const b = indices[i + 1];
-        const c = indices[i + 2];
-        adjacency[a].add(b); adjacency[a].add(c);
-        adjacency[b].add(a); adjacency[b].add(c);
-        adjacency[c].add(a); adjacency[c].add(b);
-      }
-
-      const isLocked = vertex => {
-        const onGroundOrTop = vertex.y < 1e-5 || Math.abs(vertex.y - bounds.prismHeight) < 1e-5;
-        const onXEdge = Math.abs(vertex.x) < 1e-5 || Math.abs(vertex.x + bounds.chamferX) < 1e-5;
-        const onZEdge = Math.abs(vertex.z) < 1e-5 || Math.abs(vertex.z - bounds.chamferY) < 1e-5;
-        const onChamferFace = Math.abs((-vertex.x / bounds.chamferX) + (vertex.z / bounds.chamferY) - 1) < Math.max(dx, dz) * 0.55;
-        return onGroundOrTop || onXEdge || onZEdge || onChamferFace;
+      const pointAt = (x, y, z) => new THREE.Vector3(
+        -(minIx + x + 0.5) * dx,
+        (minIy + y + 0.5) * dy,
+        (minIz + z + 0.5) * dz
+      );
+      const interpolate = (a, b, valueA, valueB) => {
+        const difference = valueB - valueA;
+        const amount = Math.abs(difference) < 1e-8
+          ? 0.5
+          : THREE.MathUtils.clamp((isoLevel - valueA) / difference, 0, 1);
+        return a.clone().lerp(b, amount);
+      };
+      const averagePoint = points => {
+        const average = new THREE.Vector3();
+        for (const point of points) average.add(point);
+        return average.multiplyScalar(1 / points.length);
+      };
+      const addTriangle = (a, b, c, outward) => {
+        const edgeAB = b.clone().sub(a);
+        const edgeAC = c.clone().sub(a);
+        const normal = edgeAB.cross(edgeAC);
+        if (normal.lengthSq() < 1e-12) return;
+        if (normal.dot(outward) < 0) {
+          const swap = b;
+          b = c;
+          c = swap;
+        }
+        indices.push(vertexIndex(a), vertexIndex(b), vertexIndex(c));
       };
 
-      let smoothed = vertices.map(vertex => vertex.clone());
-      for (let pass = 0; pass < 3; pass++) {
-        const next = smoothed.map(vertex => vertex.clone());
-        for (let i = 0; i < smoothed.length; i++) {
-          if (isLocked(vertices[i]) || adjacency[i].size < 3) continue;
-          const average = new THREE.Vector3();
-          for (const neighbor of adjacency[i]) average.add(smoothed[neighbor]);
-          average.multiplyScalar(1 / adjacency[i].size);
-          next[i].lerp(average, 0.34);
+      for (let z = 0; z < nz - 1; z++) {
+        for (let y = 0; y < ny - 1; y++) {
+          for (let x = 0; x < nx - 1; x++) {
+            const values = cubeOffsets.map(([ox, oy, oz]) => density[fieldIndex(x + ox, y + oy, z + oz)]);
+            const minimum = Math.min(...values);
+            const maximum = Math.max(...values);
+            if (minimum >= isoLevel || maximum < isoLevel) continue;
+            const points = cubeOffsets.map(([ox, oy, oz]) => pointAt(x + ox, y + oy, z + oz));
+
+            for (const tetrahedron of tetrahedra) {
+              const inside = tetrahedron.filter(index => values[index] >= isoLevel);
+              if (inside.length === 0 || inside.length === 4) continue;
+              const outside = tetrahedron.filter(index => values[index] < isoLevel);
+              const insideCenter = averagePoint(inside.map(index => points[index]));
+              const outsideCenter = averagePoint(outside.map(index => points[index]));
+              const outward = outsideCenter.sub(insideCenter);
+
+              if (inside.length === 1 || inside.length === 3) {
+                const anchor = inside.length === 1 ? inside[0] : outside[0];
+                const targets = inside.length === 1 ? outside : inside;
+                const intersections = targets.map(target => interpolate(
+                  points[anchor],
+                  points[target],
+                  values[anchor],
+                  values[target]
+                ));
+                addTriangle(intersections[0], intersections[1], intersections[2], outward);
+                continue;
+              }
+
+              const [insideA, insideB] = inside;
+              const [outsideA, outsideB] = outside;
+              const a = interpolate(points[insideA], points[outsideA], values[insideA], values[outsideA]);
+              const b = interpolate(points[insideA], points[outsideB], values[insideA], values[outsideB]);
+              const c = interpolate(points[insideB], points[outsideA], values[insideB], values[outsideA]);
+              const d = interpolate(points[insideB], points[outsideB], values[insideB], values[outsideB]);
+              addTriangle(a, b, c, outward);
+              addTriangle(b, d, c, outward);
+            }
+          }
         }
-        smoothed = next;
       }
 
-      const positions = [];
-      for (const index of indices) {
-        const vertex = smoothed[index];
-        positions.push(vertex.x, vertex.y, vertex.z);
-      }
-
-      const geometry = new THREE.BufferGeometry();
       geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.setIndex(indices);
       geometry.computeVertexNormals();
       geometry.computeBoundingSphere();
       return geometry;
@@ -3350,12 +4914,17 @@
 
     function geometryToTriangles(geometry) {
       const position = geometry.getAttribute("position");
+      const index = geometry.getIndex();
       const triangles = [];
-      for (let i = 0; i < position.count; i += 3) {
+      const count = index ? index.count : position.count;
+      for (let i = 0; i < count; i += 3) {
+        const a = index ? index.getX(i) : i;
+        const b = index ? index.getX(i + 1) : i + 1;
+        const c = index ? index.getX(i + 2) : i + 2;
         const vertices = [
-          [position.getX(i), position.getY(i), position.getZ(i)],
-          [position.getX(i + 1), position.getY(i + 1), position.getZ(i + 1)],
-          [position.getX(i + 2), position.getY(i + 2), position.getZ(i + 2)]
+          [position.getX(a), position.getY(a), position.getZ(a)],
+          [position.getX(b), position.getY(b), position.getZ(b)],
+          [position.getX(c), position.getY(c), position.getZ(c)]
         ];
         triangles.push({ vertices });
       }
@@ -3436,7 +5005,35 @@
     }
 
     let rafPending = false;
+
+    function syncCalculationDetail() {
+      const detail = THREE.MathUtils.clamp(Number(state.calculationDetail) || 0, 0, 100);
+      state.calculationDetail = detail;
+      state.sweepSamples = Math.round(24 + detail * 0.36);
+      state.gridResolution = Math.round(16 + detail * 0.2);
+      state.heightSlices = Math.round(6 + detail * 0.12);
+    }
+
+    function syncEntryLaneOffsetRange() {
+      const wrapper = document.querySelector('.control[data-param="entryLaneOffset"]');
+      const vehicleWidth = outerWidth(Math.max(state.cabWidth, state.trailerWidth));
+      const limit = Math.max(0, Math.floor((state.roadWidthIn / 2 - vehicleWidth / 2 - 0.05) * 10) / 10);
+      state.entryLaneOffset = THREE.MathUtils.clamp(Number(state.entryLaneOffset) || 0, -limit, limit);
+      if (!wrapper) return;
+      const number = wrapper.querySelector("input[type='number']");
+      const range = wrapper.querySelector("input[type='range']");
+      number.min = -limit;
+      number.max = limit;
+      range.min = -limit;
+      range.max = limit;
+      number.value = state.entryLaneOffset;
+      range.value = state.entryLaneOffset;
+    }
+
     function updateScene() {
+      syncCalculationDetail();
+      syncEntryLaneOffsetRange();
+      queueWorkspaceSave();
       if (rafPending) return;
       rafPending = true;
       requestAnimationFrame(() => {
@@ -3468,7 +5065,7 @@
         range.addEventListener("input", () => setValue(range.value));
       }
 
-      for (const key of ["cargoEnabled", "smoothVolume", "showRemaining", "showIntersection", "showSwept"]) {
+      for (const key of ["cargoEnabled", "counterTraffic", "smoothVolume", "showRemaining", "showIntersection", "showSwept"]) {
         const input = document.querySelector(`#${key}`);
         input.checked = state[key];
         input.addEventListener("change", () => {
@@ -3750,6 +5347,11 @@
         status.textContent = tr("enterModel");
         return;
       }
+      const preset = findVehiclePreset(query);
+      if (preset) {
+        applyVehiclePreset(preset, status);
+        return;
+      }
       button.disabled = true;
       status.textContent = tr("searching");
       try {
@@ -3844,6 +5446,18 @@
     document.querySelector("#vehicleSearchQuery").addEventListener("keydown", event => {
       if (event.key === "Enter") lookupVehicle();
     });
+    document.querySelector("#vehicleSearchQuery").addEventListener("input", event => {
+      const select = document.querySelector("#vehiclePresetSelect");
+      const preset = vehiclePresets.find(item => item.id === select.value);
+      if (preset && preset.query !== event.currentTarget.value) select.value = "";
+      queueWorkspaceSave();
+    });
+    document.querySelector("#vehiclePresetSelect").addEventListener("change", event => {
+      const preset = vehiclePresets.find(item => item.id === event.currentTarget.value);
+      if (preset) document.querySelector("#vehicleSearchQuery").value = preset.query;
+      queueWorkspaceSave();
+    });
+    document.querySelector("#vehicleDimensionText").addEventListener("input", queueWorkspaceSave);
     document.querySelector("#parseDimensionButton").addEventListener("click", parseManualDimensionText);
     document.querySelector("#languageToggle").addEventListener("click", () => {
       applyLanguage(currentLanguage === "jp" ? "cn" : "jp");
@@ -3852,6 +5466,7 @@
     remainingViewer.closeButton.addEventListener("click", closeRemainingViewer);
     remainingViewer.resetButton.addEventListener("click", () => refreshRemainingViewer(true));
     document.querySelector("#saveRemainingVolume").addEventListener("click", saveCurrentRemainingVolume);
+    document.querySelector("#exportA4Report").addEventListener("click", exportA4Report);
     savedVolumeViewer.closeButton.addEventListener("click", closeSavedVolumeViewer);
     heatmapViewer.openButton.addEventListener("click", openHeatmapViewer);
     heatmapViewer.closeButton.addEventListener("click", closeHeatmapViewer);
@@ -3859,6 +5474,7 @@
       updateHeatmapThresholdLabel();
     });
     heatmapViewer.exportButton.addEventListener("click", exportHeatmapStl);
+    heatmapViewer.lockButton.addEventListener("click", toggleHeatmapViewLock);
     document.querySelector("#exportStl").addEventListener("click", exportRemainingStl);
     document.querySelector("#topViewCamera").addEventListener("click", () => setTopView(!topViewActive));
     document.querySelector("#resetCamera").addEventListener("click", resetCamera);
@@ -3881,9 +5497,11 @@
     }
 
     window.addEventListener("resize", resize);
+    window.addEventListener("orientationchange", () => window.setTimeout(resize, 160));
+    restoreLocalMemory();
     bindControls();
     resize();
-    applyLanguage("jp");
+    applyLanguage(currentLanguage);
     updateScene();
     requestAnimationFrame(animate);
   </script>
