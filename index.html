@@ -1622,11 +1622,11 @@
       cargoBaseOffset: 0,
       cargoHeight: 2.7,
       progress: 0,
-      turnRadius: 2.9,
+      turnRadius: 5,
       entryLaneOffset: 0,
       maxSteeringAngle: 38,
       turnEaseRatio: 28,
-      turnStartX: -1.5,
+      turnStartX: -4.2,
       stopY: 21.2,
       maxArticulation: 38,
       rigidBody: false,
@@ -1634,7 +1634,7 @@
       sweepSamples: 42,
       gridResolution: 26,
       heightSlices: 12,
-      counterTraffic: false,
+      counterTraffic: true,
       smoothVolume: true,
       showRemaining: true,
       showIntersection: true,
@@ -2409,7 +2409,7 @@
     function persistWorkspace() {
       try {
         localStorage.setItem(workspaceStorageKey, JSON.stringify({
-          version: 3,
+          version: 4,
           language: currentLanguage,
           state,
           form: {
@@ -2469,6 +2469,17 @@
         }
         if (workspace?.language === "jp" || workspace?.language === "cn") {
           currentLanguage = workspace.language;
+        }
+        if ((workspace?.version || 1) < 4) {
+          Object.assign(state, {
+            progress: 0,
+            turnRadius: 5,
+            entryLaneOffset: 0,
+            turnStartX: -4.2,
+            stopY: 21.2,
+            calculationDetail: 50,
+            counterTraffic: true
+          });
         }
         if (isValidHeatmapCameraView(workspace?.heatmapView)) {
           lockedHeatmapView = workspace.heatmapView;
