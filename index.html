@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8" />
@@ -336,6 +336,74 @@
       margin-top: -7px;
     }
 
+    .sweep-mode-control {
+      margin-top: 12px;
+      padding: 12px 12px 10px;
+      border: 1px solid rgba(255, 255, 255, .7);
+      border-radius: 13px;
+      background: rgba(255, 255, 255, .34);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 10px 26px rgba(78, 92, 106, .05);
+      backdrop-filter: blur(16px) saturate(150%);
+    }
+
+    .sweep-mode-control label {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .sweep-mode-value {
+      color: var(--text);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .sweep-mode-control input[type="range"] {
+      display: block;
+      width: 100%;
+      margin: 13px 0 8px;
+      accent-color: var(--accent);
+    }
+
+    .sweep-mode-control input[type="range"]::-webkit-slider-runnable-track {
+      height: 8px;
+      border: 1px solid rgba(255, 255, 255, .8);
+      border-radius: 999px;
+      background:
+        linear-gradient(90deg, rgba(183,255,47,.95), rgba(183,255,47,.62)),
+        rgba(255,255,255,.38);
+      box-shadow: inset 0 1px 1px rgba(255,255,255,.8), 0 6px 18px rgba(183,255,47,.18);
+    }
+
+    .sweep-mode-control input[type="range"]::-webkit-slider-thumb {
+      margin-top: -6px;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255,255,255,.9);
+      border-radius: 999px;
+      background: var(--accent);
+      box-shadow: 0 6px 18px rgba(119, 198, 0, .36);
+    }
+
+    .sweep-mode-ticks {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    .sweep-mode-ticks span:nth-child(2) {
+      text-align: center;
+    }
+
+    .sweep-mode-ticks span:nth-child(3) {
+      text-align: right;
+    }
+
     .toggle-row {
       display: flex;
       justify-content: space-between;
@@ -422,6 +490,33 @@
       stroke-width: 2;
       stroke-linecap: round;
       stroke-linejoin: round;
+    }
+
+    .vehicle-type-row {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .vehicle-type-row label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .vehicle-type-select {
+      min-width: 0;
+      height: 40px;
+      padding: 0 34px 0 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: rgba(255, 255, 255, .58);
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 800;
     }
 
     .lookup-text {
@@ -722,7 +817,8 @@
       gap: 8px;
     }
 
-    .volume-library__actions .report-action {
+    .volume-library__actions .report-action,
+    .volume-library__actions .sort-action {
       grid-column: 1 / -1;
     }
 
@@ -782,7 +878,12 @@
 
     .saved-volume__buttons {
       display: flex;
+      flex-wrap: wrap;
       gap: 8px;
+    }
+
+    .saved-volume__buttons button {
+      flex: 1 1 64px;
     }
 
     .saved-volume__buttons button,
@@ -1243,6 +1344,8 @@
         left: auto;
         width: 278px;
         max-height: min(220px, calc(100% - 28px));
+        transform: scale(.5);
+        transform-origin: right bottom;
       }
 
       .volume-library__body {
@@ -1326,6 +1429,10 @@
             </div>
             <button id="vehicleSearchButton" type="button">匹配</button>
           </div>
+          <div class="vehicle-type-row">
+            <label for="vehicleTypeSelect">基础类型</label>
+            <select class="vehicle-type-select" id="vehicleTypeSelect"></select>
+          </div>
           <textarea id="vehicleDimensionText" class="lookup-text" placeholder="也可以粘贴车辆尺寸资料，例如：外形尺寸 5995×2550×3950mm，轴距 3400mm，前悬 1.2m，后悬 0.9m"></textarea>
           <div class="lookup lookup-footer">
             <p class="lookup-status" id="vehicleLookupStatus">自动匹配会尝试查找开放结构化车型数据；查不到时不会改动当前参数。</p>
@@ -1352,7 +1459,7 @@
           </div>
         </details>
 
-        <details>
+        <details data-vehicle-section="cab">
           <summary>车头尺寸</summary>
           <div class="control" data-param="cabLength">
             <label>车头长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.2" max="8" step="0.1">
@@ -1374,7 +1481,7 @@
           </div>
         </details>
 
-        <details>
+        <details data-vehicle-section="trailer">
           <summary>挂车尺寸</summary>
           <div class="control" data-param="trailerLength">
             <label>挂车长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1.5" max="18" step="0.1">
@@ -1408,7 +1515,7 @@
           </div>
         </details>
 
-        <details>
+        <details data-vehicle-section="cargo">
           <summary>货箱</summary>
           <div class="toggle-row">
             <label for="cargoEnabled">显示并参与计算</label>
@@ -1425,6 +1532,105 @@
           </div>
           <div class="control" data-param="cargoHeight">
             <label>货箱高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="4.5" step="0.1">
+          </div>
+        </details>
+
+        <details data-type-section="lowPlatform">
+          <summary>ターレットトラック</summary>
+          <div class="control" data-param="turretDiameter">
+            <label>前部圆筒直径 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.5" max="2" step="0.05">
+          </div>
+          <div class="control" data-param="turretHeight">
+            <label>前部圆筒高度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.5" max="2.2" step="0.05">
+          </div>
+          <div class="control" data-param="platformLength">
+            <label>后部荷台长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.8" max="6" step="0.1">
+          </div>
+          <div class="control" data-param="platformWidth">
+            <label>后部荷台宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="3" step="0.1">
+          </div>
+          <div class="control" data-param="platformDeckThickness">
+            <label>平台厚度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.05" max="0.6" step="0.05">
+          </div>
+          <div class="control" data-param="platformDeckHeight">
+            <label>平台离地高度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.05" max="0.8" step="0.05">
+          </div>
+          <div class="control" data-param="platformHandleHeight">
+            <label>驾驶护栏高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.3" max="2.4" step="0.1">
+          </div>
+          <div class="control" data-param="wheelTrack">
+            <label>脚轮轮距 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.4" max="2.5" step="0.1">
+          </div>
+          <div class="control" data-param="wheelWidth">
+            <label>脚轮宽度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.08" max="0.5" step="0.05">
+          </div>
+          <div class="control" data-param="wheelRadius">
+            <label>脚轮半径 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.1" max="0.5" step="0.05">
+          </div>
+        </details>
+
+        <details data-type-section="cageCart">
+          <summary>笼车/框架台车</summary>
+          <div class="control" data-param="cageLength">
+            <label>笼车长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.8" max="5" step="0.1">
+          </div>
+          <div class="control" data-param="cageWidth">
+            <label>笼车宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="3" step="0.1">
+          </div>
+          <div class="control" data-param="cageBaseHeight">
+            <label>底盘离地高度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.05" max="0.8" step="0.05">
+          </div>
+          <div class="control" data-param="cageDeckThickness">
+            <label>底盘厚度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.05" max="0.5" step="0.05">
+          </div>
+          <div class="control" data-param="cageHeight">
+            <label>框架高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.6" max="3.5" step="0.1">
+          </div>
+          <div class="control" data-param="cagePostThickness">
+            <label>框架杆件厚度 m</label><input class="value" type="number" step="0.01"><input type="range" min="0.03" max="0.2" step="0.01">
+          </div>
+          <div class="control" data-param="wheelTrack">
+            <label>脚轮轮距 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.4" max="2.5" step="0.1">
+          </div>
+          <div class="control" data-param="wheelWidth">
+            <label>脚轮宽度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.08" max="0.5" step="0.05">
+          </div>
+          <div class="control" data-param="wheelRadius">
+            <label>脚轮半径 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.1" max="0.5" step="0.05">
+          </div>
+        </details>
+
+        <details data-type-section="frontFork">
+          <summary>叉车/堆高车</summary>
+          <div class="control" data-param="forkliftBodyLength">
+            <label>车身长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.8" max="4" step="0.1">
+          </div>
+          <div class="control" data-param="forkliftBodyWidth">
+            <label>车身宽度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.6" max="2.5" step="0.1">
+          </div>
+          <div class="control" data-param="forkliftBodyHeight">
+            <label>车身高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.6" max="2.6" step="0.1">
+          </div>
+          <div class="control" data-param="forkMastHeight">
+            <label>门架高度 m</label><input class="value" type="number" step="0.1"><input type="range" min="1" max="5" step="0.1">
+          </div>
+          <div class="control" data-param="forkLength">
+            <label>货叉长度 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="3" step="0.1">
+          </div>
+          <div class="control" data-param="forkSpread">
+            <label>货叉外侧宽度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.3" max="2" step="0.05">
+          </div>
+          <div class="control" data-param="forkThickness">
+            <label>货叉厚度 m</label><input class="value" type="number" step="0.02"><input type="range" min="0.04" max="0.3" step="0.02">
+          </div>
+          <div class="control" data-param="wheelTrack">
+            <label>轮胎轮距 m</label><input class="value" type="number" step="0.1"><input type="range" min="0.5" max="2.5" step="0.1">
+          </div>
+          <div class="control" data-param="wheelWidth">
+            <label>轮胎宽度 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.1" max="0.6" step="0.05">
+          </div>
+          <div class="control" data-param="wheelRadius">
+            <label>轮胎半径 m</label><input class="value" type="number" step="0.05"><input type="range" min="0.15" max="0.7" step="0.05">
           </div>
         </details>
 
@@ -1448,18 +1654,22 @@
           <div class="control" data-param="calculationDetail">
             <label>计算精细度 %</label><input class="value" type="number" step="1"><input type="range" min="0" max="100" step="1">
           </div>
-          <div class="toggle-row">
-            <label for="counterTraffic">包含对向来车扫掠</label>
-            <input id="counterTraffic" type="checkbox">
+          <div class="sweep-mode-control">
+            <label for="sweepAxisMode">
+              <span id="sweepAxisModeLabel">扫掠方向</span>
+              <span class="sweep-mode-value" id="sweepAxisModeValue">双向扫掠</span>
+            </label>
+            <input id="sweepAxisMode" type="range" min="0" max="2" step="1" value="2">
+            <div class="sweep-mode-ticks" aria-hidden="true">
+              <span id="sweepAxisXLabel">X轴扫掠</span>
+              <span id="sweepAxisYLabel">Y轴扫掠</span>
+              <span id="sweepAxisBothLabel">双向扫掠</span>
+            </div>
           </div>
         </details>
 
         <details open>
           <summary>显示</summary>
-          <div class="toggle-row">
-            <label for="smoothVolume">平滑体积模式</label>
-            <input id="smoothVolume" type="checkbox" checked>
-          </div>
           <div class="toggle-row">
             <label for="showRemaining">显示剩余体积</label>
             <input id="showRemaining" type="checkbox" checked>
@@ -1487,10 +1697,6 @@
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
           <span>播放</span>
         </button>
-        <button id="toggleSmoothVolume" type="button" aria-label="切换体积显示模式">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15c3-4 6 4 10 0s3-7 6-4"/><path d="M4 20h16"/><path d="M4 4h16"/></svg>
-          <span>平滑体积</span>
-        </button>
         <button id="openRemainingViewer" type="button" aria-label="打开剩余体积视图">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6z"/><circle cx="12" cy="12" r="2.6"/></svg>
           <span>剩余体积视图</span>
@@ -1515,7 +1721,7 @@
         <span><i style="background:#b7ff2f"></i><strong class="brand-term">トラッ角</strong>三角柱边界</span>
       </div>
       <details class="volume-library" id="volumeLibrary" open>
-        <summary>剩余体积库 <span id="savedVolumeCount">0/20</span></summary>
+        <summary>剩余体积库 <span id="savedVolumeCount">0/50</span></summary>
         <div class="volume-library__body">
           <div class="volume-library__actions">
             <button id="saveRemainingVolume" type="button">
@@ -1529,6 +1735,10 @@
             <button class="report-action" id="exportA4Report" type="button">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v4h4"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>
               <span>导出报告</span>
+            </button>
+            <button class="sort-action" id="sortSavedVolumes" type="button">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 6h11"/><path d="M8 12h8"/><path d="M8 18h5"/><path d="M4 6v12"/><path d="M2 16l2 2 2-2"/></svg>
+              <span>按体积排序</span>
             </button>
           </div>
           <div class="volume-library__list" id="savedVolumeList"></div>
@@ -1590,9 +1800,13 @@
     }
   </script>
 
+  <script src="https://cdn.jsdelivr.net/npm/polygon-clipping@0.15.7/dist/polygon-clipping.umd.min.js"></script>
+
   <script type="module">
     import * as THREE from "three";
     import { OrbitControls } from "https://cdn.jsdelivr.net/npm/three@0.164.1/examples/jsm/controls/OrbitControls.js";
+
+    const polygonClipping = globalThis.polygonClipping;
 
     const state = {
       roadWidthIn: 6,
@@ -1600,6 +1814,7 @@
       chamferX: 4,
       chamferY: 4,
       prismHeight: 4,
+      vehicleType: "boxVan",
       cabLength: 2.4,
       cabFrontOverhang: 0.3,
       cabRearOverhang: 0.7,
@@ -1635,15 +1850,189 @@
       gridResolution: 26,
       heightSlices: 12,
       counterTraffic: true,
-      smoothVolume: true,
+      sweepAxisMode: 2,
       showRemaining: true,
       showIntersection: true,
-      showSwept: true
+      showSwept: true,
+      platformLength: 2.8,
+      platformWidth: 1.2,
+      platformDeckThickness: 0.18,
+      platformDeckHeight: 0.22,
+      platformHandleHeight: 1.0,
+      turretDiameter: 1.05,
+      turretHeight: 1.25,
+      cageLength: 2.0,
+      cageWidth: 1.1,
+      cageBaseHeight: 0.18,
+      cageDeckThickness: 0.16,
+      cageHeight: 1.7,
+      cagePostThickness: 0.06,
+      forkliftBodyLength: 1.8,
+      forkliftBodyWidth: 1.15,
+      forkliftBodyHeight: 1.35,
+      forkMastHeight: 2.4,
+      forkLength: 1.2,
+      forkSpread: 0.8,
+      forkThickness: 0.08
     };
 
-    const savedVolumeLimit = 20;
+    const savedVolumeLimit = 50;
 
     let currentLanguage = "jp";
+
+    const vehicleTypes = {
+      boxVan: { jp: "箱式車", cn: "箱式车" },
+      flatbed: { jp: "平ボディ・低床", cn: "平板/低栏车" },
+      articulated: { jp: "連結トレーラー", cn: "铰接拖挂车" },
+      lowPlatform: { jp: "ターレットトラック", cn: "ターレットトラック" },
+      cageCart: { jp: "カゴ台車・ラック車", cn: "笼车/框架台车" },
+      frontFork: { jp: "フォークリフト・スタッカー", cn: "叉车/堆高车" }
+    };
+
+    const vehicleTypeDefaultsByGroup = {
+      keiTruck: "flatbed",
+      keiVan: "boxVan",
+      compactVan: "boxVan",
+      deliveryVan: "boxVan",
+      wideFlatbed: "flatbed",
+      smallTruck: "flatbed",
+      boxDelivery: "boxVan",
+      temperature: "boxVan",
+      specialBody: "flatbed",
+      international: "boxVan",
+      articulatedYard: "articulated",
+      turretTruck: "lowPlatform",
+      cageEquipment: "cageCart",
+      forkliftEquipment: "frontFork"
+    };
+
+    const vehicleMarketClasses = {
+      smallBoxVan: { jp: "小型配送箱車", cn: "小型配送箱车", stl: "Small Outbound Box Van Class", active: "06:00-11:00" },
+      largeBoxVan: { jp: "入荷用大型箱車", cn: "入货大型箱车", stl: "Large Inbound Box Truck Class", active: "18:00-03:00" },
+      flatbed: { jp: "平ボディ・低床", cn: "平板/低栏车", stl: "Flatbed / Low Drop-side Class", active: "18:00-03:00" },
+      articulated: { jp: "連結・構内牽引", cn: "铰接/场内牵引车", stl: "Articulated Yard Class", active: "18:00-06:00" },
+      lowPlatform: { jp: "ターレットトラック", cn: "ターレットトラック", stl: "Turret Truck Class", active: "03:30-11:00" },
+      cageCart: { jp: "カゴ台車・ラック車", cn: "笼车/框架台车", stl: "Cage Cart / Rack Class", active: "04:30-12:00" },
+      frontFork: { jp: "フォークリフト・スタッカー", cn: "叉车/堆高车", stl: "Forklift / Stacker Class", active: "18:00-12:00" }
+    };
+
+    const vehicleTypeDefaultValues = {
+      boxVan: {
+        cabLength: 2.4,
+        cabFrontOverhang: 0.3,
+        cabRearOverhang: 0.7,
+        hitchGap: 0,
+        cabWidth: 2.1,
+        cabHeight: 2.1,
+        trailerLength: 5.1,
+        trailerFrontOverhang: 0,
+        trailerRearOverhang: 1.0,
+        trailerWidth: 2.25,
+        deckHeight: 0.22,
+        chassisHeight: 0.55,
+        cargoEnabled: true,
+        cargoLength: 4.9,
+        cargoFrontOverhang: 0,
+        cargoBaseOffset: 0,
+        cargoHeight: 2.35,
+        wheelTrack: 1.8,
+        wheelWidth: 0.32,
+        wheelRadius: 0.4,
+        turnRadius: 5.2,
+        rigidBody: true,
+        maxArticulation: 0
+      },
+      flatbed: {
+        cabLength: 2.3,
+        cabFrontOverhang: 0.3,
+        cabRearOverhang: 0.7,
+        hitchGap: 0,
+        cabWidth: 2.05,
+        cabHeight: 2.0,
+        trailerLength: 5.0,
+        trailerFrontOverhang: 0,
+        trailerRearOverhang: 1.0,
+        trailerWidth: 2.15,
+        deckHeight: 0.22,
+        chassisHeight: 0.58,
+        cargoEnabled: false,
+        wheelTrack: 1.8,
+        wheelWidth: 0.32,
+        wheelRadius: 0.4,
+        turnRadius: 5.1,
+        rigidBody: true,
+        maxArticulation: 0
+      },
+      articulated: {
+        cabLength: 2.4,
+        cabFrontOverhang: 0.3,
+        cabRearOverhang: 0.7,
+        hitchGap: 0.4,
+        cabWidth: 2.1,
+        cabHeight: 2.1,
+        trailerLength: 5.1,
+        trailerFrontOverhang: 0.1,
+        trailerRearOverhang: 1.9,
+        trailerWidth: 2.9,
+        deckHeight: 0.15,
+        chassisHeight: 0.5,
+        cargoEnabled: true,
+        cargoLength: 4.9,
+        cargoFrontOverhang: 0,
+        cargoBaseOffset: 0,
+        cargoHeight: 2.7,
+        wheelTrack: 2,
+        wheelWidth: 0.36,
+        wheelRadius: 0.45,
+        turnRadius: 5,
+        rigidBody: false,
+        maxArticulation: 38
+      },
+      lowPlatform: {
+        platformLength: 2.8,
+        platformWidth: 1.35,
+        platformDeckThickness: 0.18,
+        platformDeckHeight: 0.28,
+        platformHandleHeight: 1.45,
+        turretDiameter: 1.05,
+        turretHeight: 1.25,
+        wheelTrack: 1.1,
+        wheelWidth: 0.16,
+        wheelRadius: 0.24,
+        turnRadius: 2.6,
+        rigidBody: true,
+        maxArticulation: 0
+      },
+      cageCart: {
+        cageLength: 2.0,
+        cageWidth: 1.1,
+        cageBaseHeight: 0.18,
+        cageDeckThickness: 0.16,
+        cageHeight: 1.7,
+        cagePostThickness: 0.06,
+        wheelTrack: 0.95,
+        wheelWidth: 0.14,
+        wheelRadius: 0.18,
+        turnRadius: 2.4,
+        rigidBody: true,
+        maxArticulation: 0
+      },
+      frontFork: {
+        forkliftBodyLength: 1.8,
+        forkliftBodyWidth: 1.15,
+        forkliftBodyHeight: 1.35,
+        forkMastHeight: 2.4,
+        forkLength: 1.2,
+        forkSpread: 0.8,
+        forkThickness: 0.08,
+        wheelTrack: 0.95,
+        wheelWidth: 0.18,
+        wheelRadius: 0.28,
+        turnRadius: 2.7,
+        rigidBody: true,
+        maxArticulation: 0
+      }
+    };
 
     function integratedVanCabLength(config) {
       if (config.cabVisualLength) return config.cabVisualLength;
@@ -1696,6 +2085,7 @@
         cargoInnerWidth: config.cargoWidth || null,
         cargoInnerHeight: config.cargoHeight || null,
         values: {
+          vehicleType: config.vehicleType || vehicleTypeDefaultsByGroup[config.group] || (config.enclosed === false ? "flatbed" : "boxVan"),
           cabLength,
           cabFrontOverhang: Math.min(0.6, Math.max(0.2, cabLength * 0.24)),
           cabRearOverhang: Math.min(0.7, Math.max(0.2, cabLength * 0.28)),
@@ -1723,6 +2113,18 @@
           turnEaseRatio: config.turnEaseRatio || 28,
           maxArticulation,
           rigidBody
+        }
+      };
+    }
+
+    function makeEquipmentPreset(config) {
+      return {
+        ...config,
+        estimatedBody: config.estimatedBody ?? true,
+        values: {
+          vehicleType: config.vehicleType || vehicleTypeDefaultsByGroup[config.group] || "boxVan",
+          progress: 0,
+          ...config.values
         }
       };
     }
@@ -1756,6 +2158,24 @@
     ];
 
     const vehiclePresets = [
+      makeDeliveryPreset({ id: "suzuki-carry-kc", group: "keiTruck", nameJp: "スズキ キャリイ KC 平ボディ", nameCn: "铃木 Carry KC 平板轻卡", query: "Suzuki Carry KC", length: 3.395, width: 1.475, height: 1.765, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www.suzuki.co.jp/car/carry/detail/pdf/detail.pdf" }),
+      makeDeliveryPreset({ id: "suzuki-carry-cold", group: "temperature", nameJp: "スズキ キャリイ 冷蔵・冷凍車（架装参考）", nameCn: "铃木 Carry 冷藏冷冻车（改装参考）", query: "Suzuki Carry refrigerated", length: 3.395, width: 1.475, height: 2.02, cargoLength: 1.82, bodyWidth: 1.46, bodyHeight: 1.42, cargoHeight: 1.28, enclosed: true, wheelRadius: 0.28, turnRadius: 3.6, estimatedBody: true, source: "https://www.suzuki.co.jp/car/carry_customized/base/detail/" }),
+      makeDeliveryPreset({ id: "daihatsu-hijet-truck", group: "keiTruck", nameJp: "ダイハツ ハイゼット トラック スタンダード", nameCn: "大发 Hijet Truck 标准版", query: "Daihatsu Hijet Truck Standard", length: 3.395, width: 1.475, height: 1.78, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www.daihatsu.co.jp/lineup/truck/index.htm" }),
+      makeDeliveryPreset({ id: "daihatsu-hijet-panel", group: "keiTruck", nameJp: "ダイハツ ハイゼット パネルバン（架装参考）", nameCn: "大发 Hijet 厢式轻卡（改装参考）", query: "Daihatsu Hijet panel van", length: 3.395, width: 1.475, height: 2.02, cargoLength: 1.82, bodyWidth: 1.46, bodyHeight: 1.43, cargoHeight: 1.3, enclosed: true, wheelRadius: 0.28, turnRadius: 3.6, estimatedBody: true, source: "https://www.daihatsu.co.jp/lineup/truck/index.htm" }),
+      makeDeliveryPreset({ id: "nissan-clipper-truck", group: "keiTruck", nameJp: "日産 クリッパートラック DX", nameCn: "日产 Clipper Truck DX", query: "Nissan Clipper Truck DX", length: 3.395, width: 1.475, height: 1.765, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www3.nissan.co.jp/vehicles/new/clippertruck/specifications.html" }),
+      makeDeliveryPreset({ id: "subaru-sambar-truck", group: "keiTruck", nameJp: "SUBARU サンバートラック TB", nameCn: "斯巴鲁 Sambar Truck TB", query: "Subaru Sambar Truck TB", length: 3.395, width: 1.475, height: 1.78, cargoLength: 2.03, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.28, turnRadius: 3.6, source: "https://www.subaru.jp/sambar-truck/specification/" }),
+      makeDeliveryPreset({ id: "suzuki-every", group: "keiVan", nameJp: "スズキ エブリイ PAリミテッド", nameCn: "铃木 Every PA Limited 厢式货运车", query: "Suzuki Every PA Limited", length: 3.395, width: 1.475, height: 1.895, cargoLength: 1.91, cargoHeight: 1.24, enclosed: true, wheelRadius: 0.28, turnRadius: 4.1, source: "https://www.suzuki.co.jp/car/every/detail/pdf/detail.pdf" }),
+      makeDeliveryPreset({ id: "daihatsu-hijet-cargo", group: "keiVan", nameJp: "ダイハツ ハイゼット カーゴ デラックス", nameCn: "大发 Hijet Cargo Deluxe", query: "Daihatsu Hijet Cargo Deluxe", length: 3.395, width: 1.475, height: 1.89, cargoLength: 1.915, cargoHeight: 1.25, enclosed: true, wheelRadius: 0.28, turnRadius: 4.2, source: "https://www.daihatsu.co.jp/lineup/cargo/pdf/specifications.pdf" }),
+      makeDeliveryPreset({ id: "toyota-pixis-van", group: "keiVan", nameJp: "トヨタ ピクシス バン デラックス", nameCn: "丰田 Pixis Van Deluxe", query: "Toyota Pixis Van Deluxe", length: 3.395, width: 1.475, height: 1.89, cargoLength: 1.915, cargoHeight: 1.25, enclosed: true, wheelRadius: 0.28, turnRadius: 4.2, source: "https://toyota.jp/pages/contents/pixisvan/002_b_001/4.0/pdf/spec/pixisvan_spec_202112.pdf" }),
+      makeDeliveryPreset({ id: "subaru-sambar-van", group: "keiVan", nameJp: "SUBARU サンバーバン VB", nameCn: "斯巴鲁 Sambar Van VB", query: "Subaru Sambar Van VB", length: 3.395, width: 1.475, height: 1.89, cargoLength: 1.915, cargoHeight: 1.25, enclosed: true, wheelRadius: 0.28, turnRadius: 4.2, source: "https://www.subaru.jp/sambar-van/specification/" }),
+      makeDeliveryPreset({ id: "honda-nvan", group: "keiVan", nameJp: "Honda N-VAN G", nameCn: "本田 N-VAN G", query: "Honda N-VAN G", length: 3.395, width: 1.475, height: 1.945, cargoLength: 1.51, cargoHeight: 1.365, enclosed: true, wheelRadius: 0.28, turnRadius: 4.6, source: "https://www.honda.co.jp/N-VAN/common/pdf/nvan_spec_list.pdf" }),
+      makeDeliveryPreset({ id: "toyota-townace-van", group: "compactVan", nameJp: "トヨタ タウンエース バン DX", nameCn: "丰田 TownAce Van DX", query: "Toyota TownAce Van DX", length: 4.065, width: 1.665, height: 1.93, cargoLength: 2.045, cargoHeight: 1.305, enclosed: true, wheelRadius: 0.31, turnRadius: 4.9, source: "https://toyota.jp/pages/contents/townacevan/004_b_010/4.0/pdf/spec/townacevan_spec_202506.pdf" }),
+      makeDeliveryPreset({ id: "nissan-nv200", group: "compactVan", nameJp: "日産 NV200バネット DX 2WD", nameCn: "日产 NV200 Vanette DX 2WD", query: "Nissan NV200 Vanette DX 2WD", length: 4.4, width: 1.695, height: 1.855, cargoLength: 1.9, cargoHeight: 1.365, enclosed: true, wheelRadius: 0.32, turnRadius: 5.2, source: "https://www3.nissan.co.jp/content/dam/Nissan/jp/vehicles/nv200vannete/2107/pdf/nv200vanette_2107_specsheet.pdf" }),
+      makeDeliveryPreset({ id: "toyota-hiace-dx", group: "deliveryVan", nameJp: "トヨタ ハイエース バン DX 標準ボディ", nameCn: "丰田 HiAce Van DX 标准车身", query: "Toyota HiAce Van DX standard body", length: 4.695, width: 1.695, height: 1.98, cargoLength: 3, cargoHeight: 1.32, enclosed: true, wheelRadius: 0.34, turnRadius: 5, source: "https://toyota.jp/sc_files/media/images/carlineup/hiace/005_b_013/spec/spec/van/image/spec_van.pdf" }),
+      makeDeliveryPreset({ id: "nissan-caravan-dx", group: "deliveryVan", nameJp: "日産 キャラバン バン DX 標準幅", nameCn: "日产 Caravan Van DX 标准宽度", query: "Nissan Caravan Van DX standard width", length: 4.695, width: 1.695, height: 1.99, cargoLength: 3.055, cargoHeight: 1.325, enclosed: true, wheelRadius: 0.34, turnRadius: 5.2, source: "https://www3.nissan.co.jp/vehicles/new/caravan/loadability_comfort/loadability.html" }),
+      makeDeliveryPreset({ id: "isuzu-elfmio-flatbed", group: "smallTruck", nameJp: "いすゞ エルフミオ 1.0t 平ボディ", nameCn: "五十铃 ELF mio 1.0t 平板车", query: "Isuzu ELF mio 1.0t flatbed", length: 4.69, width: 1.695, height: 1.965, cargoLength: 3.115, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.36, turnRadius: 4.4, source: "https://www.isuzu.co.jp/product/elfmio/assets/pdf/ELFmio_store_specification.pdf" }),
+      makeDeliveryPreset({ id: "isuzu-elf-flatbed", group: "smallTruck", nameJp: "いすゞ エルフ 1.5t 標準キャブ 平ボディ", nameCn: "五十铃 ELF 1.5t 标准驾驶室平板车", query: "Isuzu ELF 1.5t standard cab flatbed", length: 4.69, width: 1.695, height: 1.97, cargoLength: 3.12, cargoHeight: 0.5, enclosed: false, wheelRadius: 0.38, turnRadius: 4.5, source: "https://www.isuzu.co.jp/support/data/pdf/elf/06shogen.pdf" }),
+      makeDeliveryPreset({ id: "fuso-canter-alumivan", group: "smallTruck", nameJp: "三菱ふそう キャンター 標準キャブ アルミバン（架装参考）", nameCn: "三菱扶桑 Canter 标准驾驶室铝厢车（改装参考）", query: "Mitsubishi Fuso Canter standard cab aluminum van", length: 4.69, width: 1.695, height: 2.85, cargoLength: 3.1, bodyLength: 3.18, bodyWidth: 1.84, bodyHeight: 1.95, cargoWidth: 1.78, cargoHeight: 1.845, cabHeight: 1.68, chassisHeight: 0.58, deckHeight: 0.22, enclosed: true, wheelRadius: 0.38, turnRadius: 4.5, estimatedBody: true, source: "https://www.mitsubishi-fuso.com/ja/product/canter/variation/" }),
       makeDeliveryPreset({ id: "hino-dutro-wide-flatbed", group: "wideFlatbed", nameJp: "日野 デュトロ ワイドキャブ 平ボディ（架装参考）", nameCn: "日野 Dutro 宽体驾驶室平板车（改装参考）", query: "Hino Dutro wide cab flatbed", length: 5.19, width: 1.995, height: 2.1, cargoLength: 3.5, bodyLength: 3.5, bodyWidth: 2.08, cargoHeight: 0.5, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: false, wheelRadius: 0.39, turnRadius: 5.1, estimatedBody: true, source: "https://www.hino.co.jp/dutro/specifications/" }),
       makeDeliveryPreset({ id: "hino-dutro-wide-alumivan", group: "boxDelivery", nameJp: "日野 デュトロ ワイドキャブ アルミバン（架装参考）", nameCn: "日野 Dutro 宽体驾驶室铝厢车（改装参考）", query: "Hino Dutro wide cab aluminum van", length: 5.5, width: 1.995, height: 3.02, cargoLength: 3.65, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.hino.co.jp/dutro/lineup/standard/" }),
       makeDeliveryPreset({ id: "hino-dutro-wide-cold", group: "temperature", nameJp: "日野 デュトロ ワイドキャブ 冷蔵冷凍車（架装参考）", nameCn: "日野 Dutro 宽体驾驶室冷藏冷冻车（改装参考）", query: "Hino Dutro wide cab refrigerated truck", length: 5.5, width: 1.995, height: 3.12, cargoLength: 3.62, bodyLength: 3.75, bodyWidth: 2.12, bodyHeight: 2.25, cargoWidth: 2, cargoHeight: 2.13, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.hino.co.jp/dutro/lineup/cool/index.html" }),
@@ -1775,7 +2195,19 @@
       makeDeliveryPreset({ id: "mercedes-sprinter-l2h2", group: "international", nameJp: "Mercedes-Benz Sprinter Panel Van L2H2", nameCn: "梅赛德斯-奔驰 Sprinter 厢式车 L2H2", query: "Mercedes-Benz Sprinter Panel Van L2H2", length: 5.932, width: 2.02, height: 2.62, cargoLength: 3.272, cargoHeight: 1.94, enclosed: true, wheelRadius: 0.38, turnRadius: 6.25, source: "https://www.mercedes-benz.co.uk/content/dam/hq/vans/models/sprinter/panel-van/overview/mercedes-benz-sprinter-panel-van-rwd-fwd-awd-technical-data.pdf" }),
       makeDeliveryPreset({ id: "ford-transit-l2h2", group: "international", nameJp: "Ford Transit Panel Van L2H2", nameCn: "福特 Transit 厢式车 L2H2", query: "Ford Transit Panel Van L2H2", length: 5.531, width: 2.052, height: 2.49, cargoLength: 3.044, cargoHeight: 1.886, enclosed: true, wheelRadius: 0.38, turnRadius: 6, source: "https://media.ford.com/content/dam/fordmedia/Europe/en/2019/04/Transit%20press%20kit/Transit_Technical_Specifications_EU.pdf" }),
       makeDeliveryPreset({ id: "vw-crafter-mwb-high", group: "international", nameJp: "Volkswagen Crafter Panel Van MWB High Roof", nameCn: "大众 Crafter 厢式车中轴高顶版", query: "Volkswagen Crafter Panel Van MWB High Roof", length: 5.986, width: 2.04, height: 2.59, cargoLength: 3.45, cargoHeight: 1.961, enclosed: true, wheelRadius: 0.38, turnRadius: 6, source: "https://www.volkswagen-vans.co.uk/idhub/content/dam/onehub_nfz/importers/gb/downloads/product-guides/crafter-panel-van-product-guide.pdf" }),
-      makeDeliveryPreset({ id: "iveco-daily-l2h2", group: "international", nameJp: "IVECO Daily Van L2H2", nameCn: "依维柯 Daily 厢式车 L2H2", query: "IVECO Daily Van L2H2", length: 6.087, width: 2.052, height: 2.66, cargoLength: 3.54, cargoHeight: 1.9, enclosed: true, wheelRadius: 0.39, turnRadius: 6.15, source: "https://www.iveco.com/uk/-/media/IVECOdotcom/PDF/IVECO-UK/Daily/IVECO-Daily-Brochure.ashx" })
+      makeDeliveryPreset({ id: "iveco-daily-l2h2", group: "international", nameJp: "IVECO Daily Van L2H2", nameCn: "依维柯 Daily 厢式车 L2H2", query: "IVECO Daily Van L2H2", length: 6.087, width: 2.052, height: 2.66, cargoLength: 3.54, cargoHeight: 1.9, enclosed: true, wheelRadius: 0.39, turnRadius: 6.15, source: "https://www.iveco.com/uk/-/media/IVECOdotcom/PDF/IVECO-UK/Daily/IVECO-Daily-Brochure.ashx" }),
+      makeDeliveryPreset({ id: "toyota-dyna-wide-flatbed", group: "wideFlatbed", nameJp: "トヨタ ダイナ ワイドキャブ 平ボディ（架装参考）", nameCn: "丰田 Dyna 宽体驾驶室平板车（改装参考）", query: "Toyota Dyna wide cab flatbed", length: 5.19, width: 1.995, height: 2.08, cargoLength: 3.5, bodyLength: 3.5, bodyWidth: 2.08, cargoHeight: 0.5, cabHeight: 1.76, chassisHeight: 0.62, deckHeight: 0.24, enclosed: false, wheelRadius: 0.39, turnRadius: 5.1, estimatedBody: true, source: "https://toyota.jp/dyna/" }),
+      makeDeliveryPreset({ id: "toyota-dyna-wide-alumivan", group: "boxDelivery", nameJp: "トヨタ ダイナ ワイドキャブ アルミバン（架装参考）", nameCn: "丰田 Dyna 宽体驾驶室铝厢车（改装参考）", query: "Toyota Dyna wide cab aluminum van", length: 5.55, width: 1.995, height: 3.02, cargoLength: 3.75, bodyLength: 3.85, bodyWidth: 2.12, bodyHeight: 2.15, cargoWidth: 2.02, cargoHeight: 2.03, cabHeight: 1.76, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://toyota.jp/dyna/" }),
+      makeDeliveryPreset({ id: "isuzu-elf-wide-bottle", group: "specialBody", nameJp: "いすゞ エルフ ワイドキャブ ボトルカー（架装参考）", nameCn: "五十铃 ELF 宽体驾驶室饮料配送车（改装参考）", query: "Isuzu ELF wide cab bottle carrier", length: 5.6, width: 1.995, height: 2.65, cargoLength: 3.85, bodyLength: 3.95, bodyWidth: 2.12, bodyHeight: 1.75, cargoWidth: 2.02, cargoHeight: 1.62, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: true, wheelRadius: 0.39, turnRadius: 5.3, estimatedBody: true, source: "https://www.isuzu.co.jp/product/elf_post/assets/pdf/ELF_JIREI.pdf" }),
+      makeDeliveryPreset({ id: "hino-dutro-wide-open-top", group: "specialBody", nameJp: "日野 デュトロ ワイドキャブ 青果平ボディ高あおり（架装参考）", nameCn: "日野 Dutro 宽体驾驶室青果高栏平板车（改装参考）", query: "Hino Dutro wide cab produce flatbed", length: 5.55, width: 1.995, height: 2.35, cargoLength: 3.75, bodyLength: 3.85, bodyWidth: 2.12, cargoHeight: 0.9, cabHeight: 1.78, chassisHeight: 0.62, deckHeight: 0.24, enclosed: false, wheelRadius: 0.39, turnRadius: 5.2, estimatedBody: true, source: "https://www.hino.co.jp/dutro/lineup/standard/" }),
+      makeEquipmentPreset({ id: "yard-tow-compact-cart", group: "articulatedYard", nameJp: "構内牽引車＋小型荷台台車（市場参考）", nameCn: "场内牵引车＋小型货台拖车（市场参考）", query: "yard tow tractor compact cargo trailer", source: "https://www.toyota-lf.com/products/", values: { vehicleType: "articulated", cabLength: 1.55, cabFrontOverhang: 0.25, cabRearOverhang: 0.25, hitchGap: 0.35, cabWidth: 1.1, cabHeight: 1.45, trailerLength: 2.4, trailerFrontOverhang: 0.15, trailerRearOverhang: 0.55, trailerWidth: 1.25, sideProtrusion: 0, deckHeight: 0.16, chassisHeight: 0.36, cargoEnabled: false, wheelTrack: 0.92, wheelWidth: 0.16, wheelRadius: 0.24, turnRadius: 2.2, rigidBody: false, maxArticulation: 55, maxSteeringAngle: 42, turnEaseRatio: 25 } }),
+      makeEquipmentPreset({ id: "yard-tow-long-cart", group: "articulatedYard", nameJp: "構内牽引車＋長尺荷台台車（市場参考）", nameCn: "场内牵引车＋长货台拖车（市场参考）", query: "yard tow tractor long platform trailer", source: "https://www.toyota-lf.com/products/", values: { vehicleType: "articulated", cabLength: 1.65, cabFrontOverhang: 0.25, cabRearOverhang: 0.3, hitchGap: 0.45, cabWidth: 1.18, cabHeight: 1.5, trailerLength: 3.6, trailerFrontOverhang: 0.2, trailerRearOverhang: 0.8, trailerWidth: 1.45, sideProtrusion: 0, deckHeight: 0.18, chassisHeight: 0.38, cargoEnabled: false, wheelTrack: 1.05, wheelWidth: 0.18, wheelRadius: 0.26, turnRadius: 2.6, rigidBody: false, maxArticulation: 52, maxSteeringAngle: 40, turnEaseRatio: 28 } }),
+      makeEquipmentPreset({ id: "turret-market-short", group: "turretTruck", nameJp: "ターレットトラック 標準荷台（市場参考）", nameCn: "ターレットトラック 标准荷台（市场参考）", query: "turret truck standard platform", source: "https://ja.wikipedia.org/wiki/%E3%82%BF%E3%83%BC%E3%83%AC%E3%83%83%E3%83%88%E3%83%A9%E3%83%83%E3%82%AF", values: { vehicleType: "lowPlatform", turretDiameter: 1.05, turretHeight: 1.22, platformLength: 2.35, platformWidth: 1.2, platformDeckThickness: 0.16, platformDeckHeight: 0.28, platformHandleHeight: 1.45, wheelTrack: 1.02, wheelWidth: 0.14, wheelRadius: 0.22, turnRadius: 2.1, rigidBody: true, maxArticulation: 0, maxSteeringAngle: 44, turnEaseRatio: 22 } }),
+      makeEquipmentPreset({ id: "turret-market-long", group: "turretTruck", nameJp: "ターレットトラック 長尺荷台（市場参考）", nameCn: "ターレットトラック 长荷台（市场参考）", query: "turret truck long platform", source: "https://www.webcartop.jp/2025/07/1653106/", values: { vehicleType: "lowPlatform", turretDiameter: 1.15, turretHeight: 1.32, platformLength: 3.25, platformWidth: 1.38, platformDeckThickness: 0.18, platformDeckHeight: 0.3, platformHandleHeight: 1.55, wheelTrack: 1.16, wheelWidth: 0.16, wheelRadius: 0.24, turnRadius: 2.45, rigidBody: true, maxArticulation: 0, maxSteeringAngle: 42, turnEaseRatio: 24 } }),
+      makeEquipmentPreset({ id: "roll-box-1100-800", group: "cageEquipment", nameJp: "ロールボックスパレット W1100×D800", nameCn: "笼车/框架台车 W1100×D800", query: "roll box pallet W1100 D800 H1700", source: "https://www.monotaro.com/g/00354036/", values: { vehicleType: "cageCart", cageLength: 1.1, cageWidth: 0.8, cageBaseHeight: 0.18, cageDeckThickness: 0.12, cageHeight: 1.7, cagePostThickness: 0.05, wheelTrack: 0.66, wheelWidth: 0.08, wheelRadius: 0.13, turnRadius: 1.35, rigidBody: true, maxArticulation: 0, maxSteeringAngle: 44, turnEaseRatio: 18 } }),
+      makeEquipmentPreset({ id: "roll-box-1200-1000", group: "cageEquipment", nameJp: "大型ロールボックスパレット W1200×D1000", nameCn: "大型笼车/框架台车 W1200×D1000", query: "large roll box pallet W1200 D1000 H1700", source: "https://www.monotaro.com/g/00354036/", values: { vehicleType: "cageCart", cageLength: 1.2, cageWidth: 1.0, cageBaseHeight: 0.2, cageDeckThickness: 0.14, cageHeight: 1.75, cagePostThickness: 0.055, wheelTrack: 0.82, wheelWidth: 0.09, wheelRadius: 0.15, turnRadius: 1.55, rigidBody: true, maxArticulation: 0, maxSteeringAngle: 44, turnEaseRatio: 18 } }),
+      makeEquipmentPreset({ id: "toyota-geneo-15", group: "forkliftEquipment", nameJp: "トヨタL&F Geneo 1.5t クラス", nameCn: "丰田L&F Geneo 1.5t 级叉车", query: "Toyota L&F Geneo 1.5 ton forklift", source: "https://www.toyota-lf.com/products/detail/geneo/", values: { vehicleType: "frontFork", forkliftBodyLength: 2.1, forkliftBodyWidth: 1.08, forkliftBodyHeight: 1.38, forkMastHeight: 2.0, forkLength: 1.07, forkSpread: 0.82, forkThickness: 0.08, wheelTrack: 0.92, wheelWidth: 0.18, wheelRadius: 0.28, turnRadius: 2.0, rigidBody: true, maxArticulation: 0, maxSteeringAngle: 44, turnEaseRatio: 18 } }),
+      makeEquipmentPreset({ id: "toyota-geneo-25", group: "forkliftEquipment", nameJp: "トヨタL&F Geneo 2.5t クラス", nameCn: "丰田L&F Geneo 2.5t 级叉车", query: "Toyota L&F Geneo 2.5 ton forklift", source: "https://www.toyota-lf.com/products/detail/geneo/", values: { vehicleType: "frontFork", forkliftBodyLength: 2.55, forkliftBodyWidth: 1.18, forkliftBodyHeight: 1.45, forkMastHeight: 2.2, forkLength: 1.22, forkSpread: 0.9, forkThickness: 0.09, wheelTrack: 1.0, wheelWidth: 0.2, wheelRadius: 0.31, turnRadius: 2.25, rigidBody: true, maxArticulation: 0, maxSteeringAngle: 42, turnEaseRatio: 20 } })
     ];
 
     const i18n = {
@@ -1790,6 +2222,7 @@
         remainVolume: "残余体積 m³",
         remainRatio: "残余率",
         vehicleMatch: "車両データ自動入力",
+        vehicleType: "基本ジオメトリ",
         match: "検索",
         vehicleSearchPlaceholder: "トラックのメーカー・型式を入力（例：Volvo FH16）",
         dimensionPlaceholder: "車両寸法資料を貼り付けることもできます。例：外形寸法 5995×2550×3950mm、ホイールベース 3400mm、前オーバーハング 1.2m、後オーバーハング 0.9m",
@@ -1825,6 +2258,29 @@
         cargoFrontOverhang: "荷箱前方張出し m",
         cargoBaseOffset: "荷箱のデッキ上高さ m",
         cargoHeight: "荷箱高さ m",
+        lowPlatformSection: "ターレットトラック",
+        turretDiameter: "前部円筒直径 m",
+        turretHeight: "前部円筒高さ m",
+        platformLength: "後部荷台長さ m",
+        platformWidth: "後部荷台幅 m",
+        platformDeckThickness: "荷台床板厚 m",
+        platformDeckHeight: "荷台床高さ m",
+        platformHandleHeight: "運転部ガード高さ m",
+        cageCartSection: "カゴ台車・ラック車",
+        cageLength: "台車長さ m",
+        cageWidth: "台車幅 m",
+        cageBaseHeight: "床高さ m",
+        cageDeckThickness: "床板厚 m",
+        cageHeight: "フレーム高さ m",
+        cagePostThickness: "フレーム部材厚 m",
+        frontForkSection: "フォークリフト・スタッカー",
+        forkliftBodyLength: "車体長さ m",
+        forkliftBodyWidth: "車体幅 m",
+        forkliftBodyHeight: "車体高さ m",
+        forkMastHeight: "マスト高さ m",
+        forkLength: "フォーク長さ m",
+        forkSpread: "フォーク外幅 m",
+        forkThickness: "フォーク厚さ m",
         turnSection: "旋回・計算",
         progress: "旋回進捗 %",
         turnRadius: "旋回半径 m",
@@ -1839,15 +2295,16 @@
         gridResolution: "平面サンプル精度",
         heightSlices: "高さ方向分割数",
         counterTraffic: "対向車両の掃引を含める",
+        sweepAxisMode: "掃引方向",
+        sweepAxisX: "X軸掃引",
+        sweepAxisY: "Y軸掃引",
+        sweepAxisBoth: "双方向掃引",
         displaySection: "表示",
-        smoothVolume: "平滑体積モード",
         showRemaining: "残余体積を表示",
         showIntersection: "掃引占有体積を表示",
         showSwept: "掃引軌跡を表示",
         play: "再生",
         pause: "一時停止",
-        smoothButton: "平滑体積",
-        voxelButton: "体素体積",
         remainingView: "残余体積ビュー",
         exportStl: "STL出力",
         topView: "平面図",
@@ -1860,6 +2317,7 @@
         saveCurrent: "現在値を保存",
         overlapAnalysis: "重ね合わせ解析",
         exportReport: "レポート出力",
+        sortVolumes: "体積順に並べ替え",
         reportNoSaved: "先に残余体積を1件以上保存してください。",
         remainingViewerTitle: "残余体積のみ表示。回転・移動・ズームできます。",
         close: "閉じる",
@@ -1875,12 +2333,9 @@
         view: "表示",
         delete: "削除",
         rename: "残余体積の名前を変更",
-        voxel: "体素",
         pose: "姿勢",
         savedName: index => `体積${index}`,
         heatmapTitleWithCount: count => `残余体積重ね合わせ密度表示 · ${count}案`,
-        statusSmooth: "現在は平滑表示です。",
-        statusVoxel: "現在は体素表示です。",
         pasteFirst: "先に車両寸法資料を貼り付けてください。",
         parsedApplied: applied => `貼り付けたテキストから認識して入力しました：${applied.join("、")}。記載のない値は変更していません。`,
         parsedNone: "自動入力できません：貼り付けたテキストから利用可能な寸法を認識できませんでした。",
@@ -1888,9 +2343,7 @@
         searching: "車両寸法データを検索しています…",
         matched: (label, applied) => `${label} を照合し、自動入力しました：${applied.join("、")}。対象の型式・年式に適したデータか確認してください。`,
         noUsableData: "自動入力できません：利用可能な長さ・幅・高さ・ホイールベースを見つけられませんでした。",
-        lookupFailed: error => `自動入力できません：${error || "オンライン検索に失敗しました"}。`,
-        smoothAria: "現在は平滑体積です。クリックすると体素体積に切り替わります。",
-        voxelAria: "現在は体素体積です。クリックすると平滑体積に切り替わります。"
+        lookupFailed: error => `自動入力できません：${error || "オンライン検索に失敗しました"}。`
       },
       cn: {
         langButton: "CN",
@@ -1903,6 +2356,7 @@
         remainVolume: "剩余体积 m³",
         remainRatio: "剩余比例",
         vehicleMatch: "车型自动匹配",
+        vehicleType: "基础几何类型",
         match: "匹配",
         vehicleSearchPlaceholder: "输入货车品牌型号，例如 Volvo FH16",
         dimensionPlaceholder: "也可以粘贴车辆尺寸资料，例如：外形尺寸 5995×2550×3950mm，轴距 3400mm，前悬 1.2m，后悬 0.9m",
@@ -1938,6 +2392,29 @@
         cargoFrontOverhang: "货箱前伸 m",
         cargoBaseOffset: "货箱离底盘高度 m",
         cargoHeight: "货箱高度 m",
+        lowPlatformSection: "ターレットトラック",
+        turretDiameter: "前部圆筒直径 m",
+        turretHeight: "前部圆筒高度 m",
+        platformLength: "后部荷台长度 m",
+        platformWidth: "后部荷台宽度 m",
+        platformDeckThickness: "荷台厚度 m",
+        platformDeckHeight: "荷台离地高度 m",
+        platformHandleHeight: "驾驶护栏高度 m",
+        cageCartSection: "笼车/框架台车",
+        cageLength: "笼车长度 m",
+        cageWidth: "笼车宽度 m",
+        cageBaseHeight: "底盘离地高度 m",
+        cageDeckThickness: "底盘厚度 m",
+        cageHeight: "框架高度 m",
+        cagePostThickness: "框架杆件厚度 m",
+        frontForkSection: "叉车/堆高车",
+        forkliftBodyLength: "车身长度 m",
+        forkliftBodyWidth: "车身宽度 m",
+        forkliftBodyHeight: "车身高度 m",
+        forkMastHeight: "门架高度 m",
+        forkLength: "货叉长度 m",
+        forkSpread: "货叉外侧宽度 m",
+        forkThickness: "货叉厚度 m",
         turnSection: "转弯与计算",
         progress: "转弯进度 %",
         turnRadius: "转弯半径 m",
@@ -1952,15 +2429,16 @@
         gridResolution: "平面采样精度",
         heightSlices: "高度切片数",
         counterTraffic: "包含对向来车扫掠",
+        sweepAxisMode: "扫掠方向",
+        sweepAxisX: "X轴扫掠",
+        sweepAxisY: "Y轴扫掠",
+        sweepAxisBoth: "双向扫掠",
         displaySection: "显示",
-        smoothVolume: "平滑体积模式",
         showRemaining: "显示剩余体积",
         showIntersection: "显示扫掠占用体积",
         showSwept: "显示扫掠影子",
         play: "播放",
         pause: "暂停",
-        smoothButton: "平滑体积",
-        voxelButton: "体素体积",
         remainingView: "剩余体积视图",
         exportStl: "导出STL",
         topView: "顶视图",
@@ -1973,6 +2451,7 @@
         saveCurrent: "保存当前",
         overlapAnalysis: "叠加分析",
         exportReport: "导出报告",
+        sortVolumes: "按体积降序",
         reportNoSaved: "请先保存至少一个剩余体积。",
         remainingViewerTitle: "仅显示剩余体积，可旋转、平移、缩放",
         close: "关闭",
@@ -1988,12 +2467,9 @@
         view: "查看",
         delete: "删除",
         rename: "重命名剩余体积",
-        voxel: "体素",
         pose: "姿态",
         savedName: index => `体积${index}`,
         heatmapTitleWithCount: count => `剩余体积叠加密度图 · ${count} 个方案`,
-        statusSmooth: "当前为平滑显示。",
-        statusVoxel: "当前为体素显示。",
         pasteFirst: "请先粘贴车辆尺寸资料。",
         parsedApplied: applied => `已从粘贴文本识别并填入：${applied.join("、")}。未出现的数值保持不变。`,
         parsedNone: "无法自动输入数值：粘贴文本中没有识别到可用尺寸。",
@@ -2001,9 +2477,7 @@
         searching: "正在查找车型尺寸数据…",
         matched: (label, applied) => `已匹配 ${label}，自动填入：${applied.join("、")}。请核对来源数据是否适合你的具体车型/年份。`,
         noUsableData: "无法自动输入数值：没有找到可用的长、宽、高或轴距数据。",
-        lookupFailed: error => `无法自动输入数值：${error || "联网查询失败"}。`,
-        smoothAria: "当前为平滑体积，点击切换为体素体积",
-        voxelAria: "当前为体素体积，点击切换为平滑体积"
+        lookupFailed: error => `无法自动输入数值：${error || "联网查询失败"}。`
       }
     };
 
@@ -2027,7 +2501,27 @@
       cargoLength: "cargoLength",
       cargoFrontOverhang: "cargoFrontOverhang",
       cargoBaseOffset: "cargoBaseOffset",
-      cargoHeight: "cargoHeight"
+      cargoHeight: "cargoHeight",
+      turretDiameter: "turretDiameter",
+      turretHeight: "turretHeight",
+      platformLength: "platformLength",
+      platformWidth: "platformWidth",
+      platformDeckThickness: "platformDeckThickness",
+      platformDeckHeight: "platformDeckHeight",
+      platformHandleHeight: "platformHandleHeight",
+      cageLength: "cageLength",
+      cageWidth: "cageWidth",
+      cageBaseHeight: "cageBaseHeight",
+      cageDeckThickness: "cageDeckThickness",
+      cageHeight: "cageHeight",
+      cagePostThickness: "cagePostThickness",
+      forkliftBodyLength: "forkliftBodyLength",
+      forkliftBodyWidth: "forkliftBodyWidth",
+      forkliftBodyHeight: "forkliftBodyHeight",
+      forkMastHeight: "forkMastHeight",
+      forkLength: "forkLength",
+      forkSpread: "forkSpread",
+      forkThickness: "forkThickness"
     };
 
     function tr(key, ...args) {
@@ -2069,15 +2563,153 @@
     }
 
     const vehiclePresetGroups = {
+      keiTruck: { jp: "軽トラック・軽架装", cn: "轻卡与轻型改装" },
+      keiVan: { jp: "軽バン・軽配送", cn: "轻型厢式货运车" },
+      compactVan: { jp: "コンパクトバン", cn: "紧凑型厢式车" },
+      deliveryVan: { jp: "標準配送バン", cn: "标准配送厢式车" },
+      smallTruck: { jp: "標準幅小型トラック", cn: "标准宽小型卡车" },
       wideFlatbed: { jp: "ワイドキャブ・平ボディ", cn: "宽体驾驶室与平板车" },
       boxDelivery: { jp: "都市配送・アルミバン", cn: "城市配送与铝厢车" },
       temperature: { jp: "低温物流・冷蔵冷凍", cn: "低温物流与冷藏冷冻" },
       specialBody: { jp: "荷役・特殊架装", cn: "装卸与特殊改装车" },
+      articulatedYard: { jp: "連結・構内牽引", cn: "铰接与场内牵引" },
+      turretTruck: { jp: "市場ターレット", cn: "市场ターレットトラック" },
+      cageEquipment: { jp: "カゴ台車・ラック車", cn: "笼车与框架台车" },
+      forkliftEquipment: { jp: "フォークリフト・スタッカー", cn: "叉车与堆高车" },
       international: { jp: "海外の実用参考車種", cn: "海外实用参考车型" }
     };
 
+    const vehiclePresetTypeOrder = ["boxVan", "flatbed", "articulated", "lowPlatform", "cageCart", "frontFork"];
+
+    function vehiclePresetGroupLabel(groupKey) {
+      const group = vehiclePresetGroups[groupKey] || { jp: groupKey, cn: groupKey };
+      return currentLanguage === "jp" ? group.jp : group.cn;
+    }
+
+    function vehicleTypeLabel(type = state.vehicleType) {
+      const item = vehicleTypes[type] || vehicleTypes.boxVan;
+      return currentLanguage === "jp" ? item.jp : item.cn;
+    }
+
+    function renderVehicleTypeOptions() {
+      const select = document.querySelector("#vehicleTypeSelect");
+      if (!select) return;
+      const selected = vehicleTypes[state.vehicleType] ? state.vehicleType : "boxVan";
+      select.innerHTML = "";
+      for (const [type, label] of Object.entries(vehicleTypes)) {
+        const option = document.createElement("option");
+        option.value = type;
+        option.textContent = currentLanguage === "jp" ? label.jp : label.cn;
+        select.appendChild(option);
+      }
+      select.value = selected;
+      select.setAttribute("aria-label", tr("vehicleType"));
+      state.vehicleType = selected;
+    }
+
+    function syncVehicleControlSections() {
+      const type = vehicleTypes[state.vehicleType] ? state.vehicleType : "boxVan";
+      const specialTypes = new Set(["lowPlatform", "cageCart", "frontFork"]);
+      const useStandardSections = !specialTypes.has(type);
+      for (const section of document.querySelectorAll("[data-vehicle-section]")) {
+        section.hidden = !useStandardSections;
+      }
+      for (const section of document.querySelectorAll("[data-type-section]")) {
+        section.hidden = section.dataset.typeSection !== type;
+      }
+    }
+
+    function refreshControlInputs() {
+      for (const wrapper of document.querySelectorAll(".control[data-param]")) {
+        const key = wrapper.dataset.param;
+        const number = wrapper.querySelector("input[type='number']");
+        const range = wrapper.querySelector("input[type='range']");
+        if (!number || !range || typeof state[key] === "undefined") continue;
+        number.value = state[key];
+        range.value = state[key];
+      }
+      for (const key of ["cargoEnabled", "showRemaining", "showIntersection", "showSwept"]) {
+        const input = document.querySelector(`#${key}`);
+        if (input) input.checked = Boolean(state[key]);
+      }
+      syncSweepAxisModeControl();
+    }
+
+    function applyVehicleTypeDefaults(type) {
+      const defaults = vehicleTypeDefaultValues[type];
+      if (!defaults) return;
+      for (const [key, value] of Object.entries(defaults)) {
+        if (typeof value === "boolean") {
+          state[key] = value;
+        } else if (!setControlValue(key, value)) {
+          state[key] = value;
+        }
+      }
+      refreshControlInputs();
+    }
+
+    function setVehicleType(type, { applyDefaults = false, clearPreset = false } = {}) {
+      state.vehicleType = vehicleTypes[type] ? type : "boxVan";
+      const typeSelect = document.querySelector("#vehicleTypeSelect");
+      if (typeSelect) typeSelect.value = state.vehicleType;
+      if (applyDefaults) applyVehicleTypeDefaults(state.vehicleType);
+      if (clearPreset) {
+        const presetSelect = document.querySelector("#vehiclePresetSelect");
+        const search = document.querySelector("#vehicleSearchQuery");
+        if (presetSelect) presetSelect.value = "";
+        if (search) search.value = "";
+      }
+      syncVehicleControlSections();
+      renderVehiclePresetOptions();
+    }
+
     function vehiclePresetName(preset) {
       return currentLanguage === "jp" ? preset.nameJp : preset.nameCn;
+    }
+
+    function vehiclePresetType(preset) {
+      return preset?.values?.vehicleType || vehicleTypeDefaultsByGroup[preset?.group] || "boxVan";
+    }
+
+    function vehiclePresetMarketClass(preset) {
+      const type = vehiclePresetType(preset);
+      if (type !== "boxVan") return type;
+      if (preset?.marketClass) return preset.marketClass;
+      const width = Number(preset?.bodyWidth || preset?.width || 0);
+      const length = Number(preset?.bodyLength || preset?.length || 0);
+      const cargoLength = Number(preset?.cargoLength || 0);
+      const isLargeInbound = width >= 1.9 || length >= 5.2 || cargoLength >= 3.4 || ["boxDelivery", "temperature", "specialBody"].includes(preset?.group);
+      return isLargeInbound ? "largeBoxVan" : "smallBoxVan";
+    }
+
+    function vehicleMarketClassLabel(classKey) {
+      const item = vehicleMarketClasses[classKey] || vehicleMarketClasses[state.vehicleType] || vehicleMarketClasses.smallBoxVan;
+      return currentLanguage === "jp" ? item.jp : item.cn;
+    }
+
+    function sweepAxisModeKey(value = state.sweepAxisMode) {
+      const mode = Math.round(Number(value));
+      if (mode === 0) return "sweepAxisX";
+      if (mode === 1) return "sweepAxisY";
+      return "sweepAxisBoth";
+    }
+
+    function sweepModeIncludesX() {
+      return Math.round(Number(state.sweepAxisMode)) !== 1;
+    }
+
+    function sweepModeIncludesY() {
+      return Math.round(Number(state.sweepAxisMode)) !== 0;
+    }
+
+    function syncSweepAxisModeControl() {
+      const input = document.querySelector("#sweepAxisMode");
+      const value = document.querySelector("#sweepAxisModeValue");
+      const mode = Math.max(0, Math.min(2, Math.round(Number(state.sweepAxisMode) || 0)));
+      state.sweepAxisMode = mode;
+      state.counterTraffic = mode !== 0;
+      if (input) input.value = String(mode);
+      if (value) value.textContent = tr(sweepAxisModeKey(mode));
     }
 
     function renderVehiclePresetOptions() {
@@ -2089,20 +2721,36 @@
       placeholder.value = "";
       placeholder.textContent = "";
       select.appendChild(placeholder);
-      for (const [groupKey, group] of Object.entries(vehiclePresetGroups)) {
-        const presets = vehiclePresets.filter(preset => preset.group === groupKey);
-        if (!presets.length) continue;
-        const optgroup = document.createElement("optgroup");
-        optgroup.label = currentLanguage === "jp" ? group.jp : group.cn;
-        for (const preset of presets) {
-          const option = document.createElement("option");
-          option.value = preset.id;
-          option.textContent = vehiclePresetName(preset);
-          optgroup.appendChild(option);
+      for (const type of vehiclePresetTypeOrder) {
+        const typePresets = vehiclePresets.filter(preset => vehiclePresetType(preset) === type);
+        if (!typePresets.length) continue;
+        const buckets = [];
+        for (const preset of typePresets) {
+          const marketClass = type === "boxVan" ? vehiclePresetMarketClass(preset) : type;
+          const key = `${marketClass}__${preset.group}`;
+          let bucket = buckets.find(item => item.key === key);
+          if (!bucket) {
+            bucket = { key, marketClass, groupKey: preset.group, presets: [] };
+            buckets.push(bucket);
+          }
+          bucket.presets.push(preset);
         }
-        select.appendChild(optgroup);
+        for (const bucket of buckets) {
+          const optgroup = document.createElement("optgroup");
+          optgroup.label = type === "boxVan"
+            ? `${vehicleTypeLabel(type)} / ${vehicleMarketClassLabel(bucket.marketClass)} / ${vehiclePresetGroupLabel(bucket.groupKey)}`
+            : `${vehicleTypeLabel(type)} / ${vehiclePresetGroupLabel(bucket.groupKey)}`;
+          for (const preset of bucket.presets) {
+            const option = document.createElement("option");
+            option.value = preset.id;
+            option.textContent = vehiclePresetName(preset);
+            optgroup.appendChild(option);
+          }
+          select.appendChild(optgroup);
+        }
       }
-      select.value = selected;
+      const selectedPreset = vehiclePresets.find(preset => preset.id === selected);
+      select.value = selectedPreset ? selected : "";
       delete select.dataset.restoreValue;
       select.title = currentLanguage === "jp" ? "市場でよく使われる車種から選択" : "从装卸市场常用车型中选择";
       select.setAttribute("aria-label", select.title);
@@ -2122,15 +2770,21 @@
     }
 
     function applyVehiclePreset(preset, status) {
+      setVehicleType(vehiclePresetType(preset), { applyDefaults: false, clearPreset: false });
       for (const [key, value] of Object.entries(preset.values)) {
         if (typeof value === "boolean") {
           state[key] = value;
           const input = document.querySelector(`#${key}`);
           if (input) input.checked = value;
+        } else if (key === "vehicleType") {
+          continue;
         } else {
           if (!setControlValue(key, value)) state[key] = value;
         }
       }
+      refreshControlInputs();
+      syncVehicleControlSections();
+      renderVehiclePresetOptions();
       const select = document.querySelector("#vehiclePresetSelect");
       const search = document.querySelector("#vehicleSearchQuery");
       if (select) select.value = preset.id;
@@ -2172,7 +2826,7 @@
       setHTML(".metrics .metric:nth-child(3) span", "remainVolume");
       setHTML("#remainRatioCard span", "remainRatio");
 
-      const detailKeys = ["vehicleMatch", "cornerSection", "cabSection", "trailerSection", "cargoSection", "turnSection", "displaySection"];
+      const detailKeys = ["vehicleMatch", "cornerSection", "cabSection", "trailerSection", "cargoSection", "lowPlatformSection", "cageCartSection", "frontForkSection", "turnSection", "displaySection"];
       document.querySelectorAll(".controls > details > summary").forEach((summary, index) => {
         if (detailKeys[index]) summary.innerHTML = termHTML(tr(detailKeys[index]));
       });
@@ -2186,15 +2840,21 @@
         if (label) label.innerHTML = termHTML(tr(key));
       }
       setHTML('label[for="cargoEnabled"]', "cargoEnabled");
-      setHTML('label[for="smoothVolume"]', "smoothVolume");
       setHTML('label[for="showRemaining"]', "showRemaining");
       setHTML('label[for="showIntersection"]', "showIntersection");
       setHTML('label[for="showSwept"]', "showSwept");
-      setHTML('label[for="counterTraffic"]', "counterTraffic");
+      setHTML("#sweepAxisModeLabel", "sweepAxisMode");
+      setText("#sweepAxisXLabel", "sweepAxisX");
+      setText("#sweepAxisYLabel", "sweepAxisY");
+      setText("#sweepAxisBothLabel", "sweepAxisBoth");
+      syncSweepAxisModeControl();
 
       setPlaceholder("#vehicleSearchQuery", "vehicleSearchPlaceholder");
       setPlaceholder("#vehicleDimensionText", "dimensionPlaceholder");
       renderVehiclePresetOptions();
+      renderVehicleTypeOptions();
+      syncVehicleControlSections();
+      setHTML('label[for="vehicleTypeSelect"]', "vehicleType");
       setText("#vehicleSearchButton", "match");
       setText("#parseDimensionButton", "parseText");
       const lookupStatus = document.querySelector("#vehicleLookupStatus");
@@ -2222,6 +2882,7 @@
       setText("#saveRemainingVolume span", "saveCurrent");
       setText("#openHeatmapViewer span", "overlapAnalysis");
       setText("#exportA4Report span", "exportReport");
+      setText("#sortSavedVolumes span", "sortVolumes");
       setHTML("#remainingViewerTitle", "remainingViewerTitle");
       setText("#closeRemainingViewer", "close");
       setText("#resetRemainingCamera", "resetView");
@@ -2234,7 +2895,6 @@
       setText("#heatmapDensityHigh", "heatmapDensityHigh");
       syncHeatmapLockButton();
       updateHeatmapThresholdLabel();
-      syncSmoothModeControls();
       renderSavedVolumeList();
       queueWorkspaceSave();
     }
@@ -2352,8 +3012,8 @@
         polygonOffsetFactor: 1,
         polygonOffsetUnits: 1
       }),
-      remaining: new THREE.MeshBasicMaterial({ color: 0x050505, transparent: true, opacity: 0.48, depthWrite: false, side: THREE.DoubleSide }),
-      cut: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.48, depthWrite: false, side: THREE.DoubleSide })
+      remaining: new THREE.MeshBasicMaterial({ color: 0x050505, transparent: true, opacity: 0.56, depthWrite: true, side: THREE.FrontSide }),
+      cut: new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.34, depthWrite: false, side: THREE.DoubleSide })
     };
 
     const remainingViewer = {
@@ -2409,13 +3069,14 @@
     function persistWorkspace() {
       try {
         localStorage.setItem(workspaceStorageKey, JSON.stringify({
-          version: 4,
+          version: 5,
           language: currentLanguage,
           state,
           form: {
             vehicleSearchQuery: document.querySelector("#vehicleSearchQuery")?.value || "",
             vehicleDimensionText: document.querySelector("#vehicleDimensionText")?.value || "",
-            vehiclePresetId: document.querySelector("#vehiclePresetSelect")?.value || ""
+            vehiclePresetId: document.querySelector("#vehiclePresetSelect")?.value || "",
+            vehicleType: document.querySelector("#vehicleTypeSelect")?.value || state.vehicleType
           },
           heatmapView: lockedHeatmapView
         }));
@@ -2432,14 +3093,15 @@
     function persistVolumeLibrary() {
       try {
         localStorage.setItem(volumeLibraryStorageKey, JSON.stringify({
-          version: 2,
+          version: 3,
           serial: savedVolumeSerial,
           volumes: savedVolumes.map(item => ({
             id: item.id,
             name: item.name,
             color: item.color,
             created: item.created,
-            sourceState: item.result.sourceState
+            sourceState: item.sourceState || item.result?.sourceState,
+            summary: item.summary || summaryFromResult(item.result)
           }))
         }));
       } catch (error) {
@@ -2451,10 +3113,59 @@
       const activeState = { ...state };
       try {
         Object.assign(state, { entryLaneOffset: 0 }, sourceState);
-        return cloneVoxelResult(computeVoxelResult());
+        return cloneVolumeResult(computeSmoothVolumeResult());
       } finally {
         Object.assign(state, activeState);
       }
+    }
+
+    function summaryFromResult(result) {
+      if (!result) return null;
+      return {
+        mode: result.mode,
+        totalCells: result.totalCells,
+        sampleFrames: result.sampleFrames,
+        totalVolume: result.totalVolume,
+        cutVolume: result.cutVolume,
+        remainVolume: result.remainVolume,
+        remainRatio: result.remainRatio ?? (result.totalVolume > 0 ? result.remainVolume / result.totalVolume * 100 : 0),
+        chamferX: result.chamferX,
+        chamferY: result.chamferY,
+        prismHeight: result.prismHeight,
+        vehicle: result.vehicle
+      };
+    }
+
+    function lazyResultFromSavedItem(item) {
+      const summary = item.summary || {};
+      return {
+        mode: summary.mode || "stl-solid",
+        remaining: [],
+        occupied: [],
+        remainingSolids: [],
+        occupiedSolids: [],
+        totalCells: summary.totalCells || 0,
+        sampleFrames: summary.sampleFrames || 0,
+        totalVolume: Number(summary.totalVolume) || 0,
+        cutVolume: Number(summary.cutVolume) || 0,
+        remainVolume: Number(summary.remainVolume) || 0,
+        remainRatio: Number(summary.remainRatio) || 0,
+        chamferX: Number(summary.chamferX) || item.sourceState?.chamferX || 0,
+        chamferY: Number(summary.chamferY) || item.sourceState?.chamferY || 0,
+        prismHeight: Number(summary.prismHeight) || item.sourceState?.prismHeight || 0,
+        sourceState: item.sourceState,
+        vehicle: summary.vehicle || {}
+      };
+    }
+
+    function ensureSavedVolumeResult(item) {
+      if (!item) return null;
+      if (item.result?.remainingSolids?.length || item.result?.remaining?.length) return item.result;
+      if (!item.sourceState && item.result?.sourceState) item.sourceState = item.result.sourceState;
+      if (!item.sourceState) return item.result || null;
+      item.result = computeSavedResultFromState(item.sourceState);
+      item.summary = summaryFromResult(item.result);
+      return item.result;
     }
 
     function restoreLocalMemory() {
@@ -2465,6 +3176,7 @@
             if (!(key in state)) continue;
             if (typeof state[key] === "number" && Number.isFinite(Number(value))) state[key] = Number(value);
             if (typeof state[key] === "boolean" && typeof value === "boolean") state[key] = value;
+            if (key === "vehicleType" && typeof value === "string" && vehicleTypes[value]) state[key] = value;
           }
         }
         if (workspace?.language === "jp" || workspace?.language === "cn") {
@@ -2481,6 +3193,9 @@
             counterTraffic: true
           });
         }
+        if ((workspace?.version || 1) < 5) {
+          state.sweepAxisMode = state.counterTraffic ? 2 : 0;
+        }
         if (isValidHeatmapCameraView(workspace?.heatmapView)) {
           lockedHeatmapView = workspace.heatmapView;
         }
@@ -2491,6 +3206,7 @@
           if (searchInput) searchInput.value = workspace.form.vehicleSearchQuery || "";
           if (dimensionText) dimensionText.value = workspace.form.vehicleDimensionText || "";
           if (presetSelect) presetSelect.dataset.restoreValue = workspace.form.vehiclePresetId || "";
+          if (vehicleTypes[workspace.form.vehicleType]) state.vehicleType = workspace.form.vehicleType;
           const restoredPreset = vehiclePresets.find(preset => preset.id === workspace.form.vehiclePresetId);
           if ((workspace.version || 1) < 3 && restoredPreset) {
             state.rigidBody = restoredPreset.values.rigidBody;
@@ -2511,7 +3227,9 @@
             name: item.name,
             color: item.color,
             created: item.created,
-            result: computeSavedResultFromState(item.sourceState)
+            sourceState: item.sourceState,
+            summary: item.summary || null,
+            result: lazyResultFromSavedItem(item)
           });
         }
         savedVolumeSerial = Math.max(Number(library.serial) || 1, savedVolumes.length + 1);
@@ -2718,12 +3436,8 @@
       if (!remainingViewer.isOpen) return;
       clearRemainingViewerGroup();
       let mesh = null;
-      const result = latestVoxelResult || computeVoxelResult();
-      if (result.remaining.length) {
-        mesh = state.smoothVolume
-          ? smoothedVoxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, remainingViewerMaterial)
-          : voxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, remainingViewerMaterial);
-      }
+      const result = latestSmoothResult || computeSmoothVolumeResult();
+      if (result.remainingSolids?.length) mesh = extrudedSolidsMesh(result.remainingSolids, remainingViewerMaterial);
       if (!mesh) return;
       mesh.renderOrder = 10;
       remainingViewerGroup.add(mesh);
@@ -2760,6 +3474,70 @@
       }));
     }
 
+    function cloneMultiPolygon(multiPolygon) {
+      return (multiPolygon || []).map(polygon => polygon.map(ring => ring.map(point => [point[0], point[1]])));
+    }
+
+    function cloneSolids(solids) {
+      return (solids || []).map(solid => ({
+        multiPolygon: cloneMultiPolygon(solid.multiPolygon),
+        y0: solid.y0,
+        y1: solid.y1
+      }));
+    }
+
+    function volumeVehicleSnapshot() {
+      const presetSelect = document.querySelector("#vehiclePresetSelect");
+      const preset = vehiclePresets.find(item => item.id === presetSelect?.value);
+      const marketClass = preset ? vehiclePresetMarketClass(preset) : (
+        state.vehicleType === "boxVan"
+          ? (state.trailerWidth >= 1.9 || state.trailerLength >= 3.4 || state.cargoLength >= 3.4 ? "largeBoxVan" : "smallBoxVan")
+          : state.vehicleType
+      );
+      return {
+        vehicleType: state.vehicleType,
+        vehicleTypeLabel: vehicleTypeLabel(),
+        vehiclePresetId: preset?.id || "",
+        modelName: preset ? vehiclePresetName(preset) : "",
+        marketClass,
+        marketClassLabel: vehicleMarketClassLabel(marketClass),
+        cabLength: state.cabLength,
+        cabWidth: state.cabWidth,
+        cabHeight: state.cabHeight,
+        trailerLength: state.trailerLength,
+        trailerWidth: state.trailerWidth,
+        cargoLength: state.cargoEnabled ? state.cargoLength : 0,
+        cargoHeight: state.cargoEnabled ? state.cargoHeight : 0,
+        turnRadius: state.turnRadius,
+        counterTraffic: state.counterTraffic
+      };
+    }
+
+    function cloneVolumeResult(result) {
+      const isSolid = result.mode === "smooth" || result.mode === "stl-solid" || result.remainingSolids?.length;
+      return {
+        mode: isSolid ? "stl-solid" : "voxel",
+        remaining: isSolid ? [] : cloneCells(result.remaining),
+        occupied: isSolid ? [] : cloneCells(result.occupied),
+        remainingSolids: isSolid ? cloneSolids(result.remainingSolids) : [],
+        occupiedSolids: isSolid ? cloneSolids(result.occupiedSolids) : [],
+        totalCells: result.totalCells,
+        sampleFrames: result.sampleFrames,
+        dx: result.dx,
+        dPlaneY: result.dPlaneY,
+        dy: result.dy,
+        totalVolume: result.totalVolume,
+        cutVolume: result.cutVolume,
+        remainVolume: result.remainVolume,
+        remainRatio: result.totalVolume > 0 ? result.remainVolume / result.totalVolume * 100 : 0,
+        chamferX: state.chamferX,
+        chamferY: state.chamferY,
+        prismHeight: state.prismHeight,
+        sourceState: { ...state },
+        vehicle: volumeVehicleSnapshot()
+      };
+    }
+
     function cloneVoxelResult(result) {
       return {
         remaining: cloneCells(result.remaining),
@@ -2778,6 +3556,10 @@
         prismHeight: state.prismHeight,
         sourceState: { ...state },
         vehicle: {
+          vehicleType: state.vehicleType,
+          vehicleTypeLabel: vehicleTypeLabel(),
+          marketClass: state.vehicleType,
+          marketClassLabel: vehicleMarketClassLabel(state.vehicleType),
           cabLength: state.cabLength,
           cabWidth: state.cabWidth,
           cabHeight: state.cabHeight,
@@ -2792,8 +3574,7 @@
     }
 
     function currentVolumeSnapshot() {
-      const result = computeVoxelResult();
-      return cloneVoxelResult(result);
+      return cloneVolumeResult(computeSmoothVolumeResult());
     }
 
     function renderSavedVolumeList() {
@@ -2802,10 +3583,12 @@
       const saveButton = document.querySelector("#saveRemainingVolume");
       const heatButton = document.querySelector("#openHeatmapViewer");
       const reportButton = document.querySelector("#exportA4Report");
+      const sortButton = document.querySelector("#sortSavedVolumes");
       count.textContent = `${savedVolumes.length}/${savedVolumeLimit}`;
       saveButton.disabled = savedVolumes.length >= savedVolumeLimit;
       heatButton.disabled = savedVolumes.length === 0;
       reportButton.disabled = savedVolumes.length === 0;
+      sortButton.disabled = savedVolumes.length < 2;
       list.innerHTML = "";
 
       if (!savedVolumes.length) {
@@ -2824,7 +3607,9 @@
         const swatch = document.createElement("i");
         swatch.className = "saved-volume__swatch";
         swatch.style.background = item.color;
-        summary.textContent = `${item.name} · ${item.result.remainVolume.toFixed(1)} m³`;
+        const itemSummary = item.summary || summaryFromResult(item.result) || {};
+        const remainVolume = Number(itemSummary.remainVolume ?? item.result?.remainVolume ?? 0);
+        summary.textContent = `${item.name} · ${remainVolume.toFixed(1)} m³`;
         summary.prepend(swatch);
         details.appendChild(summary);
 
@@ -2845,7 +3630,14 @@
         const meta = document.createElement("div");
         meta.className = "saved-volume__meta";
         const locale = currentLanguage === "jp" ? "ja-JP" : "zh-CN";
-        meta.innerHTML = `<span>${item.result.remaining.length.toLocaleString(locale)} ${tr("voxel")}</span><span>${item.result.sampleFrames} ${tr("pose")}</span><span>${item.created}</span>`;
+        const isLoaded = Boolean(item.result?.remainingSolids?.length || item.result?.remaining?.length);
+        const volumeModeLabel = isLoaded
+          ? (currentLanguage === "jp" ? "計算済み" : "已计算")
+          : (currentLanguage === "jp" ? "待機中" : "待加载");
+        const volumeUnitCount = isLoaded
+          ? (item.result.remainingSolids?.length || item.result.remaining?.length || 0)
+          : (itemSummary.totalCells || 0);
+        meta.innerHTML = `<span>${volumeUnitCount.toLocaleString(locale)} ${volumeModeLabel}</span><span>${itemSummary.sampleFrames || 0} ${tr("pose")}</span><span>${item.created}</span>`;
 
         const buttons = document.createElement("div");
         buttons.className = "saved-volume__buttons";
@@ -2854,6 +3646,13 @@
         viewButton.type = "button";
         viewButton.textContent = tr("view");
         viewButton.addEventListener("click", () => openSavedVolumeViewer(item.id));
+
+        const downloadButton = document.createElement("button");
+        downloadButton.type = "button";
+        downloadButton.textContent = "STL";
+        downloadButton.title = currentLanguage === "jp" ? "この残余体積をSTL出力" : "下载该剩余体积 STL";
+        downloadButton.disabled = !item.sourceState && !item.result?.remainingSolids?.length;
+        downloadButton.addEventListener("click", () => exportSavedVolumeStl(item));
 
         const deleteButton = document.createElement("button");
         deleteButton.type = "button";
@@ -2868,7 +3667,7 @@
           refreshHeatmapViewer(true);
         });
 
-        buttons.append(viewButton, deleteButton);
+        buttons.append(viewButton, downloadButton, deleteButton);
         content.append(input, meta, buttons);
         details.appendChild(content);
         list.appendChild(details);
@@ -2883,12 +3682,29 @@
         id,
         name: tr("savedName", savedVolumeSerial++),
         color: savedVolumeColors[savedVolumes.length % savedVolumeColors.length],
+        sourceState: snapshot.sourceState,
+        summary: summaryFromResult(snapshot),
         result: snapshot,
         created: new Date().toLocaleTimeString(currentLanguage === "jp" ? "ja-JP" : "zh-CN", { hour: "2-digit", minute: "2-digit" })
       });
       latestHeatmap = null;
       persistVolumeLibrary();
       renderSavedVolumeList();
+      refreshHeatmapViewer(true);
+    }
+
+    function savedVolumeRemainingValue(item) {
+      const itemSummary = item?.summary || summaryFromResult(item?.result) || {};
+      return Number(itemSummary.remainVolume ?? item?.result?.remainVolume ?? 0) || 0;
+    }
+
+    function sortSavedVolumesByVolume() {
+      if (savedVolumes.length < 2) return;
+      savedVolumes.sort((a, b) => savedVolumeRemainingValue(b) - savedVolumeRemainingValue(a));
+      latestHeatmap = null;
+      persistVolumeLibrary();
+      renderSavedVolumeList();
+      refreshSavedVolumeViewer(false);
       refreshHeatmapViewer(true);
     }
 
@@ -2917,8 +3733,10 @@
       const item = savedVolumes.find(saved => saved.id === savedVolumeViewer.activeId);
       clearRenderGroup(savedVolumeGroup);
       if (!item) return;
-      const result = item.result;
-      const mesh = smoothedVoxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, savedVolumeMaterial, result);
+      const result = ensureSavedVolumeResult(item);
+      persistVolumeLibrary();
+      renderSavedVolumeList();
+      const mesh = extrudedSolidsMesh(result.remainingSolids || [], savedVolumeMaterial);
       savedVolumeGroup.add(mesh);
       if (resetView) fitCameraToObject(mesh, savedVolumeCamera, savedVolumeControls);
     }
@@ -2931,10 +3749,10 @@
     }
 
     function heatmapDensityStyle(count, maxCount) {
-      const ratio = maxCount <= 1 ? 1 : count / maxCount;
+      const ratio = maxCount <= 1 ? 1 : THREE.MathUtils.clamp((count - 1) / Math.max(1, maxCount - 1), 0, 1);
       const whiteMix = 1 - ratio;
-      const color = new THREE.Color(0x2a74e0).lerp(new THREE.Color(0xffffff), whiteMix * 0.82);
-      const opacity = THREE.MathUtils.lerp(0.08, 0.7, ratio);
+      const color = new THREE.Color(0x2a74e0).lerp(new THREE.Color(0xffffff), whiteMix * 0.68);
+      const opacity = THREE.MathUtils.lerp(0.22, 0.7, Math.pow(ratio, 0.72));
       return { color, opacity, whiteMix };
     }
 
@@ -3007,7 +3825,178 @@
       return texture;
     }
 
+    function multiPolygonIsVisible(multiPolygon) {
+      return multiPolygonArea(multiPolygon) > 1e-5;
+    }
+
+    function unionMultiPolygons(multiPolygons) {
+      const valid = (multiPolygons || [])
+        .map(sanitizeMultiPolygon)
+        .filter(multiPolygonIsVisible);
+      if (!valid.length) return [];
+      let result = valid[0];
+      for (let i = 1; i < valid.length; i += 8) {
+        result = sanitizeMultiPolygon(polygonClipping.union(result, ...valid.slice(i, i + 8)));
+      }
+      return result;
+    }
+
+    function coalesceOverlapRegions(regions) {
+      const byCount = new Map();
+      for (const region of regions) {
+        if (!multiPolygonIsVisible(region.multiPolygon)) continue;
+        if (!byCount.has(region.count)) byCount.set(region.count, []);
+        byCount.get(region.count).push(region.multiPolygon);
+      }
+      return [...byCount.entries()]
+        .map(([count, multiPolygons]) => ({ count, multiPolygon: unionMultiPolygons(multiPolygons) }))
+        .filter(region => multiPolygonIsVisible(region.multiPolygon))
+        .sort((a, b) => a.count - b.count);
+    }
+
+    function activeMultiPolygonAtY(result, y0, y1) {
+      return unionMultiPolygons((result?.remainingSolids || [])
+        .filter(solid => solid.y0 < y1 && solid.y1 > y0)
+        .map(solid => solid.multiPolygon));
+    }
+
+    function splitOverlapMultiPolygons(multiPolygons) {
+      let regions = [];
+      let usedCount = 0;
+      for (const incoming of multiPolygons) {
+        if (!multiPolygonIsVisible(incoming)) continue;
+        usedCount++;
+        const existingUnion = unionMultiPolygons(regions.map(region => region.multiPolygon));
+        const nextRegions = [];
+        for (const region of regions) {
+          const intersection = sanitizeMultiPolygon(polygonClipping.intersection(region.multiPolygon, incoming));
+          const outside = sanitizeMultiPolygon(polygonClipping.difference(region.multiPolygon, incoming));
+          if (multiPolygonIsVisible(outside)) nextRegions.push({ count: region.count, multiPolygon: outside });
+          if (multiPolygonIsVisible(intersection)) nextRegions.push({ count: region.count + 1, multiPolygon: intersection });
+        }
+        const onlyIncoming = existingUnion.length
+          ? sanitizeMultiPolygon(polygonClipping.difference(incoming, existingUnion))
+          : incoming;
+        if (multiPolygonIsVisible(onlyIncoming)) nextRegions.push({ count: 1, multiPolygon: onlyIncoming });
+        regions = coalesceOverlapRegions(nextRegions);
+      }
+      return { regions, usedCount };
+    }
+
+    function aggregateSavedSmoothVolumes() {
+      if (!savedVolumes.length) return null;
+      for (const item of savedVolumes) ensureSavedVolumeResult(item);
+      const yBreaks = uniqueSorted(savedVolumes.flatMap(item =>
+        (item.result.remainingSolids || []).flatMap(solid => [solid.y0, solid.y1])
+      ));
+      const solidRegions = [];
+      let maxCount = 0;
+      for (let i = 0; i < yBreaks.length - 1; i++) {
+        const y0 = yBreaks[i];
+        const y1 = yBreaks[i + 1];
+        if (y1 - y0 < 1e-6) continue;
+        const layerInputs = savedVolumes.map(item => activeMultiPolygonAtY(item.result, y0, y1));
+        const { regions, usedCount } = splitOverlapMultiPolygons(layerInputs);
+        maxCount = Math.max(maxCount, usedCount);
+        for (const region of regions) {
+          solidRegions.push({ ...region, y0, y1 });
+        }
+      }
+      if (!solidRegions.length) return null;
+      return {
+        solidRegions,
+        prismHeight: Math.max(...yBreaks),
+        maxCount: maxCount || savedVolumes.length
+      };
+    }
+
+    function addHeatmapDensitySolids(group, heatmap) {
+      let fitMesh = null;
+      for (let count = 1; count <= heatmap.maxCount; count++) {
+        const multiPolygon = unionMultiPolygons(
+          heatmap.solidRegions
+            .filter(region => region.count === count)
+            .map(region => region.multiPolygon)
+        );
+        if (!multiPolygonIsVisible(multiPolygon)) continue;
+        const style = heatmapDensityStyle(count, heatmap.maxCount);
+        const material = new THREE.MeshBasicMaterial({
+          color: style.color,
+          transparent: true,
+          opacity: style.opacity,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        const solids = heatmap.solidRegions
+          .filter(region => region.count === count)
+          .map(region => ({ multiPolygon: region.multiPolygon, y0: region.y0, y1: region.y1 }));
+        const mesh = extrudedSolidsMesh(solids, material);
+        mesh.renderOrder = count;
+        group.add(mesh);
+        if (!fitMesh) fitMesh = mesh;
+      }
+      return fitMesh;
+    }
+
+    function aggregateSavedOverlayVolumes() {
+      if (!savedVolumes.length) return null;
+      const items = [];
+      for (const item of savedVolumes) {
+        const result = ensureSavedVolumeResult(item);
+        const solids = (result?.remainingSolids || []).filter(solid => solid.y1 > solid.y0 && multiPolygonIsVisible(solid.multiPolygon));
+        if (solids.length) items.push({ id: item.id, name: item.name, solids });
+      }
+      if (!items.length) return null;
+      return {
+        overlayItems: items,
+        maxCount: Math.max(1, savedVolumes.length),
+        approximate: true,
+        whiteDotMix: 0.74
+      };
+    }
+
+    function addHeatmapOverlayMeshes(group, heatmap) {
+      let fitMesh = null;
+      const perVolumeOpacity = THREE.MathUtils.clamp(1.85 / Math.max(1, heatmap.overlayItems.length), 0.026, 0.085);
+      const dotOpacity = THREE.MathUtils.clamp(1.15 / Math.max(1, heatmap.overlayItems.length), 0.018, 0.07);
+      heatmap.overlayItems.forEach((item, index) => {
+        const geometry = extrudedSolidsGeometry(item.solids);
+        if (!geometry.attributes.position?.count) {
+          geometry.dispose();
+          return;
+        }
+        const material = new THREE.MeshBasicMaterial({
+          color: 0x2a74e0,
+          transparent: true,
+          opacity: perVolumeOpacity,
+          depthWrite: false,
+          side: THREE.DoubleSide
+        });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.renderOrder = index + 1;
+        group.add(mesh);
+        const dots = mesh.clone();
+        dots.material = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          map: heatmapWhiteDotTexture(heatmap.whiteDotMix || 0.72),
+          transparent: true,
+          opacity: dotOpacity,
+          depthWrite: false,
+          side: THREE.DoubleSide,
+          polygonOffset: true,
+          polygonOffsetFactor: -1,
+          polygonOffsetUnits: -1
+        });
+        dots.renderOrder = 100 + index;
+        group.add(dots);
+        if (!fitMesh) fitMesh = mesh;
+      });
+      return fitMesh;
+    }
+
     function addHeatmapDensityMeshes(group, heatmap) {
+      if (heatmap.overlayItems) return addHeatmapOverlayMeshes(group, heatmap);
+      if (heatmap.solidRegions) return addHeatmapDensitySolids(group, heatmap);
       let fitMesh = null;
       for (let count = 1; count <= heatmap.maxCount; count++) {
         const cells = heatmap.cells.filter(cell => cell.count === count);
@@ -3044,38 +4033,38 @@
     }
 
     function aggregateSavedVolumes() {
-      if (!savedVolumes.length) return null;
-      const dx = Math.max(...savedVolumes.map(item => item.result.dx));
-      const dy = Math.max(...savedVolumes.map(item => item.result.dy));
-      const dz = Math.max(...savedVolumes.map(item => item.result.dPlaneY));
-      const buckets = new Map();
+      if (savedVolumes.length > 20) return aggregateSavedOverlayVolumes();
+      const smoothHeatmap = aggregateSavedSmoothVolumes();
+      if (smoothHeatmap) return smoothHeatmap;
+      return aggregateSavedOverlayVolumes();
+    }
 
-      for (const item of savedVolumes) {
-        const localKeys = new Set();
-        for (const cell of item.result.remaining) {
-          const ix = Math.floor(cell.x / dx);
-          const iy = Math.floor(cell.y / dy);
-          const iz = Math.floor(cell.z / dz);
-          localKeys.add(`${ix},${iy},${iz}`);
-        }
-        for (const key of localKeys) {
-          let bucket = buckets.get(key);
-          if (!bucket) {
-            const [ix, iy, iz] = key.split(",").map(Number);
-            bucket = { ix, iy, iz, x: (ix + 0.5) * dx, y: (iy + 0.5) * dy, z: (iz + 0.5) * dz, count: 0 };
-            buckets.set(key, bucket);
-          }
-          bucket.count++;
-        }
-      }
+    function solidRegionsVolume(regions) {
+      return (regions || []).reduce((sum, region) => {
+        const area = multiPolygonArea(region.multiPolygon);
+        const height = Math.max(0, Number(region.y1) - Number(region.y0));
+        return sum + area * height;
+      }, 0);
+    }
 
-      return {
-        cells: [...buckets.values()],
-        dx,
-        dy,
-        dz,
-        maxCount: savedVolumes.length
-      };
+    function heatmapPrismVolume() {
+      const totals = savedVolumes
+        .map(item => Number((item.summary || summaryFromResult(item.result) || {}).totalVolume))
+        .filter(Number.isFinite)
+        .filter(value => value > 0);
+      if (totals.length) return totals.reduce((sum, value) => sum + value, 0) / totals.length;
+      return 0.5 * state.chamferX * state.chamferY * state.prismHeight;
+    }
+
+    function heatmapExportFilename(threshold, remainVolume, sweptVolume, totalVolume) {
+      const residue = totalVolume > 0 ? remainVolume / totalVolume * 100 : 0;
+      const code = `TR-EX-${String(threshold).padStart(2, "0")}`;
+      const raw = [
+        code,
+        `RESIDUE_${Number.isFinite(residue) ? residue.toFixed(0) : "0"}pct`,
+        `SWEPT_${Number.isFinite(sweptVolume) ? sweptVolume.toFixed(sweptVolume < 10 ? 1 : 0) : "0"}m3`
+      ].join("_");
+      return safeStlFilename(raw, code);
     }
 
     function updateHeatmapThresholdLabel() {
@@ -3091,7 +4080,7 @@
       heatmapViewer.root.classList.add("is-open");
       heatmapViewer.root.setAttribute("aria-hidden", "false");
       resizeHeatmapViewer();
-      refreshHeatmapViewer(true);
+      requestAnimationFrame(() => refreshHeatmapViewer(true));
     }
 
     function closeHeatmapViewer() {
@@ -3107,7 +4096,10 @@
       clearRenderGroup(heatmapGroup, true);
       latestHeatmap = aggregateSavedVolumes();
       if (!latestHeatmap) return;
-      heatmapViewer.title.textContent = tr("heatmapTitleWithCount", savedVolumes.length);
+      const quickSuffix = latestHeatmap.approximate
+        ? (currentLanguage === "jp" ? "・高速プレビュー" : "・快速预览")
+        : "";
+      heatmapViewer.title.textContent = `${tr("heatmapTitleWithCount", savedVolumes.length)}${quickSuffix}`;
 
       const fitMesh = addHeatmapDensityMeshes(heatmapGroup, latestHeatmap);
 
@@ -3117,9 +4109,23 @@
     }
 
     function exportHeatmapStl() {
-      const heatmap = latestHeatmap || aggregateSavedVolumes();
-      if (!heatmap) return;
       const threshold = heatmapThresholdCount();
+      const heatmap = aggregateSavedSmoothVolumes();
+      if (!heatmap) return;
+      if (heatmap.solidRegions) {
+        const exportRegions = heatmap.solidRegions.filter(region => region.count >= threshold);
+        const solids = exportRegions.map(region => ({ multiPolygon: region.multiPolygon, y0: region.y0, y1: region.y1 }));
+        if (!solids.length) return;
+        const geometry = extrudedSolidsGeometry(solids);
+        const triangles = geometryToTriangles(geometry);
+        geometry.dispose();
+        const remainVolume = solidRegionsVolume(exportRegions);
+        const totalVolume = heatmapPrismVolume();
+        const sweptVolume = Math.max(0, totalVolume - remainVolume);
+        const filename = heatmapExportFilename(threshold, remainVolume, sweptVolume, totalVolume);
+        exportTrianglesAsStl(triangles, filename, `TR-EX-${String(threshold).padStart(2, "0")} threshold ${threshold}, residue ${totalVolume > 0 ? (remainVolume / totalVolume * 100).toFixed(1) : "0"}%, swept ${sweptVolume.toFixed(3)}m3`);
+        return;
+      }
       const cells = heatmap.cells.filter(cell => cell.count >= threshold);
       if (!cells.length) return;
       const triangles = voxelSurfaceTriangles(cells, heatmap.dx, heatmap.dy, heatmap.dz);
@@ -3195,20 +4201,22 @@
 
     function reportVehicleText(vehicle, copy) {
       if (!vehicle) return "";
-      const cargo = vehicle.cargoLength > 0
-        ? `${vehicle.cargoLength.toFixed(1)}×${vehicle.cargoHeight.toFixed(1)}m`
+      const fmt = value => Number.isFinite(Number(value)) ? Number(value).toFixed(1) : "-";
+      const cargo = Number(vehicle.cargoLength) > 0
+        ? `${fmt(vehicle.cargoLength)}×${fmt(vehicle.cargoHeight)}m`
         : copy.none;
       return [
-        `${copy.tractor} ${vehicle.cabLength.toFixed(1)}×${vehicle.cabWidth.toFixed(1)}×${vehicle.cabHeight.toFixed(1)}m`,
-        `${copy.trailer} ${vehicle.trailerLength.toFixed(1)}×${vehicle.trailerWidth.toFixed(1)}m`,
+        vehicle.marketClassLabel || vehicle.vehicleTypeLabel || (vehicle.vehicleType ? vehicleTypeLabel(vehicle.vehicleType) : ""),
+        `${copy.tractor} ${fmt(vehicle.cabLength)}×${fmt(vehicle.cabWidth)}×${fmt(vehicle.cabHeight)}m`,
+        `${copy.trailer} ${fmt(vehicle.trailerLength)}×${fmt(vehicle.trailerWidth)}m`,
         `${copy.cargo} ${cargo}`,
-        `${copy.radius} ${vehicle.turnRadius.toFixed(1)}m`,
+        `${copy.radius} ${fmt(vehicle.turnRadius)}m`,
         `${copy.counter} ${vehicle.counterTraffic ? copy.yes : copy.no}`
       ].join(" / ");
     }
 
     function renderReportHeatmapImages() {
-      const heatmap = aggregateSavedVolumes();
+      const heatmap = latestHeatmap || aggregateSavedVolumes();
       if (!heatmap) return null;
       const reportCanvas = document.createElement("canvas");
       reportCanvas.width = 1200;
@@ -3284,21 +4292,31 @@
       }
 
       const copy = reportCopy();
+      const reportWindow = window.open("", "_blank", "width=980,height=1280");
+      if (!reportWindow) return;
+      reportWindow.document.write(`<!doctype html><html lang="${currentLanguage === "jp" ? "ja" : "zh-CN"}"><head><meta charset="utf-8"><title>${escapeHtml(copy.title)}</title><style>body{margin:28px;font-family:Inter,"Segoe UI","Microsoft YaHei",Arial,sans-serif;color:#111721;background:#f4f7f9}div{padding:18px 22px;border-radius:18px;background:rgba(255,255,255,.78);box-shadow:0 18px 42px rgba(17,23,33,.12)}</style></head><body><div>${currentLanguage === "jp" ? "レポートを生成しています..." : "正在生成报告..."}</div></body></html>`);
+      reportWindow.document.close();
       const images = renderReportHeatmapImages();
+      if (!images) {
+        reportWindow.document.open();
+        reportWindow.document.write(`<!doctype html><meta charset="utf-8"><body>${currentLanguage === "jp" ? "重ね合わせ画像を生成できませんでした。" : "未能生成叠加分析图像。"}</body>`);
+        reportWindow.document.close();
+        return;
+      }
       const locale = currentLanguage === "jp" ? "ja-JP" : "zh-CN";
       const generated = new Date().toLocaleString(locale);
       const rows = savedVolumes.map(item => {
-        const ratio = item.result.remainRatio ?? (item.result.totalVolume > 0 ? item.result.remainVolume / item.result.totalVolume * 100 : 0);
+        const itemSummary = item.summary || summaryFromResult(item.result) || {};
+        const ratio = itemSummary.remainRatio ?? (itemSummary.totalVolume > 0 ? itemSummary.remainVolume / itemSummary.totalVolume * 100 : 0);
         return `
           <tr>
             <td class="report-name"><i style="background:${item.color}"></i>${escapeHtml(item.name)}</td>
             <td class="report-ratio">${ratio.toFixed(1)}%</td>
             <td class="report-color">${escapeHtml(item.color)}</td>
-            <td>${escapeHtml(reportVehicleText(item.result.vehicle, copy))}</td>
+            <td>${escapeHtml(reportVehicleText(itemSummary.vehicle || item.result?.vehicle, copy))}</td>
           </tr>`;
       }).join("");
-      const reportWindow = window.open("", "_blank", "width=980,height=1280");
-      if (!reportWindow) return;
+      reportWindow.document.open();
       reportWindow.document.write(`<!doctype html>
         <html lang="${currentLanguage === "jp" ? "ja" : "zh-CN"}">
         <head>
@@ -3308,13 +4326,15 @@
             @page { size: A4 portrait; margin: 9mm; }
             * { box-sizing: border-box; }
             body { width: 192mm; margin: 0 auto; color: #111721; font-family: Inter, "Segoe UI", "Microsoft YaHei", Arial, sans-serif; }
+            .page { min-height: 279mm; page-break-after: always; }
+            .page:last-child { page-break-after: auto; }
             header { display: flex; justify-content: space-between; gap: 12mm; padding: 1mm 0 4mm; border-bottom: 1px solid #b7ff2f; }
             h1 { margin: 0 0 1mm; font-size: 19px; }
             p { margin: 0; color: #66717e; font-size: 9px; line-height: 1.45; }
             .meta { display: grid; gap: 1mm; min-width: 45mm; font-size: 8px; color: #52606c; text-align: right; }
             .figure { margin-top: 4mm; }
             h2 { margin: 0 0 2mm; font-size: 12px; }
-            .visual-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, .75fr); grid-template-rows: repeat(3, 35mm); gap: 2mm; }
+            .visual-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, .75fr); grid-template-rows: repeat(3, 51mm); gap: 3mm; }
             .visual-card { position: relative; overflow: hidden; }
             .visual-card:first-child { grid-row: 1 / 4; }
             .visual-card img { display: block; width: 100%; height: 100%; object-fit: contain; }
@@ -3322,40 +4342,59 @@
             .heat-scale { display: grid; grid-template-columns: auto minmax(42mm, 1fr) auto; gap: 2.5mm; align-items: center; margin-top: 2mm; color: #66717e; font-size: 8px; }
             .heat-scale i { display: block; height: 3mm; border: 1px solid #d4dce2; border-radius: 99px; background: radial-gradient(circle, rgba(255,255,255,.92) 0 24%, transparent 26%) 0 0 / 2.2mm 2.2mm, linear-gradient(90deg, rgba(255,255,255,.86), rgba(42,116,224,.96)); }
             .list { margin-top: 4mm; }
-            table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 6.3px; }
-            th, td { padding: .7mm .9mm; border-bottom: 1px solid #dde3e7; text-align: left; vertical-align: middle; line-height: 1.18; }
+            table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 5.7px; }
+            th, td { padding: .56mm .72mm; border-bottom: 1px solid #dde3e7; text-align: left; vertical-align: middle; line-height: 1.1; }
             th { background: #f3f6f8; color: #4d5965; font-weight: 700; }
-            .report-name { width: 27mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+            .report-name { width: 31mm; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .report-name i { display: inline-block; width: 2.5mm; height: 2.5mm; margin-right: 1.5mm; border: 1px solid rgba(17,23,33,.18); border-radius: 50%; vertical-align: -0.3mm; }
-            .report-ratio { width: 15mm; font-weight: 800; }
-            .report-color { width: 19mm; color: #66717e; font-family: Consolas, monospace; font-size: 6.7px; }
+            .report-ratio { width: 13mm; font-weight: 800; }
+            .report-color { width: 16mm; color: #66717e; font-family: Consolas, monospace; font-size: 5.8px; }
             footer { margin-top: 3mm; padding-top: 2mm; border-top: 1px solid #dde3e7; color: #7b8792; font-size: 7px; text-align: right; }
           </style>
         </head>
         <body>
-          <header>
-            <div><h1>${escapeHtml(copy.title)}</h1><p>${escapeHtml(copy.subtitle)}</p></div>
-            <div class="meta"><span>${escapeHtml(copy.generated)} ${escapeHtml(generated)}</span><span>${escapeHtml(copy.count)} ${savedVolumes.length}/${savedVolumeLimit}</span></div>
-          </header>
-          <section class="figure">
-            <h2>${escapeHtml(copy.figure)}</h2>
-            <div class="visual-grid">
-              <div class="visual-card"><img src="${images.main}" alt="${escapeHtml(copy.viewMain)}"><b>${escapeHtml(copy.viewMain)}</b></div>
-              <div class="visual-card"><img src="${images.right}" alt="${escapeHtml(copy.viewRight)}"><b>${escapeHtml(copy.viewRight)}</b></div>
-              <div class="visual-card"><img src="${images.left}" alt="${escapeHtml(copy.viewLeft)}"><b>${escapeHtml(copy.viewLeft)}</b></div>
-              <div class="visual-card"><img src="${images.bottom}" alt="${escapeHtml(copy.viewBottom)}"><b>${escapeHtml(copy.viewBottom)}</b></div>
-            </div>
-            <div class="heat-scale"><span>${escapeHtml(copy.overlapLow)}</span><i></i><span>${escapeHtml(copy.overlapHigh)}</span></div>
+          <section class="page">
+            <header>
+              <div><h1>${escapeHtml(copy.title)}</h1><p>${escapeHtml(copy.subtitle)}</p></div>
+              <div class="meta"><span>${escapeHtml(copy.generated)} ${escapeHtml(generated)}</span><span>${escapeHtml(copy.count)} ${savedVolumes.length}/${savedVolumeLimit}</span></div>
+            </header>
+            <section class="figure">
+              <h2>${escapeHtml(copy.figure)}</h2>
+              <div class="visual-grid">
+                <div class="visual-card"><img src="${images.main}" alt="${escapeHtml(copy.viewMain)}"><b>${escapeHtml(copy.viewMain)}</b></div>
+                <div class="visual-card"><img src="${images.right}" alt="${escapeHtml(copy.viewRight)}"><b>${escapeHtml(copy.viewRight)}</b></div>
+                <div class="visual-card"><img src="${images.left}" alt="${escapeHtml(copy.viewLeft)}"><b>${escapeHtml(copy.viewLeft)}</b></div>
+                <div class="visual-card"><img src="${images.bottom}" alt="${escapeHtml(copy.viewBottom)}"><b>${escapeHtml(copy.viewBottom)}</b></div>
+              </div>
+              <div class="heat-scale"><span>${escapeHtml(copy.overlapLow)}</span><i></i><span>${escapeHtml(copy.overlapHigh)}</span></div>
+            </section>
           </section>
-          <section class="list">
-            <h2>${escapeHtml(copy.list)}</h2>
-            <table>
-              <thead><tr><th>${escapeHtml(copy.name)}</th><th>${escapeHtml(copy.ratio)}</th><th>${escapeHtml(copy.color)}</th><th>${escapeHtml(copy.vehicle)}</th></tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
+          <section class="page">
+            <header>
+              <div><h1>${escapeHtml(copy.list)}</h1><p>${escapeHtml(copy.subtitle)}</p></div>
+              <div class="meta"><span>${escapeHtml(copy.generated)} ${escapeHtml(generated)}</span><span>${escapeHtml(copy.count)} ${savedVolumes.length}/${savedVolumeLimit}</span></div>
+            </header>
+            <section class="list">
+              <table>
+                <thead><tr><th>${escapeHtml(copy.name)}</th><th>${escapeHtml(copy.ratio)}</th><th>${escapeHtml(copy.color)}</th><th>${escapeHtml(copy.vehicle)}</th></tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </section>
+            <footer>${escapeHtml(copy.footer)}</footer>
           </section>
-          <footer>${escapeHtml(copy.footer)}</footer>
-          <script>window.addEventListener("load", () => setTimeout(() => window.print(), 250));<\/script>
+          <script>
+            window.addEventListener("load", async () => {
+              const images = Array.from(document.images);
+              await Promise.all(images.map(image => image.decode ? image.decode().catch(() => {}) : new Promise(resolve => {
+                if (image.complete) resolve();
+                else {
+                  image.addEventListener("load", resolve, { once: true });
+                  image.addEventListener("error", resolve, { once: true });
+                }
+              })));
+              setTimeout(() => window.print(), 700);
+            });
+          <\/script>
         </body>
         </html>`);
       reportWindow.document.close();
@@ -3473,6 +4512,31 @@
       return mesh;
     }
 
+    function materialForBodyRole(role) {
+      if (["cab", "forkBody", "turret", "turretProxy"].includes(role)) return materials.cab;
+      if (["cargo", "cage", "mast", "fork"].includes(role)) return materials.cargo;
+      return materials.trailer;
+    }
+
+    function meshFromBodyBox(box, material = materialForBodyRole(box.role)) {
+      if (box.role === "turret") {
+        const mesh = new THREE.Mesh(
+          new THREE.CylinderGeometry(box.length / 2, box.length / 2, Math.max(0.02, box.y1 - box.y0), 32),
+          material
+        );
+        mesh.position.set(box.cx, box.y0 + (box.y1 - box.y0) / 2, box.cz);
+        return mesh;
+      }
+      return makeBox(
+        box.length,
+        Math.max(0.02, box.y1 - box.y0),
+        box.width,
+        { cx: box.cx, cz: box.cz, heading: box.heading },
+        box.y0,
+        material
+      );
+    }
+
     function cabLength() {
       return state.cabLength;
     }
@@ -3509,10 +4573,12 @@
     let turnPathCache = null;
 
     function rigidFrontAxleOffsetFromHitch() {
+      if (isSpecialSingleBodyType()) return activeRigidLength() * 0.38;
       return state.hitchGap + Math.max(0.42, cabLength() - state.cabFrontOverhang);
     }
 
     function rigidRearAxleOffsetFromHitch() {
+      if (isSpecialSingleBodyType()) return -activeRigidLength() * 0.38;
       return -Math.max(0.52, trailerLength() - state.trailerRearOverhang);
     }
 
@@ -3826,51 +4892,189 @@
       return boxes;
     }
 
-    function bodyBoxesFromPose(pose) {
-      const boxes = [
-        {
-          cx: pose.cabCenter.cx,
-          cz: pose.cabCenter.cz,
-          heading: pose.cabCenter.heading,
-          length: cabLength(),
-          width: outerWidth(state.cabWidth),
-          y0: state.chassisHeight,
-          y1: state.chassisHeight + state.cabHeight
-        },
-        {
-          cx: pose.trailerCenter.cx,
-          cz: pose.trailerCenter.cz,
-          heading: pose.trailerCenter.heading,
-          length: trailerLength(),
-          width: outerWidth(state.trailerWidth),
-          y0: state.chassisHeight,
-          y1: state.chassisHeight + state.deckHeight
-        }
-      ];
+    function boxFromPose(basePose, length, width, y0, y1, longOffset = 0, lateralOffset = 0, role = "body") {
+      const shifted = offsetPose(basePose, longOffset, lateralOffset);
+      return {
+        cx: shifted.cx,
+        cz: shifted.cz,
+        heading: shifted.heading,
+        length: Math.max(0.02, length),
+        width: Math.max(0.02, width),
+        y0,
+        y1,
+        role
+      };
+    }
 
-      if (state.cargoEnabled) {
-        const currentCargoPose = cargoPose(pose);
-        const currentCargoLength = Math.min(state.cargoLength, trailerLength());
-        boxes.push({
-          cx: currentCargoPose.cx,
-          cz: currentCargoPose.cz,
-          heading: currentCargoPose.heading,
-          length: currentCargoLength,
-          width: outerWidth(state.trailerWidth),
-          y0: state.chassisHeight + state.deckHeight + state.cargoBaseOffset,
-          y1: state.chassisHeight + state.deckHeight + state.cargoBaseOffset + state.cargoHeight
-        });
+    function boxFromPoseWithHeading(basePose, length, width, y0, y1, longOffset = 0, lateralOffset = 0, headingOffset = 0, role = "body") {
+      const shifted = offsetPose(basePose, longOffset, lateralOffset);
+      return {
+        cx: shifted.cx,
+        cz: shifted.cz,
+        heading: shifted.heading + headingOffset,
+        length: Math.max(0.02, length),
+        width: Math.max(0.02, width),
+        y0,
+        y1,
+        role
+      };
+    }
+
+    function pushCabSweepBox(boxes, pose) {
+      boxes.push(boxFromPose(
+        pose.cabCenter,
+        cabLength(),
+        outerWidth(state.cabWidth),
+        state.chassisHeight,
+        state.chassisHeight + state.cabHeight,
+        0,
+        0,
+        "cab"
+      ));
+    }
+
+    function pushDeckSweepBox(boxes, pose, role = "deck") {
+      boxes.push(boxFromPose(
+        pose.trailerCenter,
+        trailerLength(),
+        outerWidth(state.trailerWidth),
+        state.chassisHeight,
+        state.chassisHeight + state.deckHeight,
+        0,
+        0,
+        role
+      ));
+    }
+
+    function pushCargoSweepBox(boxes, pose, role = "cargo") {
+      if (!state.cargoEnabled) return;
+      const currentCargoPose = cargoPose(pose);
+      boxes.push(boxFromPose(
+        currentCargoPose,
+        Math.min(state.cargoLength, trailerLength()),
+        outerWidth(state.trailerWidth),
+        state.chassisHeight + state.deckHeight + state.cargoBaseOffset,
+        state.chassisHeight + state.deckHeight + state.cargoBaseOffset + state.cargoHeight,
+        0,
+        0,
+        role
+      ));
+    }
+
+    function pushFrameSweepBoxes(boxes, pose, length, width, baseY, height, role = "frame") {
+      const post = role === "cage"
+        ? Math.min(0.2, Math.max(0.03, state.cagePostThickness))
+        : Math.min(0.12, Math.max(0.045, Math.min(length, width) * 0.05));
+      const railHeight = Math.min(0.16, Math.max(0.06, height * 0.08));
+      for (const side of [-1, 1]) {
+        boxes.push(boxFromPose(pose, length, post, baseY, baseY + height, 0, side * (width - post) / 2, role));
       }
-      boxes.push(...wheelBoxes(pose));
+      for (const end of [-1, 1]) {
+        boxes.push(boxFromPose(pose, post, width, baseY, baseY + height, end * (length - post) / 2, 0, role));
+      }
+      boxes.push(boxFromPose(pose, length, width, baseY + height - railHeight, baseY + height, 0, 0, role));
+    }
+
+    function bodyBoxesFromPose(pose, includeWheels = true) {
+      const boxes = [];
+      const type = vehicleTypes[state.vehicleType] ? state.vehicleType : "boxVan";
+      const deckTop = state.chassisHeight + state.deckHeight;
+      const trailerWidth = outerWidth(state.trailerWidth);
+
+      if (type === "boxVan" || type === "articulated") {
+        pushCabSweepBox(boxes, pose);
+        pushDeckSweepBox(boxes, pose);
+        pushCargoSweepBox(boxes, pose);
+      } else if (type === "flatbed") {
+        pushCabSweepBox(boxes, pose);
+        pushDeckSweepBox(boxes, pose);
+        const railHeight = Math.min(0.42, Math.max(0.18, state.deckHeight * 1.4));
+        const railThickness = Math.min(0.12, Math.max(0.05, trailerWidth * 0.035));
+        for (const side of [-1, 1]) {
+          boxes.push(boxFromPose(pose.trailerCenter, trailerLength(), railThickness, deckTop, deckTop + railHeight, 0, side * (trailerWidth - railThickness) / 2, "sideRail"));
+        }
+        boxes.push(boxFromPose(pose.trailerCenter, railThickness, trailerWidth, deckTop, deckTop + railHeight, -trailerLength() / 2 + railThickness / 2, 0, "sideRail"));
+      } else if (type === "lowPlatform") {
+        const totalLength = activeRigidLength();
+        const basePose = singleBodyPose(pose, totalLength);
+        const y0 = state.platformDeckHeight;
+        const y1 = y0 + state.platformDeckThickness;
+        const turretOffset = state.platformLength / 2;
+        const deckOffset = -state.turretDiameter / 2;
+        boxes.push(boxFromPose(basePose, state.platformLength, state.platformWidth, y0, y1, deckOffset, 0, "platform"));
+        [0, Math.PI / 3, -Math.PI / 3].forEach((angle, index) => {
+          boxes.push(boxFromPoseWithHeading(
+            basePose,
+            state.turretDiameter,
+            state.turretDiameter * 0.82,
+            0,
+            state.turretHeight,
+            turretOffset,
+            0,
+            angle,
+            index === 0 ? "turret" : "turretProxy"
+          ));
+        });
+        const handleThickness = Math.min(0.12, Math.max(0.05, state.platformWidth * 0.045));
+        boxes.push(boxFromPose(
+          basePose,
+          handleThickness,
+          state.platformWidth * 0.82,
+          y1,
+          y1 + state.platformHandleHeight,
+          deckOffset + state.platformLength / 2 - handleThickness / 2,
+          0,
+          "handle"
+        ));
+      } else if (type === "cageCart") {
+        const basePose = singleBodyPose(pose, state.cageLength);
+        const y0 = state.cageBaseHeight;
+        const y1 = y0 + state.cageDeckThickness;
+        boxes.push(boxFromPose(basePose, state.cageLength, state.cageWidth, y0, y1, 0, 0, "platform"));
+        pushFrameSweepBoxes(
+          boxes,
+          basePose,
+          state.cageLength,
+          state.cageWidth,
+          y1,
+          state.cageHeight,
+          "cage"
+        );
+      } else if (type === "frontFork") {
+        const basePose = singleBodyPose(pose, activeRigidLength());
+        const bodyLength = state.forkliftBodyLength;
+        const bodyWidth = state.forkliftBodyWidth;
+        boxes.push(boxFromPose(basePose, bodyLength, bodyWidth, state.chassisHeight, state.chassisHeight + state.forkliftBodyHeight, -state.forkLength * 0.18, 0, "forkBody"));
+        const mastThickness = Math.min(0.18, Math.max(0.08, bodyLength * 0.08));
+        boxes.push(boxFromPose(basePose, mastThickness, bodyWidth, state.chassisHeight, state.chassisHeight + state.forkMastHeight, bodyLength / 2 - state.forkLength * 0.18, 0, "mast"));
+        const forkLength = state.forkLength;
+        const forkWidth = Math.min(0.16, Math.max(0.06, state.forkThickness * 1.15));
+        const forkY0 = Math.max(0.05, state.chassisHeight * 0.25);
+        const forkY1 = forkY0 + state.forkThickness;
+        for (const side of [-1, 1]) {
+          boxes.push(boxFromPose(
+            basePose,
+            forkLength,
+            forkWidth,
+            forkY0,
+            forkY1,
+            bodyLength / 2 + forkLength / 2 - state.forkLength * 0.18,
+            side * Math.max(0, state.forkSpread - forkWidth) / 2,
+            "fork"
+          ));
+        }
+      }
+
+      if (includeWheels) boxes.push(...wheelBoxes(pose));
       return boxes;
     }
 
-    function bodyBoxes(progress01) {
-      return bodyBoxesFromPose(poseAt(progress01));
+    function bodyBoxes(progress01, includeWheels = true) {
+      return bodyBoxesFromPose(poseAt(progress01), includeWheels);
     }
 
-    function counterBodyBoxes(progress01) {
-      return bodyBoxesFromPose(counterPoseAt(progress01));
+    function counterBodyBoxes(progress01, includeWheels = true) {
+      return bodyBoxesFromPose(counterPoseAt(progress01), includeWheels);
     }
 
     function pointInBox(x, y, z, box) {
@@ -3982,10 +5186,58 @@
     }
 
     function isRigidVehicle() {
-      return state.rigidBody === true;
+      if (state.vehicleType === "articulated") return false;
+      return state.rigidBody === true || ["boxVan", "flatbed", "lowPlatform", "cageCart", "frontFork"].includes(state.vehicleType);
+    }
+
+    function isSpecialSingleBodyType(type = state.vehicleType) {
+      return ["lowPlatform", "cageCart", "frontFork"].includes(type);
+    }
+
+    function activeRigidLength() {
+      if (state.vehicleType === "lowPlatform") return state.platformLength + state.turretDiameter;
+      if (state.vehicleType === "cageCart") return state.cageLength;
+      if (state.vehicleType === "frontFork") return state.forkliftBodyLength + state.forkLength * 0.55;
+      return cabLength() + Math.max(0, state.hitchGap) + trailerLength();
+    }
+
+    function activeRigidWidth() {
+      if (state.vehicleType === "lowPlatform") return Math.max(state.platformWidth, state.turretDiameter);
+      if (state.vehicleType === "cageCart") return state.cageWidth;
+      if (state.vehicleType === "frontFork") return Math.max(state.forkliftBodyWidth, state.forkSpread);
+      return outerWidth(Math.max(state.cabWidth, state.trailerWidth));
+    }
+
+    function singleBodyPose(pose, length = activeRigidLength()) {
+      const front = rigidFrontAxleOffsetFromHitch();
+      const rear = rigidRearAxleOffsetFromHitch();
+      return centerFromHitch(pose.hitch, pose.cabHeading, (front + rear) / 2 + (length - (front - rear)) * 0.05);
     }
 
     function wheelAxlePairs(pose) {
+      if (state.vehicleType === "lowPlatform") {
+        const length = activeRigidLength();
+        return [
+          {
+            base: singleBodyPose(pose, length),
+            width: Math.max(state.platformWidth, state.turretDiameter),
+            offsets: [-state.turretDiameter / 2, state.platformLength * 0.34],
+            steeringAngle: pose.steeringAngle || 0
+          }
+        ];
+      }
+      if (isSpecialSingleBodyType()) {
+        const length = activeRigidLength();
+        const width = activeRigidWidth();
+        return [
+          {
+            base: singleBodyPose(pose, length),
+            width,
+            offsets: [-length * 0.34, length * 0.34],
+            steeringAngle: pose.steeringAngle || 0
+          }
+        ];
+      }
       if (isRigidVehicle()) {
         return [
           {
@@ -4044,13 +5296,15 @@
     function buildTruck() {
       clearGroup(groups.truck);
       const pose = poseAt(state.progress / 100);
-      groups.truck.add(makeCabVisual(pose.cabCenter));
-      addCabVisualDetails(groups.truck, pose.cabCenter);
-      groups.truck.add(makeBox(trailerLength(), state.deckHeight, outerWidth(state.trailerWidth), pose.trailerCenter, state.chassisHeight, materials.trailer));
-      if (state.cargoEnabled) {
-        addCargoVisual(groups.truck, pose);
-      } else {
-        addFlatbedVisualDetails(groups.truck, pose.trailerCenter);
+      const type = vehicleTypes[state.vehicleType] ? state.vehicleType : "boxVan";
+      for (const box of bodyBoxesFromPose(pose, false)) {
+        if (box.role === "turretProxy") continue;
+        if (box.role === "cab" && (type === "boxVan" || type === "flatbed" || type === "articulated")) {
+          groups.truck.add(makeCabVisual(pose.cabCenter));
+          addCabVisualDetails(groups.truck, pose.cabCenter);
+        } else {
+          groups.truck.add(meshFromBodyBox(box));
+        }
       }
       addWheels(groups.truck, pose);
     }
@@ -4063,28 +5317,23 @@
       const currentFrameTolerance = 0.55 / (ghostCount - 1);
 
       const addGhost = pose => {
-        const cab = makeSweptBox(cabLength(), state.cabHeight, outerWidth(state.cabWidth), pose.cabCenter, state.chassisHeight);
-        const deck = makeSweptBox(trailerLength(), state.deckHeight, outerWidth(state.trailerWidth), pose.trailerCenter, state.chassisHeight);
-        groups.swept.add(cab, deck);
-        if (state.cargoEnabled) {
-          const currentCargoPose = cargoPose(pose);
-          groups.swept.add(makeSweptBox(
-            Math.min(state.cargoLength, trailerLength()),
-            state.cargoHeight,
-            outerWidth(state.trailerWidth),
-            currentCargoPose,
-            state.chassisHeight + state.deckHeight + state.cargoBaseOffset
-          ));
+        for (const box of bodyBoxesFromPose(pose, false)) {
+          if (box.role === "turretProxy") continue;
+          const mesh = meshFromBodyBox(box, materials.swept);
+          mesh.renderOrder = 5;
+          groups.swept.add(mesh);
         }
       };
 
-      for (let i = 0; i < ghostCount; i++) {
-        const progress = i / (ghostCount - 1);
-        if (Math.abs(progress - currentProgress) < currentFrameTolerance) continue;
-        addGhost(poseAt(progress));
+      if (sweepModeIncludesX()) {
+        for (let i = 0; i < ghostCount; i++) {
+          const progress = i / (ghostCount - 1);
+          if (Math.abs(progress - currentProgress) < currentFrameTolerance) continue;
+          addGhost(poseAt(progress));
+        }
       }
 
-      if (state.counterTraffic) {
+      if (sweepModeIncludesY()) {
         for (let i = 0; i < ghostCount; i++) {
           addGhost(counterPoseAt(i / (ghostCount - 1)));
         }
@@ -4093,90 +5342,27 @@
 
     function buildVoxels() {
       clearGroup(groups.voxels);
-      const result = computeVoxelResult();
-      latestVoxelResult = result;
-      latestSmoothResult = null;
+      const result = computeSmoothVolumeResult();
+      latestSmoothResult = result;
+      latestVoxelResult = null;
       setMetrics(result.totalVolume, result.cutVolume, result.remainVolume);
 
-      if (state.showRemaining && result.remaining.length) {
-        const mesh = state.smoothVolume
-          ? smoothedVoxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, materials.remaining)
-          : voxelSurfaceMesh(result.remaining, result.dx, result.dy, result.dPlaneY, materials.remaining);
+      if (state.showRemaining && result.remainingSolids.length) {
+        const mesh = extrudedSolidsMesh(result.remainingSolids, materials.remaining);
+        mesh.renderOrder = 40;
+        groups.voxels.add(mesh);
+      }
+      if (state.showIntersection && result.occupiedSolids.length) {
+        const mesh = extrudedSolidsMesh(result.occupiedSolids, materials.cut);
         mesh.renderOrder = 30;
         groups.voxels.add(mesh);
       }
-      if (state.showIntersection && result.occupied.length) {
-        const mesh = state.smoothVolume
-          ? smoothedVoxelSurfaceMesh(result.occupied, result.dx, result.dy, result.dPlaneY, materials.cut)
-          : voxelSurfaceMesh(result.occupied, result.dx, result.dy, result.dPlaneY, materials.cut);
-        mesh.renderOrder = 31;
-        groups.voxels.add(mesh);
-      }
 
-      const currentStatus = document.querySelector("#status");
-      currentStatus.textContent = state.smoothVolume
-        ? tr("statusSmooth")
-        : tr("statusVoxel");
+      document.querySelector("#status").textContent = result.missingBooleanLibrary
+        ? "连续布尔库未加载，当前无法生成 STL 扫掠实体。"
+        : `STL扫掠实体：候选范围 ${(state.chamferX + 2).toFixed(1)}×${(state.chamferY + 2).toFixed(1)}m，${result.sourcePolygonCount || 0} 个相关扫掠面片参与布尔，跳过 ${result.skippedPolygonCount || 0} 个无关面片。`;
       refreshRemainingViewer();
-      return;
-      const frames = [];
-      const sampleFrames = Math.max(2, Math.round(state.sweepSamples));
-      for (let i = 0; i < sampleFrames; i++) {
-        frames.push(bodyBoxes(i / (sampleFrames - 1)));
-        if (state.counterTraffic) frames.push(counterBodyBoxes(i / (sampleFrames - 1)));
-      }
-
-      const res = Math.max(4, Math.round(state.gridResolution));
-      const slices = Math.max(2, Math.round(state.heightSlices));
-      const dx = state.chamferX / res;
-      const dPlaneY = state.chamferY / res;
-      const dy = state.prismHeight / slices;
-      const cellVolume = dx * dPlaneY * dy;
-      const occupied = [];
-      const remaining = [];
-      let totalCells = 0;
-
-      for (let ix = 0; ix < res; ix++) {
-        const x = -(ix + 0.5) * dx;
-        for (let iz = 0; iz < res; iz++) {
-          const planeY = -(iz + 0.5) * dPlaneY;
-          const z = -planeY;
-          if (Math.abs(x) / state.chamferX + Math.abs(planeY) / state.chamferY > 1) continue;
-          for (let iy = 0; iy < slices; iy++) {
-            const y = (iy + 0.5) * dy;
-            totalCells++;
-            const record = { x, y, z, ix, iy, iz };
-            if (pointInAnySweptBox(x, y, z, frames)) occupied.push(record);
-            else remaining.push(record);
-          }
-        }
-      }
-
-      const totalVolume = 0.5 * state.chamferX * state.chamferY * state.prismHeight;
-      const cutVolume = occupied.length * cellVolume;
-      const remainVolume = Math.max(0, totalVolume - cutVolume);
-      setMetrics(totalVolume, cutVolume, remainVolume);
-
-      const cube = new THREE.BoxGeometry(dx * 0.82, dy * 0.82, dPlaneY * 0.82);
-      if (state.showRemaining && remaining.length) {
-        const mesh = new THREE.InstancedMesh(cube, materials.remaining, remaining.length);
-        mesh.frustumCulled = false;
-        placeInstances(mesh, remaining);
-        mesh.renderOrder = 30;
-        groups.voxels.add(mesh);
-      }
-      if (state.showIntersection && occupied.length) {
-        const mesh = new THREE.InstancedMesh(cube, materials.cut, occupied.length);
-        mesh.frustumCulled = false;
-        placeInstances(mesh, occupied);
-        mesh.renderOrder = 31;
-        groups.voxels.add(mesh);
-      }
-
-      const status = document.querySelector("#status");
-      status.textContent = state.smoothVolume ? tr("statusSmooth") : tr("statusVoxel");
     }
-
     function placeInstances(mesh, cells) {
       const matrix = new THREE.Matrix4();
       for (let i = 0; i < cells.length; i++) {
@@ -4190,8 +5376,9 @@
       const frames = [];
       const sampleFrames = Math.max(2, Math.round(state.sweepSamples));
       for (let i = 0; i < sampleFrames; i++) {
-        frames.push(bodyBoxes(i / (sampleFrames - 1)));
-        if (state.counterTraffic) frames.push(counterBodyBoxes(i / (sampleFrames - 1)));
+        const progress = i / (sampleFrames - 1);
+        if (sweepModeIncludesX()) frames.push(bodyBoxes(progress));
+        if (sweepModeIncludesY()) frames.push(counterBodyBoxes(progress));
       }
 
       const res = Math.max(4, Math.round(state.gridResolution));
@@ -4243,7 +5430,12 @@
     }
 
     function sanitizeRing(ring) {
-      const open = ring.slice(0, -1).map(stablePoint);
+      if (!ring || ring.length < 3) return [];
+      const firstInput = ring[0];
+      const lastInput = ring[ring.length - 1];
+      const isClosed = Math.abs(firstInput[0] - lastInput[0]) < 1e-8
+        && Math.abs(firstInput[1] - lastInput[1]) < 1e-8;
+      const open = (isClosed ? ring.slice(0, -1) : ring).map(stablePoint);
       const clean = [];
       for (const point of open) {
         const previous = clean[clean.length - 1];
@@ -4279,7 +5471,23 @@
       const s = Math.sin(box.heading);
       const halfLong = box.length / 2;
       const halfLat = box.width / 2;
-      const corners = [
+      return [sanitizeRing([
+        [-halfLong, -halfLat],
+        [halfLong, -halfLat],
+        [halfLong, halfLat],
+        [-halfLong, halfLat]
+      ].map(([long, lat]) => [
+        box.cx + c * long - s * lat,
+        box.cz + s * long + c * lat
+      ]))];
+    }
+
+    function boxCorners2D(box) {
+      const c = Math.cos(box.heading);
+      const s = Math.sin(box.heading);
+      const halfLong = box.length / 2;
+      const halfLat = box.width / 2;
+      return [
         [-halfLong, -halfLat],
         [halfLong, -halfLat],
         [halfLong, halfLat],
@@ -4288,7 +5496,66 @@
         box.cx + c * long - s * lat,
         box.cz + s * long + c * lat
       ]);
-      return [sanitizeRing(corners)];
+    }
+
+    function sweptBoxStepPolygons(previousBox, nextBox) {
+      const a = boxCorners2D(previousBox);
+      const b = boxCorners2D(nextBox);
+      const polygons = [];
+      for (let i = 0; i < 4; i++) {
+        const j = (i + 1) % 4;
+        const ring = sanitizeRing([a[i], a[j], b[j], b[i]]);
+        if (ring.length >= 4) polygons.push([ring]);
+      }
+      return polygons;
+    }
+
+    function ringBounds(ring) {
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      for (const point of ring || []) {
+        minX = Math.min(minX, point[0]);
+        maxX = Math.max(maxX, point[0]);
+        minY = Math.min(minY, point[1]);
+        maxY = Math.max(maxY, point[1]);
+      }
+      return { minX, maxX, minY, maxY };
+    }
+
+    function chamferBroadphaseBounds() {
+      const padding = 1;
+      const centerX = -state.chamferX / 2;
+      const centerY = state.chamferY / 2;
+      const halfWidth = state.chamferX / 2 + padding;
+      const halfHeight = state.chamferY / 2 + padding;
+      return {
+        minX: centerX - halfWidth,
+        maxX: centerX + halfWidth,
+        minY: centerY - halfHeight,
+        maxY: centerY + halfHeight
+      };
+    }
+
+    function polygonTouchesChamferBounds(polygon) {
+      const ring = polygon?.[0];
+      if (!ring?.length) return false;
+      const bounds = ringBounds(ring);
+      return boundsTouchChamferBroadphase(bounds);
+    }
+
+    function boundsTouchChamferBroadphase(bounds) {
+      const broadphase = chamferBroadphaseBounds();
+      return bounds.maxX >= broadphase.minX
+        && bounds.minX <= broadphase.maxX
+        && bounds.maxY >= broadphase.minY
+        && bounds.minY <= broadphase.maxY;
+    }
+
+    function sweptBoxStepTouchesChamferBounds(previousBox, nextBox) {
+      const bounds = ringBounds([...boxCorners2D(previousBox), ...boxCorners2D(nextBox)]);
+      return boundsTouchChamferBroadphase(bounds);
     }
 
     function unionMany(polygons) {
@@ -4298,7 +5565,18 @@
       for (const polygon of polygons) {
         const sanitized = sanitizeMultiPolygon([polygon]);
         if (!sanitized.length) continue;
-        const key = JSON.stringify(sanitized);
+        const ring = sanitized[0]?.[0] || [];
+        const bounds = ringBounds(ring);
+        const first = ring[0] || [0, 0];
+        const key = [
+          bounds.minX,
+          bounds.maxX,
+          bounds.minY,
+          bounds.maxY,
+          first[0],
+          first[1],
+          ring.length
+        ].map(value => stableCoord(value)).join(",");
         if (seen.has(key)) continue;
         seen.add(key);
         unique.push(sanitized);
@@ -4413,68 +5691,199 @@
       return result;
     }
 
-    function computeSmoothVolumeResult() {
-      const requestedFrames = Math.max(2, Math.round(state.sweepSamples));
-      const sampleFrames = Math.min(28, requestedFrames);
-      const frames = [];
+    function buildSweptSolids(sampleFrames) {
+      const frameSets = [];
+      const includeX = sweepModeIncludesX();
+      const includeY = sweepModeIncludesY();
+      if (includeX) frameSets.push({ axis: "x", frames: [] });
+      if (includeY) frameSets.push({ axis: "y", frames: [] });
       const yBreaks = new Set([0, state.prismHeight]);
+
       for (let i = 0; i < sampleFrames; i++) {
-        const boxes = bodyBoxes(i / (sampleFrames - 1));
-        frames.push(boxes);
-        for (const box of boxes) {
-          const y0 = Math.max(0, Math.min(state.prismHeight, box.y0));
-          const y1 = Math.max(0, Math.min(state.prismHeight, box.y1));
-          if (y1 > y0) {
-            yBreaks.add(y0);
-            yBreaks.add(y1);
+        const progress = i / Math.max(1, sampleFrames - 1);
+        if (includeX) frameSets.find(set => set.axis === "x").frames.push(bodyBoxes(progress, true));
+        if (includeY) frameSets.find(set => set.axis === "y").frames.push(counterBodyBoxes(progress, true));
+
+        for (const frameSet of frameSets) {
+          const frames = frameSet.frames;
+          const frame = frames[frames.length - 1];
+          if (!frame) continue;
+          for (const box of frame) {
+            const y0 = Math.max(0, Math.min(state.prismHeight, box.y0));
+            const y1 = Math.max(0, Math.min(state.prismHeight, box.y1));
+            if (y1 > y0) {
+              yBreaks.add(y0);
+              yBreaks.add(y1);
+            }
           }
         }
       }
 
+      const sweptSolids = [];
+      let envelopeFallbacks = 0;
+      let sourcePolygonCount = 0;
+      let skippedPolygonCount = 0;
+      const breaks = uniqueSorted([...yBreaks]);
+
+      for (let breakIndex = 0; breakIndex < breaks.length - 1; breakIndex++) {
+        const y0 = breaks[breakIndex];
+        const y1 = breaks[breakIndex + 1];
+        if (y1 - y0 < 1e-6) continue;
+
+        const activePolygons = [];
+        for (const frameSet of frameSets) {
+          const frames = frameSet.frames;
+          for (const frame of frames) {
+            for (const box of frame) {
+              if (box.y0 < y1 && box.y1 > y0) {
+                const polygon = boxPolygon(box);
+                if (polygonTouchesChamferBounds(polygon)) activePolygons.push(polygon);
+                else skippedPolygonCount++;
+              }
+            }
+          }
+          for (let frameIndex = 1; frameIndex < frames.length; frameIndex++) {
+            const previousFrame = frames[frameIndex - 1];
+            const nextFrame = frames[frameIndex];
+            const boxCount = Math.min(previousFrame.length, nextFrame.length);
+            for (let boxIndex = 0; boxIndex < boxCount; boxIndex++) {
+              const previousBox = previousFrame[boxIndex];
+              const nextBox = nextFrame[boxIndex];
+              if (
+                Math.min(previousBox.y0, nextBox.y0) < y1 &&
+                Math.max(previousBox.y1, nextBox.y1) > y0
+              ) {
+                const stepPolygons = sweptBoxStepPolygons(previousBox, nextBox);
+                if (sweptBoxStepTouchesChamferBounds(previousBox, nextBox)) {
+                  activePolygons.push(...stepPolygons);
+                } else {
+                  skippedPolygonCount += stepPolygons.length;
+                }
+              }
+            }
+          }
+        }
+
+        if (!activePolygons.length) continue;
+        sourcePolygonCount += activePolygons.length;
+        let sweptMultiPolygon = [];
+        let method = "boolean";
+        try {
+          sweptMultiPolygon = unionMany(activePolygons);
+        } catch (error) {
+          sweptMultiPolygon = envelopeMultiPolygon(activePolygons);
+          method = "envelope";
+        }
+        if (!multiPolygonIsVisible(sweptMultiPolygon)) continue;
+        if (method === "envelope") envelopeFallbacks++;
+        sweptSolids.push({ multiPolygon: sweptMultiPolygon, y0, y1, method });
+      }
+
+      return {
+        solids: sweptSolids,
+        frameSets: frameSets.map(set => set.frames),
+        breaks,
+        envelopeFallbacks,
+        sourcePolygonCount,
+        skippedPolygonCount,
+        slabCount: Math.max(0, breaks.length - 1)
+      };
+    }
+
+    function computeStlVolumeResult() {
+      if (!polygonClipping) {
+        console.warn("polygon-clipping is not loaded; smooth volume boolean cannot run.");
+        const chamfer = chamferMultiPolygon();
+        const totalVolume = 0.5 * state.chamferX * state.chamferY * state.prismHeight;
+        return {
+          mode: "stl-solid",
+          remainingSolids: [{ multiPolygon: chamfer, y0: 0, y1: state.prismHeight }],
+          occupiedSolids: [],
+          sweptSolids: [],
+          totalVolume,
+          cutVolume: 0,
+          remainVolume: totalVolume,
+          sampleFrames: 0,
+          requestedFrames: Math.max(2, Math.round(state.sweepSamples)),
+          envelopeFallbacks: 0,
+          slabCount: 1,
+          totalCells: 1,
+          missingBooleanLibrary: true,
+          sourcePolygonCount: 0
+        };
+      }
+
+      const requestedFrames = Math.max(2, Math.round(state.sweepSamples));
+      const sampleFrames = Math.min(140, Math.max(18, requestedFrames));
+      const swept = buildSweptSolids(sampleFrames);
       const chamfer = chamferMultiPolygon();
       const remainingSolids = [];
       const occupiedSolids = [];
       let cutVolume = 0;
-      let envelopeFallbacks = 0;
-      const breaks = uniqueSorted([...yBreaks]);
 
-      for (let i = 0; i < breaks.length - 1; i++) {
-        const y0 = breaks[i];
-        const y1 = breaks[i + 1];
+      for (const solid of swept.solids) {
+        const y0 = solid.y0;
+        const y1 = solid.y1;
+        try {
+          const occupied = sanitizeMultiPolygon(polygonClipping.intersection(chamfer, solid.multiPolygon));
+          if (multiPolygonIsVisible(occupied)) {
+            occupiedSolids.push({ multiPolygon: occupied, y0, y1 });
+            cutVolume += multiPolygonArea(occupied) * (y1 - y0);
+          }
+        } catch (error) {
+          console.warn("Swept/chamfer intersection failed for one slab.", error);
+        }
+      }
+
+      const solidBreaks = uniqueSorted([
+        0,
+        state.prismHeight,
+        ...occupiedSolids.flatMap(solid => [solid.y0, solid.y1])
+      ]);
+      for (let i = 0; i < solidBreaks.length - 1; i++) {
+        const y0 = solidBreaks[i];
+        const y1 = solidBreaks[i + 1];
         if (y1 - y0 < 1e-6) continue;
-        const activePolygons = [];
-        for (const frame of frames) {
-          for (const box of frame) {
-            if (box.y0 < y1 && box.y1 > y0) activePolygons.push(boxPolygon(box));
+        const cutters = occupiedSolids
+          .filter(solid => solid.y0 <= y0 + 1e-6 && solid.y1 >= y1 - 1e-6)
+          .map(solid => solid.multiPolygon);
+        let remaining = chamfer;
+        if (cutters.length) {
+          try {
+            const cutUnion = unionMultiPolygons(cutters);
+            remaining = multiPolygonIsVisible(cutUnion)
+              ? sanitizeMultiPolygon(polygonClipping.difference(chamfer, cutUnion))
+              : chamfer;
+          } catch (error) {
+            console.warn("Chamfer minus swept solid failed for one slab.", error);
+            remaining = chamfer;
           }
         }
-
-        const layer = computeLayerBoolean(chamfer, activePolygons);
-        const occupied = layer.occupied;
-        const remaining = layer.remaining;
-        if (layer.method === "envelope") envelopeFallbacks++;
-
-        if (occupied.length) {
-          occupiedSolids.push({ multiPolygon: occupied, y0, y1 });
-          cutVolume += multiPolygonArea(occupied) * (y1 - y0);
-        }
-        if (remaining.length) remainingSolids.push({ multiPolygon: remaining, y0, y1 });
+        if (multiPolygonIsVisible(remaining)) remainingSolids.push({ multiPolygon: remaining, y0, y1 });
       }
 
       const totalVolume = 0.5 * state.chamferX * state.chamferY * state.prismHeight;
       const remainVolume = Math.max(0, totalVolume - cutVolume);
       return {
-        mode: "smooth",
+        mode: "stl-solid",
         remainingSolids,
         occupiedSolids,
+        sweptSolids: swept.solids,
         totalVolume,
         cutVolume,
         remainVolume,
         sampleFrames,
         requestedFrames,
-        envelopeFallbacks,
-        slabCount: Math.max(0, breaks.length - 1)
+        envelopeFallbacks: swept.envelopeFallbacks,
+        slabCount: swept.slabCount,
+        totalCells: remainingSolids.length + occupiedSolids.length,
+        sourcePolygonCount: swept.sourcePolygonCount,
+        skippedPolygonCount: swept.skippedPolygonCount
       };
+    }
+
+    function computeSmoothVolumeResult() {
+      return computeStlVolumeResult();
     }
 
     function cleanRing(ring) {
@@ -4512,33 +5921,85 @@
       }
     }
 
+    function addMultiPolygonCap(positions, multiPolygon, y, upward = true) {
+      for (const polygon of multiPolygon || []) {
+        const contourRing = cleanRing(polygon[0]);
+        if (contourRing.length < 3) continue;
+        const holeRings = polygon.slice(1).map(cleanRing).filter(ring => ring.length >= 3);
+        const contour = contourRing.map(([x, z]) => new THREE.Vector2(x, z));
+        const holes = holeRings.map(ring => ring.map(([x, z]) => new THREE.Vector2(x, z)));
+        const flatPoints = [...contour, ...holes.flat()];
+        const faces = THREE.ShapeUtils.triangulateShape(contour, holes);
+        for (const face of faces) {
+          const a = flatPoints[face[0]];
+          const b = flatPoints[face[1]];
+          const c = flatPoints[face[2]];
+          if (upward) {
+            addVertex(positions, a.x, y, a.y);
+            addVertex(positions, b.x, y, b.y);
+            addVertex(positions, c.x, y, c.y);
+          } else {
+            addVertex(positions, c.x, y, c.y);
+            addVertex(positions, b.x, y, b.y);
+            addVertex(positions, a.x, y, a.y);
+          }
+        }
+      }
+    }
+
+    function addMultiPolygonSides(positions, multiPolygon, y0, y1) {
+      for (const polygon of multiPolygon || []) {
+        const contourRing = cleanRing(polygon[0]);
+        if (contourRing.length < 3) continue;
+        const holeRings = polygon.slice(1).map(cleanRing).filter(ring => ring.length >= 3);
+        addExtrudedRingSides(positions, contourRing, y0, y1);
+        for (const holeRing of holeRings) addExtrudedRingSides(positions, holeRing, y1, y0);
+      }
+    }
+
+    function safeDifferenceMultiPolygon(a, b) {
+      if (!multiPolygonIsVisible(a)) return [];
+      if (!multiPolygonIsVisible(b) || !polygonClipping) return a;
+      try {
+        return sanitizeMultiPolygon(polygonClipping.difference(a, b));
+      } catch (error) {
+        return a;
+      }
+    }
+
     function extrudedSolidsGeometry(solids) {
       const positions = [];
-      for (const solid of solids) {
-        for (const polygon of solid.multiPolygon || []) {
-          const contourRing = cleanRing(polygon[0]);
-          if (contourRing.length < 3) continue;
-          const holeRings = polygon.slice(1).map(cleanRing).filter(ring => ring.length >= 3);
-          const contour = contourRing.map(([x, z]) => new THREE.Vector2(x, z));
-          const holes = holeRings.map(ring => ring.map(([x, z]) => new THREE.Vector2(x, z)));
-          const flatPoints = [...contour, ...holes.flat()];
-          const faces = THREE.ShapeUtils.triangulateShape(contour, holes);
+      const validSolids = (solids || []).filter(solid => solid.y1 > solid.y0 && multiPolygonIsVisible(solid.multiPolygon));
+      const breaks = uniqueSorted(validSolids.flatMap(solid => [solid.y0, solid.y1]));
+      const layers = [];
 
-          for (const face of faces) {
-            const a = flatPoints[face[0]];
-            const b = flatPoints[face[1]];
-            const c = flatPoints[face[2]];
-            addVertex(positions, a.x, solid.y1, a.y);
-            addVertex(positions, b.x, solid.y1, b.y);
-            addVertex(positions, c.x, solid.y1, c.y);
-            addVertex(positions, c.x, solid.y0, c.y);
-            addVertex(positions, b.x, solid.y0, b.y);
-            addVertex(positions, a.x, solid.y0, a.y);
-          }
-
-          addExtrudedRingSides(positions, contourRing, solid.y0, solid.y1);
-          for (const holeRing of holeRings) addExtrudedRingSides(positions, holeRing, solid.y1, solid.y0);
+      for (let i = 0; i < breaks.length - 1; i++) {
+        const y0 = breaks[i];
+        const y1 = breaks[i + 1];
+        if (y1 - y0 < 1e-6) continue;
+        const active = validSolids
+          .filter(solid => solid.y0 <= y0 + 1e-6 && solid.y1 >= y1 - 1e-6)
+          .map(solid => solid.multiPolygon);
+        const multiPolygon = unionMultiPolygons(active);
+        if (multiPolygonIsVisible(multiPolygon)) {
+          layers.push({ y0, y1, multiPolygon });
         }
+      }
+
+      for (const layer of layers) addMultiPolygonSides(positions, layer.multiPolygon, layer.y0, layer.y1);
+      if (layers.length) {
+        addMultiPolygonCap(positions, layers[0].multiPolygon, layers[0].y0, false);
+        addMultiPolygonCap(positions, layers[layers.length - 1].multiPolygon, layers[layers.length - 1].y1, true);
+      }
+
+      for (let i = 0; i < layers.length - 1; i++) {
+        const below = layers[i];
+        const above = layers[i + 1];
+        if (Math.abs(below.y1 - above.y0) > 1e-6) continue;
+        const exposedUp = safeDifferenceMultiPolygon(below.multiPolygon, above.multiPolygon);
+        const exposedDown = safeDifferenceMultiPolygon(above.multiPolygon, below.multiPolygon);
+        addMultiPolygonCap(positions, exposedUp, below.y1, true);
+        addMultiPolygonCap(positions, exposedDown, below.y1, false);
       }
 
       const geometry = new THREE.BufferGeometry();
@@ -4548,8 +6009,55 @@
       return geometry;
     }
 
+    function displaySolidsGeometry(solids) {
+      const positions = [];
+      const validSolids = (solids || []).filter(solid => solid.y1 > solid.y0 && multiPolygonIsVisible(solid.multiPolygon));
+      const breaks = uniqueSorted(validSolids.flatMap(solid => [solid.y0, solid.y1]));
+      const layers = [];
+
+      for (let i = 0; i < breaks.length - 1; i++) {
+        const y0 = breaks[i];
+        const y1 = breaks[i + 1];
+        if (y1 - y0 < 1e-6) continue;
+        const active = validSolids
+          .filter(solid => solid.y0 <= y0 + 1e-6 && solid.y1 >= y1 - 1e-6)
+          .map(solid => solid.multiPolygon);
+        const multiPolygon = unionMultiPolygons(active);
+        if (multiPolygonIsVisible(multiPolygon)) {
+          layers.push({ y0, y1, multiPolygon });
+        }
+      }
+
+      for (const layer of layers) addMultiPolygonSides(positions, layer.multiPolygon, layer.y0, layer.y1);
+      if (layers.length) {
+        addMultiPolygonCap(positions, layers[0].multiPolygon, layers[0].y0, false);
+        addMultiPolygonCap(positions, layers[layers.length - 1].multiPolygon, layers[layers.length - 1].y1, true);
+      }
+
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      return geometry;
+    }
+
+    function closedLayerSolidsGeometry(solids) {
+      const positions = [];
+      for (const solid of solids || []) {
+        if (!(solid.y1 > solid.y0) || !multiPolygonIsVisible(solid.multiPolygon)) continue;
+        addMultiPolygonCap(positions, solid.multiPolygon, solid.y0, false);
+        addMultiPolygonCap(positions, solid.multiPolygon, solid.y1, true);
+        addMultiPolygonSides(positions, solid.multiPolygon, solid.y0, solid.y1);
+      }
+      const geometry = new THREE.BufferGeometry();
+      geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+      geometry.computeVertexNormals();
+      geometry.computeBoundingSphere();
+      return geometry;
+    }
+
     function extrudedSolidsMesh(solids, material) {
-      const mesh = new THREE.Mesh(extrudedSolidsGeometry(solids), material);
+      const mesh = new THREE.Mesh(displaySolidsGeometry(solids), material);
       mesh.frustumCulled = false;
       return mesh;
     }
@@ -4970,22 +6478,103 @@
       downloadBlob(filename, new Blob([buffer], { type: "application/octet-stream" }));
     }
 
+    function safeStlFilename(name, fallback = "remaining_volume") {
+      const base = String(name || fallback)
+        .trim()
+        .replace(/[\\/:*?"<>|]+/g, "_")
+        .replace(/\s+/g, "_")
+        .replace(/_+/g, "_")
+        .replace(/^_+|_+$/g, "");
+      return `${base || fallback}.stl`;
+    }
+
+    const marketActiveHoursByType = {
+      smallBoxVan: vehicleMarketClasses.smallBoxVan.active,
+      largeBoxVan: vehicleMarketClasses.largeBoxVan.active,
+      articulated: vehicleMarketClasses.articulated.active,
+      flatbed: vehicleMarketClasses.flatbed.active,
+      boxVan: vehicleMarketClasses.smallBoxVan.active,
+      lowPlatform: vehicleMarketClasses.lowPlatform.active,
+      cageCart: vehicleMarketClasses.cageCart.active,
+      frontFork: vehicleMarketClasses.frontFork.active
+    };
+
+    const stlClassLabelByType = {
+      smallBoxVan: vehicleMarketClasses.smallBoxVan.stl,
+      largeBoxVan: vehicleMarketClasses.largeBoxVan.stl,
+      articulated: vehicleMarketClasses.articulated.stl,
+      flatbed: vehicleMarketClasses.flatbed.stl,
+      boxVan: vehicleMarketClasses.smallBoxVan.stl,
+      lowPlatform: vehicleMarketClasses.lowPlatform.stl,
+      cageCart: vehicleMarketClasses.cageCart.stl,
+      frontFork: vehicleMarketClasses.frontFork.stl
+    };
+
+    function specimenCodeForSavedItem(item) {
+      const index = Math.max(0, savedVolumes.findIndex(saved => saved.id === item?.id));
+      return `TR-VO-${String(index + 1).padStart(2, "0")}`;
+    }
+
+    function compactLabelValue(value, fallback = "Unknown") {
+      return String(value || fallback)
+        .replace(/[\\/:*?"<>|]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim() || fallback;
+    }
+
+    function savedVolumeStlLabel(item, result = item?.result) {
+      const summary = item.summary || summaryFromResult(result) || {};
+      const vehicle = summary.vehicle || result?.vehicle || {};
+      const type = vehicle.vehicleType || item.sourceState?.vehicleType || "boxVan";
+      const marketClass = vehicle.marketClass || (type === "boxVan"
+        ? (Number(vehicle.trailerWidth || 0) >= 1.9 || Number(vehicle.trailerLength || 0) >= 3.4 || Number(vehicle.cargoLength || 0) >= 3.4 ? "largeBoxVan" : "smallBoxVan")
+        : type);
+      const total = Number(summary.totalVolume ?? result?.totalVolume ?? 0);
+      const cut = Number(summary.cutVolume ?? result?.cutVolume ?? 0);
+      const remain = Number(summary.remainVolume ?? result?.remainVolume ?? 0);
+      const residue = total > 0 ? Math.max(0, Math.min(100, remain / total * 100)) : Number(summary.remainRatio || 0);
+      return {
+        specimen: specimenCodeForSavedItem(item),
+        vehicle: compactLabelValue(vehicle.modelName || item.name || vehicle.vehicleTypeLabel, "Unknown Vehicle"),
+        className: stlClassLabelByType[marketClass] || stlClassLabelByType[type] || compactLabelValue(vehicle.marketClassLabel || vehicle.vehicleTypeLabel, "Vehicle Class"),
+        trace: "XXX-dactyl",
+        swept: `${Number.isFinite(cut) ? cut.toFixed(cut < 10 ? 1 : 0) : "0"}m3`,
+        residue: `${Number.isFinite(residue) ? residue.toFixed(0) : "0"}pct`,
+        active: marketActiveHoursByType[marketClass] || marketActiveHoursByType[type] || "05:00-10:00"
+      };
+    }
+
+    function savedVolumeLabelFilename(label) {
+      const raw = [
+        `SPECIMEN_${label.specimen}`,
+        `VEHICLE_${label.vehicle}`,
+        `CLASS_${label.className}`,
+        `TRACE_${label.trace}`,
+        `SWEPT_${label.swept}`,
+        `RESIDUE_${label.residue}`,
+        `ACTIVE_${label.active}`
+      ].join("__");
+      return safeStlFilename(raw, label.specimen);
+    }
+
     function exportRemainingStl() {
-      let triangles;
-      if (state.smoothVolume) {
-        const result = latestVoxelResult || computeVoxelResult();
-        const geometry = smoothedVoxelSurfaceGeometry(result.remaining, result.dx, result.dy, result.dPlaneY);
-        triangles = geometryToTriangles(geometry);
-        geometry.dispose();
-      }
-      if (!triangles) {
-        const result = computeVoxelResult();
-        triangles = voxelSurfaceTriangles(result.remaining, result.dx, result.dy, result.dPlaneY);
-      }
-      const header = state.smoothVolume
-        ? "remaining_chamfer_volume smoothed voxel surface, units: meters"
-        : "remaining_chamfer_volume voxel surface, units: meters";
+      const result = latestSmoothResult || computeSmoothVolumeResult();
+      const geometry = extrudedSolidsGeometry(result.remainingSolids || []);
+      const triangles = geometryToTriangles(geometry);
+      geometry.dispose();
+      const header = "remaining_chamfer_volume continuous swept solid, units: meters";
       exportTrianglesAsStl(triangles, "remaining_chamfer_volume.stl", header);
+    }
+
+    function exportSavedVolumeStl(item) {
+      const result = ensureSavedVolumeResult(item);
+      if (!result?.remainingSolids?.length) return;
+      const label = savedVolumeStlLabel(item, result);
+      const geometry = extrudedSolidsGeometry(result.remainingSolids);
+      const triangles = geometryToTriangles(geometry);
+      geometry.dispose();
+      const header = `${label.specimen} ${label.vehicle} ${label.className}`;
+      exportTrianglesAsStl(triangles, savedVolumeLabelFilename(label), header);
     }
 
     function toSketchupStlAxes(vertex) {
@@ -5027,7 +6616,7 @@
 
     function syncEntryLaneOffsetRange() {
       const wrapper = document.querySelector('.control[data-param="entryLaneOffset"]');
-      const vehicleWidth = outerWidth(Math.max(state.cabWidth, state.trailerWidth));
+      const vehicleWidth = isSpecialSingleBodyType() ? activeRigidWidth() : outerWidth(Math.max(state.cabWidth, state.trailerWidth));
       const limit = Math.max(0, Math.floor((state.roadWidthIn / 2 - vehicleWidth / 2 - 0.05) * 10) / 10);
       state.entryLaneOffset = THREE.MathUtils.clamp(Number(state.entryLaneOffset) || 0, -limit, limit);
       if (!wrapper) return;
@@ -5068,29 +6657,45 @@
           const parsed = Number(value);
           if (!Number.isFinite(parsed)) return;
           state[key] = parsed;
-          number.value = parsed;
-          range.value = parsed;
+          for (const peer of document.querySelectorAll(`.control[data-param="${key}"]`)) {
+            const peerNumber = peer.querySelector("input[type='number']");
+            const peerRange = peer.querySelector("input[type='range']");
+            if (peerNumber) peerNumber.value = parsed;
+            if (peerRange) peerRange.value = parsed;
+          }
           updateScene();
         };
-        number.addEventListener("change", () => setValue(number.value));
+        number.addEventListener("change", () => {
+          setValue(number.value);
+        });
         range.addEventListener("input", () => setValue(range.value));
       }
 
-      for (const key of ["cargoEnabled", "counterTraffic", "smoothVolume", "showRemaining", "showIntersection", "showSwept"]) {
+      for (const key of ["cargoEnabled", "showRemaining", "showIntersection", "showSwept"]) {
         const input = document.querySelector(`#${key}`);
         input.checked = state[key];
         input.addEventListener("change", () => {
           state[key] = input.checked;
-          if (key === "smoothVolume") syncSmoothModeControls();
           updateScene();
         });
       }
+      const sweepAxisInput = document.querySelector("#sweepAxisMode");
+      if (sweepAxisInput) {
+        sweepAxisInput.value = String(state.sweepAxisMode);
+        sweepAxisInput.addEventListener("input", () => {
+          state.sweepAxisMode = Math.max(0, Math.min(2, Math.round(Number(sweepAxisInput.value) || 0)));
+          state.counterTraffic = state.sweepAxisMode !== 0;
+          syncSweepAxisModeControl();
+          updateScene();
+        });
+      }
+      syncSweepAxisModeControl();
     }
 
     function setControlValue(key, value) {
-      const wrapper = document.querySelector(`.control[data-param="${key}"]`);
+      const wrappers = [...document.querySelectorAll(`.control[data-param="${key}"]`)];
+      const wrapper = wrappers[0];
       if (!wrapper) return false;
-      const number = wrapper.querySelector("input[type='number']");
       const range = wrapper.querySelector("input[type='range']");
       const min = Number(range.min);
       const max = Number(range.max);
@@ -5099,8 +6704,12 @@
       const rounded = Math.round(clamped / step) * step;
       const normalized = Number(rounded.toFixed(4));
       state[key] = normalized;
-      number.value = normalized;
-      range.value = normalized;
+      for (const item of wrappers) {
+        const itemNumber = item.querySelector("input[type='number']");
+        const itemRange = item.querySelector("input[type='range']");
+        if (itemNumber) itemNumber.value = normalized;
+        if (itemRange) itemRange.value = normalized;
+      }
       return true;
     }
 
@@ -5432,26 +7041,11 @@
       wrapper.querySelector("input[type='range']").value = value;
     }
 
-    function syncSmoothModeControls() {
-      const checkbox = document.querySelector("#smoothVolume");
-      const button = document.querySelector("#toggleSmoothVolume");
-      checkbox.checked = state.smoothVolume;
-      button.classList.toggle("is-active", state.smoothVolume);
-      button.querySelector("span").textContent = state.smoothVolume ? tr("smoothButton") : tr("voxelButton");
-      button.setAttribute("aria-label", state.smoothVolume ? tr("smoothAria") : tr("voxelAria"));
-      button.setAttribute("aria-pressed", String(state.smoothVolume));
-    }
-
     document.querySelector("#playButton").addEventListener("click", event => {
       playing = !playing;
       const label = event.currentTarget.querySelector("span");
       label.textContent = playing ? tr("pause") : tr("play");
       event.currentTarget.setAttribute("aria-label", playing ? tr("pause") : tr("play"));
-    });
-    document.querySelector("#toggleSmoothVolume").addEventListener("click", () => {
-      state.smoothVolume = !state.smoothVolume;
-      syncSmoothModeControls();
-      updateScene();
     });
     document.querySelector("#vehicleSearchButton").addEventListener("click", lookupVehicle);
     document.querySelector("#vehicleSearchQuery").addEventListener("keydown", event => {
@@ -5465,8 +7059,19 @@
     });
     document.querySelector("#vehiclePresetSelect").addEventListener("change", event => {
       const preset = vehiclePresets.find(item => item.id === event.currentTarget.value);
-      if (preset) document.querySelector("#vehicleSearchQuery").value = preset.query;
+      if (preset) {
+        document.querySelector("#vehicleSearchQuery").value = preset.query;
+        setVehicleType(vehiclePresetType(preset), { applyDefaults: false, clearPreset: false });
+      }
       queueWorkspaceSave();
+    });
+    document.querySelector("#vehicleTypeSelect").addEventListener("change", event => {
+      const nextType = event.currentTarget.value;
+      const presetSelect = document.querySelector("#vehiclePresetSelect");
+      const selectedPreset = vehiclePresets.find(item => item.id === presetSelect?.value);
+      const shouldClearPreset = Boolean(selectedPreset && vehiclePresetType(selectedPreset) !== nextType);
+      setVehicleType(nextType, { applyDefaults: true, clearPreset: shouldClearPreset });
+      updateScene();
     });
     document.querySelector("#vehicleDimensionText").addEventListener("input", queueWorkspaceSave);
     document.querySelector("#parseDimensionButton").addEventListener("click", parseManualDimensionText);
@@ -5478,6 +7083,7 @@
     remainingViewer.resetButton.addEventListener("click", () => refreshRemainingViewer(true));
     document.querySelector("#saveRemainingVolume").addEventListener("click", saveCurrentRemainingVolume);
     document.querySelector("#exportA4Report").addEventListener("click", exportA4Report);
+    document.querySelector("#sortSavedVolumes").addEventListener("click", sortSavedVolumesByVolume);
     savedVolumeViewer.closeButton.addEventListener("click", closeSavedVolumeViewer);
     heatmapViewer.openButton.addEventListener("click", openHeatmapViewer);
     heatmapViewer.closeButton.addEventListener("click", closeHeatmapViewer);
